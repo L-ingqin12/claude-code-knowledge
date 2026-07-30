@@ -128,12 +128,17 @@ get_main_pid() {
     find_main_claude_pid
 }
 
-# 保存主 claude PID 到文件 (SessionStart 调用)
+# 保存主 claude PID 到文件 (SessionStart/hook 调用, 总是覆盖)
 save_main_pid() {
     local pid
     pid=$(find_main_claude_pid)
     if [ -n "$pid" ]; then
         echo "$pid" > "$MAIN_PID_FILE" 2>/dev/null || true
+    fi
+    # 如果走进程树失败，用 pgrep 找最老的 claude --resume 进程
+    if [ -z "$pid" ]; then
+        pid=$(pgrep -f "claude.*--resume" 2>/dev/null | head -1)
+        [ -n "$pid" ] && echo "$pid" > "$MAIN_PID_FILE" 2>/dev/null || true
     fi
 }
 
@@ -453,7 +458,7 @@ do_mark_interactive() {
             fi
         fi
     fi
-    [ ! -f "$MAIN_PID_FILE" ] && save_main_pid
+    save_main_pid  # 总是刷新 (防止死PID残留)
     write_state "interactive" "PreToolUse"
     do_prioritize
     echo "mark-interactive: state=interactive"
@@ -462,7 +467,7 @@ do_mark_interactive() {
 # mark-idle: Stop / SessionStart hook 调用
 do_mark_idle() {
     # SessionStart 时保存主 PID (最可靠时机)
-    [ ! -f "$MAIN_PID_FILE" ] && save_main_pid
+    save_main_pid  # 总是刷新 (防止死PID残留)
     write_state "idle" "Stop"
     do_prioritize
     echo "mark-idle: state=idle"
