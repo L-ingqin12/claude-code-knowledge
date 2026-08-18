@@ -1,0 +1,173 @@
+[
+  {
+    "name": "git-workflow",
+    "description": "Standardized Git workflow with conventional commits, branch naming, and PR templates",
+    "namespace": "shared",
+    "paths": [".git/**", ".github/**", "**/COMMIT_EDITMSG"],
+    "includes": [],
+    "optional_includes": [],
+    "content": "Enforce conventional commit format (type(scope): desc)\nRun pre-commit hooks: lint, format, secret scan\nValidate branch name against pattern: (feature|fix|chore|docs)/<issue>-<slug>\nGenerate changelog from commit history since last tag\nSuggest squash-merge strategy for feature branches"
+  },
+  {
+    "name": "docker-build",
+    "description": "Multi-stage Docker build with caching optimization and security scanning",
+    "namespace": "shared",
+    "paths": ["**/Dockerfile", "**/Dockerfile.*", "**/.dockerignore"],
+    "includes": [],
+    "optional_includes": [],
+    "content": "Parse Dockerfile and extract base images\nOptimize layer ordering for maximum cache reuse\nRun hadolint for Dockerfile best practices\nScan built image for known CVEs with trivy\nTag image with git SHA and push to registry"
+  },
+  {
+    "name": "k8s-apply",
+    "description": "Kubernetes manifest validation, diff, and apply with rollback support",
+    "namespace": "shared",
+    "paths": ["**/*.yaml", "**/kustomization.yaml", "**/helmfile.yaml", "**/Chart.yaml"],
+    "includes": [],
+    "optional_includes": ["docker-build"],
+    "content": "Validate all manifests with kubectl dry-run\nRender Helm or Kustomize templates to final YAML\nShow diff between current and desired state\nApply with server-side apply and field-manager annotation\nCreate rollback checkpoint before destructive changes"
+  },
+  {
+    "name": "secret-management",
+    "description": "Encrypted secret storage and injection for local development and CI/CD",
+    "namespace": "shared",
+    "paths": ["**/.env*", "**/secrets/**", "**/*.encrypted"],
+    "includes": [],
+    "optional_includes": [],
+    "content": "Decrypt .env.encrypted using age or sops\nInject secrets into shell environment\nValidate required secrets are present before deploy\nRotate expired secrets with new encryption\nWarn if secrets are committed to version control"
+  },
+  {
+    "name": "slack-notify",
+    "description": "Send formatted Slack messages with rich attachments for CI/CD events",
+    "namespace": "shared",
+    "paths": [],
+    "includes": [],
+    "optional_includes": [],
+    "content": "Format message as Slack Block Kit JSON\nSend to configured webhook URL with retry logic\nInclude deploy status, commit SHA, and author\nTag relevant channel members on failure\nProvide link to CI build logs and rollback instructions"
+  },
+  {
+    "name": "code-review-checklist",
+    "description": "Automated code review checklist covering security, performance, and style",
+    "namespace": "shared",
+    "paths": ["**/*.js", "**/*.ts", "**/*.py", "**/*.go", "**/*.rs"],
+    "includes": [],
+    "optional_includes": [],
+    "content": "Check for hardcoded secrets or credentials\nVerify error handling covers all edge cases\nReview type safety and null-handling patterns\nFlag overly complex functions (cyclomatic > 10)\nEnsure test coverage for new or changed logic"
+  },
+  {
+    "name": "react-component-dev",
+    "description": "React component development scaffold with Storybook stories and accessibility checks",
+    "namespace": "team/frontend",
+    "paths": ["**/*.tsx", "**/*.jsx", "**/*.stories.*"],
+    "includes": [],
+    "optional_includes": ["code-review-checklist"],
+    "content": "Scaffold new component with TS interface and CSS module\nGenerate Storybook story with controls and knobs\nRun axe-core accessibility audit on rendered component\nVerify component renders correctly across breakpoints\nExport component with named export and barrel index"
+  },
+  {
+    "name": "vue-page-builder",
+    "description": "Vue 3 page scaffolding with composition API, Pinia store, and route config",
+    "namespace": "team/frontend",
+    "paths": ["**/*.vue", "**/pages/**", "**/router/**"],
+    "includes": [],
+    "optional_includes": ["code-review-checklist"],
+    "content": "Generate Vue SFC with script setup and scoped styles\nCreate Pinia store module with actions and getters\nRegister route with lazy-loading and meta guards\nAdd form validation rules using VeeValidate\nWrite Vitest unit tests for composable functions"
+  },
+  {
+    "name": "e2e-test-runner",
+    "description": "Playwright end-to-end test suite runner with parallel execution and video recording",
+    "namespace": "team/frontend",
+    "paths": ["**/e2e/**", "**/playwright.config.*"],
+    "includes": [],
+    "optional_includes": ["docker-build", "slack-notify"],
+    "content": "Bootstrap Playwright test fixtures with auth state\nRun tests across Chromium, Firefox, and WebKit\nCapture video and trace on test failure\nRetry flaky tests up to 3 times with backoff\nPublish test report to S3 and notify on regression"
+  },
+  {
+    "name": "go-api-dev",
+    "description": "Go HTTP API development with OpenAPI spec generation and middleware wiring",
+    "namespace": "team/backend",
+    "paths": ["**/*.go", "**/go.mod", "**/api/**/*.yaml"],
+    "includes": ["docker-build", "code-review-checklist"],
+    "optional_includes": ["slack-notify"],
+    "content": "Generate Go handler stubs from OpenAPI 3.0 spec\nWire middleware chain: logging, auth, rate-limit, tracing\nRun go vet and staticcheck on changed packages\nBuild multi-arch Docker image for the service\nGenerate mocks for interfaces and run integration tests"
+  },
+  {
+    "name": "sql-migration",
+    "description": "Database migration management with up/down migrations and data backfill",
+    "namespace": "team/backend",
+    "paths": ["**/migrations/**", "**/*.up.sql", "**/*.down.sql"],
+    "includes": ["secret-management"],
+    "optional_includes": ["slack-notify"],
+    "content": "Create timestamped migration files for up and down\nValidate SQL syntax against target dialect (PostgreSQL)\nRun migration dry-run in a transaction that rolls back\nLock migration table to prevent concurrent runs\nBackfill data transformation in batches with progress log"
+  },
+  {
+    "name": "terraform-deploy",
+    "description": "Terraform infrastructure provisioning with state management and drift detection",
+    "namespace": "team/backend",
+    "paths": ["**/*.tf", "**/*.tfvars", "**/*.tfstate*"],
+    "includes": ["docker-build", "k8s-apply", "secret-management"],
+    "optional_includes": ["slack-notify"],
+    "content": "Init Terraform with remote state backend (S3 + DynamoDB)\nGenerate plan and require human approval for production\nApply infrastructure changes in dependency order\nDetect and report configuration drift against live state\nTag all resources with cost center and environment labels"
+  },
+  {
+    "name": "api-gateway-config",
+    "description": "API Gateway route configuration with rate limiting, auth, and canary releases",
+    "namespace": "team/backend",
+    "paths": ["**/gateway/**", "**/kong/**", "**/nginx/**"],
+    "includes": [],
+    "optional_includes": ["secret-management", "slack-notify"],
+    "content": "Define upstream services with health check endpoints\nConfigure rate limiting per route and consumer\nSet up JWT or OIDC authentication plugins\nRoute percentage of traffic to canary version\nSync gateway configuration from declarative YAML source"
+  },
+  {
+    "name": "python-data-pipeline",
+    "description": "Python ETL pipeline with Airflow DAG generation and data quality checks",
+    "namespace": "team/data",
+    "paths": ["**/dags/**", "**/*.py", "**/requirements.txt"],
+    "includes": [],
+    "optional_includes": ["docker-build", "slack-notify"],
+    "content": "Generate Airflow DAG with task dependencies and retries\nRun data quality assertions after each transformation step\nPartition large datasets by date for incremental processing\nWrite Parquet output with schema evolution support\nEmit custom metrics to CloudWatch for pipeline monitoring"
+  },
+  {
+    "name": "ml-model-deploy",
+    "description": "ML model packaging and deployment with A/B testing and monitoring",
+    "namespace": "team/data",
+    "paths": ["**/model/**", "**/train.py", "**/inference.py"],
+    "includes": ["docker-build", "k8s-apply", "secret-management"],
+    "optional_includes": ["slack-notify"],
+    "content": "Serialize model artifacts with MLflow tracking URI\nBuild inference container with ONNX runtime\nDeploy to Kubernetes with HorizontalPodAutoscaler\nRoute 5% of production traffic to new model version\nMonitor prediction drift and log distribution statistics"
+  },
+  {
+    "name": "grafana-dashboard",
+    "description": "Grafana dashboard provisioning with Prometheus datasource and alert rules",
+    "namespace": "team/data",
+    "paths": ["**/dashboards/**", "**/grafana/**", "**/alerts/**"],
+    "includes": [],
+    "optional_includes": ["docker-build", "k8s-apply"],
+    "content": "Define dashboard panels with PromQL queries\nProvision alert rules with severity labels and thresholds\nCreate dashboard JSON model with templating variables\nExport dashboard as version-controlled JSON file\nValidate panel rendering against a test data source"
+  },
+  {
+    "name": "load-test-runner",
+    "description": "Distributed load testing with k6 and real-time metrics visualization",
+    "namespace": "team/data",
+    "paths": ["**/loadtests/**", "**/*.k6.js"],
+    "includes": ["docker-build", "k8s-apply", "slack-notify"],
+    "optional_includes": [],
+    "content": "Write k6 test script with thresholds and scenarios\nRun load test locally with virtual users ramp-up pattern\nStream metrics to Prometheus during test execution\nCompare p50/p95/p99 latency against baseline\nNotify Slack with test summary and pass/fail verdict"
+  },
+  {
+    "name": "incident-response",
+    "description": "Incident response runbook with severity classification and escalation paths",
+    "namespace": "team/data",
+    "paths": ["**/runbooks/**", "**/incidents/**"],
+    "includes": ["slack-notify", "code-review-checklist"],
+    "optional_includes": [],
+    "content": "Classify incident severity based on SLO burn rate\nCreate dedicated Slack channel with incident template\nGather logs, metrics, and traces into a timeline\nExecute runbook steps with checklist tracking\nPost-incident review template with action item tracking"
+  },
+  {
+    "name": "airflow-dag-deploy",
+    "description": "Airflow DAG deployment with git-based sync, variable management, and pool config",
+    "namespace": "team/data",
+    "paths": ["**/airflow/**", "**/dags/**"],
+    "includes": ["git-workflow", "docker-build", "slack-notify"],
+    "optional_includes": ["secret-management"],
+    "content": "Sync DAG files from git repository to Airflow DAGs folder\nSet Airflow variables and connections from vault secrets\nConfigure worker pools with slot counts per priority\nTrigger DAG backfill for specified date range\nNotify Slack on DAG failure with task log snippets"
+  }
+]

@@ -24,7 +24,7 @@ server.on('listening', () => {
 });
 
 // 更简洁的方式: server.listen 时传 reusePort (Node 16.7+)
-server.listen(PORT, '127.0.0.1', () => { ... });
+server.listen(PORT, '[IP已脱敏]', () => { ... });
 // 但 http.createServer 的 listen 不接受 options 中的 reusePort
 ```
 
@@ -45,7 +45,7 @@ server.on('listening', () => {
 # deploy.sh start_proxy 改为:
 start_proxy() {
     for port in 8787 8788 8789; do
-        if ! curl -s "http://127.0.0.1:$port/" >/dev/null 2>&1; then
+        if ! curl -s "http://[IP已脱敏]:$port/" >/dev/null 2>&1; then
             PROXY_PORT=$port
             node /root/claude-resilience-proxy.js > /root/.claude/proxy.log 2>&1 &
             ...

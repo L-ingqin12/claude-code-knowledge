@@ -41,7 +41,7 @@
 
 ```
 Claude Code
-  │  ANTHROPIC_BASE_URL = http://127.0.0.1:8788
+  │  ANTHROPIC_BASE_URL = http://[IP已脱敏]:8788
   │  (从 settings.local.json 读取)
   ▼
 Permafrost :8788 (Python)
@@ -58,11 +58,11 @@ api.deepseek.com/anthropic
 
 ```
 Claude Code
-  │  ANTHROPIC_BASE_URL = http://127.0.0.1:8788
+  │  ANTHROPIC_BASE_URL = http://[IP已脱敏]:8788
   ▼
 ┌─────────────────────────────────────────┐
 │  Permafrost :8788 (缓存对齐层)           │
-│  upstream = http://127.0.0.1:8787       │
+│  upstream = http://[IP已脱敏]:8787       │
 │                                         │
 │  aggressive mode:                        │
 │  ├─ 去 cache_control                    │
@@ -72,7 +72,7 @@ Claude Code
 │  ├─ 冷锚点合并 (并行子 agent 共享预热)    │
 │  └─ 空闲保活 (opt-in)                    │
 └────────────┬────────────────────────────┘
-             │ http://127.0.0.1:8787
+             │ http://[IP已脱敏]:8787
              ▼
 ┌─────────────────────────────────────────┐
 │  claude-resilience-proxy.js (韧性层)     │
@@ -113,7 +113,7 @@ bash /root/claude-permafrost-deploy.sh rollback
 bash /root/claude-rollback.sh
 
 # 查看 permafrost 实时缓存命中率
-curl -s http://127.0.0.1:8788/permafrost/stats | python3 -m json.tool
+curl -s http://[IP已脱敏]:8788/permafrost/stats | python3 -m json.tool
 ```
 
 ### 启停状态机

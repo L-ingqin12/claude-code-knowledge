@@ -126,8 +126,8 @@ nohup bash -c 'while true; do bash ~/claude-cache-monitor.sh once; sleep 60; don
 ```json
 {
   "env": {
-    "ANTHROPIC_BASE_URL": "http://127.0.0.1:8788",
-    "ANTHROPIC_AUTH_TOKEN": "ark-xxx",
+    "ANTHROPIC_BASE_URL": "http://[IP已脱敏]:8788",
+    "ANTHROPIC_AUTH_TOKEN": "[已脱敏]",
     "ANTHROPIC_MODEL": "deepseek-v4-pro"
   }
 }
@@ -138,8 +138,8 @@ nohup bash -c 'while true; do bash ~/claude-cache-monitor.sh once; sleep 60; don
 ```json
 {
   "env": {
-    "ANTHROPIC_BASE_URL": "http://127.0.0.1:8788",
-    "ANTHROPIC_AUTH_TOKEN": "ark-xxx",
+    "ANTHROPIC_BASE_URL": "http://[IP已脱敏]:8788",
+    "ANTHROPIC_AUTH_TOKEN": "[已脱敏]",
     "ANTHROPIC_MODEL": "deepseek-v4-pro"
   }
 }

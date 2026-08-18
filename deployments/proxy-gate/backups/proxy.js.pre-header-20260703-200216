@@ -113,7 +113,7 @@ const server = http.createServer((clientReq, clientRes) => {
 
 server.on('connection', (sock) => sock.setKeepAlive(true, 60000));
 // SO_REUSEPORT enables zero-downtime restart (PRoot requires both flags)
-server.listen({ port: PORT, host: '127.0.0.1', reusePort: true }, () => {
-  console.error(`[proxy] Listening 127.0.0.1:${PORT} → ${TARGET}`);
+server.listen({ port: PORT, host: '[IP已脱敏]', reusePort: true }, () => {
+  console.error(`[proxy] Listening [IP已脱敏]:${PORT} → ${TARGET}`);
   console.error(`[proxy] Retries: ${RETRIES}, backoff: ${BACKOFF.map(b=>b/1000+'s').join('/')}`);
 });

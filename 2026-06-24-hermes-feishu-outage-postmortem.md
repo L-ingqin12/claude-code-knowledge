@@ -32,7 +32,7 @@
 2026-06-24 20:06:08 urllib3.exceptions.SSLError: EOF occurred in violation of protocol
 ```
 
-xray 通过韩国 VLESS reality 节点 (`222.120.184.97:10000` 等) 转发流量。reality 协议通过伪造 TLS 握手 (SNI=apple.com) 规避 GFW 检测。但韩国节点的 TLS 层不稳定 — 对端会间歇性发送 TCP RST 或直接关闭连接, 导致 `SSLError: EOF`。
+xray 通过韩国 VLESS reality 节点 (`[IP已脱敏]:10000` 等) 转发流量。reality 协议通过伪造 TLS 握手 (SNI=apple.com) 规避 GFW 检测。但韩国节点的 TLS 层不稳定 — 对端会间歇性发送 TCP RST 或直接关闭连接, 导致 `SSLError: EOF`。
 
 **命令复现**:
 ```bash
@@ -40,7 +40,7 @@ xray 通过韩国 VLESS reality 节点 (`222.120.184.97:10000` 等) 转发流量
 grep '"address"' /usr/local/etc/xray/config.json
 # 测试代理连通性
 curl -s -o /dev/null -w "HTTP %{http_code}\n" --connect-timeout 10 \
-  --socks5-hostname 127.0.0.1:10808 https://github.com
+  --socks5-hostname [IP已脱敏]:10808 https://github.com
 ```
 
 ### 第 2 层: 重试放大 (放大器)
@@ -55,7 +55,7 @@ N 个并发工具调用 × 3 次重试 × 15s 超时 → 数百个死连接
 
 ### 第 3 层: 连接表饱和 (临界点)
 
-路由器 `192.168.0.1` 维护 conntrack/NAT 表, 跟踪所有内网→外网连接。连接堆积导致:
+路由器 `[IP已脱敏]` 维护 conntrack/NAT 表, 跟踪所有内网→外网连接。连接堆积导致:
 
 ```
 conntrack 表项 → 耗尽
@@ -74,7 +74,7 @@ conntrack 表项 → 耗尽
 
 ### 第 4 层: DNS 断裂 (飞书断连)
 
-路由器也是 DNS 服务器 (`/etc/resolv.conf` → `nameserver 192.168.0.1`)。
+路由器也是 DNS 服务器 (`/etc/resolv.conf` → `nameserver [IP已脱敏]`)。
 
 虽然飞书走 xray `direct` 出站, 不通过代理, 但 DNS 仍需路由器:
 ```bash
@@ -109,7 +109,7 @@ ping 通 (ICMP) 但 TCP 不通 (SSH, HTTP 全死)
 **排查命令**:
 ```bash
 # 1. 检查 gateway 状态
-ssh pi@192.168.0.191 'systemctl --user status hermes-gateway.service'
+ssh pi@[IP已脱敏] 'systemctl --user status hermes-gateway.service'
 # 输出: active (running) — 进程活着但不应答
 
 # 2. 检查 gateway 日志
@@ -121,7 +121,7 @@ tail -50 /home/pi/.hermes/logs/errors.log
 # 发现: 大量 NameResolutionError (open.feishu.cn) + SSLError
 
 # 4. 检查代理
-curl --socks5-hostname 127.0.0.1:10808 https://github.com
+curl --socks5-hostname [IP已脱敏]:10808 https://github.com
 # HTTP 000 — 代理不通
 ```
 
@@ -148,7 +148,7 @@ outbound=$(grep "Sending response.*Feishu" gateway.log | tail -20 | wc -l)
 
 ### 3.3 定位瓶颈
 
-**关键发现**: 整个子网 (192.168.0.1~254) 的端口 22 全部表现相同 — `Connection closed`, 包括路由器本身。
+**关键发现**: 整个子网 ([IP已脱敏]~254) 的端口 22 全部表现相同 — `Connection closed`, 包括路由器本身。
 
 ```bash
 # 全网扫描
@@ -159,7 +159,7 @@ done
 # 结论: 路由器 conntrack 过载, 不是 Pi 独有问题
 ```
 
-**验证**: telnet 到路由器 `192.168.0.1:22` 同样 `Connection closed`。
+**验证**: telnet 到路由器 `[IP已脱敏]:22` 同样 `Connection closed`。
 
 ### 3.4 DNS 隔离确认
 
@@ -177,17 +177,17 @@ sudo journalctl -u xray-proxy | grep feishu
 
 ```bash
 # ping 通
-ping 192.168.0.191  # 正常
+ping [IP已脱敏]  # 正常
 
 # telnet 通但 SSH 协议握手失败
-echo "quit" | telnet 192.168.0.191 22
-# Connected to 192.168.0.191. → Connection closed by foreign host.
+echo "quit" | telnet [IP已脱敏] 22
+# Connected to [IP已脱敏]. → Connection closed by foreign host.
 # 没有 SSH 横幅 → TCP 握手成功但应用层被截断
 ```
 
 ## 四、IP 变更事件
 
-重启后 Pi 的 IP 从 `192.168.0.191` 变为未知 (路由器 DHCP 可能重新分配), 导致无法 SSH。
+重启后 Pi 的 IP 从 `[IP已脱敏]` 变为未知 (路由器 DHCP 可能重新分配), 导致无法 SSH。
 
 **排查方法**:
 ```bash
@@ -243,7 +243,7 @@ sudo sysctl -p /etc/sysctl.d/90-hermes-tcp.conf
 #### 3. DNS 静态绑定
 
 ```bash
-echo "39.174.186.134 open.feishu.cn" | sudo tee -a /etc/hosts
+echo "[IP已脱敏] open.feishu.cn" | sudo tee -a /etc/hosts
 ```
 
 **原理**: 飞书 WebSocket 连接需要解析 `open.feishu.cn`。将此主机名写入 `/etc/hosts` 绕过路由器 DNS, 即使路由器 DNS 挂掉也不影响飞书重连。⚠️ 飞书 IP 可能会变, 需定期 (每周) 更新。
@@ -277,8 +277,8 @@ sed -i 's/FEISHU_ALLOW_ALL_USERS=false/FEISHU_ALLOW_ALL_USERS=true/' \
 | 探针 | 检测 | 方法 |
 |------|------|------|
 | P1 网关进程 | systemd 单元状态 | `systemctl --user show -p ActiveState` |
-| P2 模型路由器 | :18888/health | `curl http://127.0.0.1:18888/health` |
-| P3 代理连通性 | GitHub 可达性 | socks5://127.0.0.1:10808 → GitHub |
+| P2 模型路由器 | :18888/health | `curl http://[IP已脱敏]:18888/health` |
+| P3 代理连通性 | GitHub 可达性 | socks5://[IP已脱敏]:10808 → GitHub |
 | P4 飞书响应 (复合) | WS + 日志 + API ping | grep Connected + inbound/outbound + API |
 | P5 工具循环 | tool_call 堆积 | agent.log 中 tool/response 比率 |
 | P6 会话数 | 会话泄漏 | `ls /home/pi/.hermes/sessions/*.json | wc -l` |
@@ -317,8 +317,8 @@ sed -i 's/FEISHU_ALLOW_ALL_USERS=false/FEISHU_ALLOW_ALL_USERS=true/' \
 ### 6.1 网络拓扑
 
 ```
-树莓派 (192.168.0.191)
-├── /etc/hosts: open.feishu.cn → 39.174.186.134 (绕过 DNS)
+树莓派 ([IP已脱敏])
+├── /etc/hosts: open.feishu.cn → [IP已脱敏] (绕过 DNS)
 ├── xray-proxy (:10808)
 │   ├── outbound proxy: 韩国/台湾 VLESS reality → 外网
 │   └── outbound direct: geosite:cn → 直连 (飞书走这里)
@@ -326,7 +326,7 @@ sed -i 's/FEISHU_ALLOW_ALL_USERS=false/FEISHU_ALLOW_ALL_USERS=true/' \
 ├── hermes-gateway → model-router (API) + xray proxy (GitHub)
 └── hermes-gateway-ranzi (同上)
 
-路由器 (192.168.0.1)
+路由器 ([IP已脱敏])
 ├── DHCP + DNS + NAT
 ├── conntrack 表: 所有内网→外网连接的跟踪
 └── 瓶颈: conntrack 满 → 全内网断网
@@ -375,7 +375,7 @@ grep -c "Sending response.*Feishu" /home/pi/.hermes/logs/gateway.log
 
 ```bash
 curl -s -o /dev/null -w "HTTP %{http_code}\n" --connect-timeout 10 \
-  --socks5-hostname 127.0.0.1:10808 https://github.com
+  --socks5-hostname [IP已脱敏]:10808 https://github.com
 curl -s -o /dev/null -w "HTTP %{http_code}\n" --connect-timeout 10 \
   https://www.baidu.com
 host -t A open.feishu.cn
@@ -384,8 +384,8 @@ host -t A open.feishu.cn
 ### 7.4 网络诊断
 
 ```bash
-ping 192.168.0.191
-ping 192.168.0.1
+ping [IP已脱敏]
+ping [IP已脱敏]
 ip addr show wlan0 | grep inet
 arp -a
 # 全网端口扫描

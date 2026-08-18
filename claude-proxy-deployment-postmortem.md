@@ -71,9 +71,9 @@ T+60min Node.js 代理测试: HTTP 200 ✅
 
 **根因**: 
 - DeepSeek 的 Anthropic 兼容 API 路径为 `/anthropic/v1/messages`
-- Claude 发送请求到 `/v1/messages` (因为 `ANTHROPIC_BASE_URL=http://127.0.0.1:8787`)
-- Python 版本的 ANTHROPIC_BASE_URL 是 `http://127.0.0.1:8787/anthropic` → Claude 自动加了 `/anthropic` 前缀 → 代理收到 `self.path = /anthropic/v1/messages`
-- Node.js 版本的 ANTHROPIC_BASE_URL 改为 `http://127.0.0.1:8787` (无 `/anthropic`) → Claude 发送 `/v1/messages` → 代理未补全路径 → DeepSeek 返回 404
+- Claude 发送请求到 `/v1/messages` (因为 `ANTHROPIC_BASE_URL=http://[IP已脱敏]:8787`)
+- Python 版本的 ANTHROPIC_BASE_URL 是 `http://[IP已脱敏]:8787/anthropic` → Claude 自动加了 `/anthropic` 前缀 → 代理收到 `self.path = /anthropic/v1/messages`
+- Node.js 版本的 ANTHROPIC_BASE_URL 改为 `http://[IP已脱敏]:8787` (无 `/anthropic`) → Claude 发送 `/v1/messages` → 代理未补全路径 → DeepSeek 返回 404
 
 **解决**: 在代理中, 转发前将 `TARGET_URL.pathname` (`/anthropic`) 拼接到 `req.url` 前面。
 
@@ -116,7 +116,7 @@ T+60min Node.js 代理测试: HTTP 200 ✅
 
 ```
 Claude Code (Node.js undici fetch)
-  │ ANTHROPIC_BASE_URL=http://127.0.0.1:8787
+  │ ANTHROPIC_BASE_URL=http://[IP已脱敏]:8787
   │ HTTP/1.1 请求 → /v1/messages
   ▼
 Node.js 代理 (http.createServer)
@@ -210,7 +210,7 @@ Step 4: 确认当前会话环境变量
     → node --check → OK, 无语法错误
 
   Step 2: 测试代理基本功能
-    → curl http://127.0.0.1:8787/ → "Authentication Fails (governor)"
+    → curl http://[IP已脱敏]:8787/ → "Authentication Fails (governor)"
     → 代理在运行, 且成功转发到了 DeepSeek (DeepSeek 返回了认证错误)
     
   Step 3: 完整 API 调用测试

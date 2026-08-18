@@ -479,10 +479,10 @@ Nginx 配置与 opencode 版 **完全相同**，仅 upstream 端口需对齐:
 ```nginx
 upstream pi_agent_backend {
     least_conn;
-    server 127.0.0.1:8801 weight=1 max_fails=3 fail_timeout=30s;
-    server 127.0.0.1:8802 weight=1 max_fails=3 fail_timeout=30s;
-    server 127.0.0.1:8803 weight=1 max_fails=3 fail_timeout=30s;
-    server 127.0.0.1:8804 weight=1 max_fails=3 fail_timeout=30s;
+    server [IP已脱敏]:8801 weight=1 max_fails=3 fail_timeout=30s;
+    server [IP已脱敏]:8802 weight=1 max_fails=3 fail_timeout=30s;
+    server [IP已脱敏]:8803 weight=1 max_fails=3 fail_timeout=30s;
+    server [IP已脱敏]:8804 weight=1 max_fails=3 fail_timeout=30s;
     keepalive 32;
 }
 ```

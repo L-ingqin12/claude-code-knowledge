@@ -379,7 +379,7 @@ services:
 
 ```bash
 # 启动
-ANTHROPIC_API_KEY=sk-ant-xxx docker-compose up -d
+ANTHROPIC_API_KEY=[已脱敏] docker-compose up -d
 
 # 查看日志
 docker-compose logs -f claude-daemon
@@ -802,7 +802,7 @@ wsl -d Ubuntu -- bash -c 'nohup claude daemon start > /root/.claude/daemon.log 2
 ```bash
 # docker-compose.yml（完整内容见第三章 3.4）
 # 启动
-ANTHROPIC_API_KEY=sk-ant-xxx docker-compose up -d
+ANTHROPIC_API_KEY=[已脱敏] docker-compose up -d
 
 # 触发一次性任务
 docker-compose exec claude-daemon claude -p "运行完整测试" --permission-mode accept-edits

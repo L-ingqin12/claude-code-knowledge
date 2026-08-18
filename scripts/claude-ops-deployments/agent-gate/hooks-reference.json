@@ -1,0 +1,84 @@
+{
+  "// 警告": "本文件是 REFERENCE ONLY，不可直接部署。手动将 hooks 节合并到 settings.local.json。",
+  "// 说明": "子代理资源门控 Phase 2 + 2b + 2d hook 配置。合并到 /root/.claude/settings.local.json。注意: Bash hook 仅在有 subagent 时生效(单进程快速路径跳过)，非 fan-out 模式零开销。",
+
+  "hooks": {
+    "SessionStart": [
+      {
+        "//": "原有的版本检查 hook，保持不变",
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /root/claude-version-hook.sh full 2>/dev/null || true"
+          }
+        ]
+      },
+      {
+        "//": "新增: SessionStart 时清理孤儿 + 标记 idle (append)",
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /root/claude-agent-gate.sh cleanup 2>/dev/null || true; bash /root/claude-agent-gate.sh mark-idle 2>/dev/null || true"
+          }
+        ]
+      }
+    ],
+
+    "PreToolUse": [
+      {
+        "//": "无 matcher = 所有工具: 每次 tool 执行前标记 interactive，并降权已有子代理",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /root/claude-agent-gate.sh mark-interactive 2>/dev/null || true"
+          }
+        ]
+      },
+      {
+        "//": "仅 Agent 工具 (subagent spawn): 门控检查 — interactive降并发(3进程/1子代理), idle全速(4进程/2子代理)",
+        "matcher": "Agent",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /root/claude-agent-gate.sh check 2>/dev/null || true"
+          }
+        ]
+      }
+    ],
+
+    "Stop": [
+      {
+        "//": "Claude 停止回复时标记 idle，恢复子代理优先级",
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /root/claude-agent-gate.sh mark-idle 2>/dev/null || true"
+          }
+        ]
+      }
+    ],
+
+    "PostToolUse": [
+      {
+        "//": "Phase 2d: Bash 命令执行后自动释放资源锁 (防止锁泄漏)",
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /root/claude-agent-gate.sh release acquired 2>/dev/null || true"
+          }
+        ]
+      }
+    ]
+  },
+
+  "// Phase 2d 说明": {
+    "资源锁机制": "acquire/release 仅在有 subagent (claude进程>1) 时生效，单进程快速路径跳过，非fan-out零开销",
+    "Bash hook": "PreToolUse: acquire auto --try-only (最佳尝试，不阻塞); PostToolUse: release acquired (防止锁泄漏)",
+    "Agent hook": "check 第6步资源锁冲突检查仅在有 subagent 时执行",
+    "Wrapper": "claude-gate-bash.sh 可选使用: detect→acquire→exec→release 透明包装"
+  }
+}

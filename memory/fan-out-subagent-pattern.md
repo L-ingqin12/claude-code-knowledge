@@ -4,7 +4,7 @@ description: Fan-Out 扇出模式 — 主智能体并行分发任务到多个子
 metadata: 
   node_type: memory
   type: reference
-  originSessionId: 833ec90b-fd64-4736-8eda-362e765d3f55
+  originSessionId: [已脱敏]
 ---
 
 # Fan-Out 子智能体分发模式

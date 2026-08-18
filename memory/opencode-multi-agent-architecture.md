@@ -4,7 +4,7 @@ description: OpenCode 两层智能体架构的设计原理与自规划调度机�
 metadata: 
   node_type: memory
   type: reference
-  originSessionId: 833ec90b-fd64-4736-8eda-362e765d3f55
+  originSessionId: [已脱敏]
 ---
 
 # OpenCode 多智能体协作架构

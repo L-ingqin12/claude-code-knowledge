@@ -201,7 +201,7 @@ claude --resume
 
 ```json
 {
-  "id": "ae0f3c4b",
+  "id": "[已脱敏]",
   "cron": "13 9 * * 1-5",
   "prompt": "Monitor Claude Code community updates...",
   "recurring": true

@@ -348,7 +348,7 @@ done
 |---|------|------|----------|
 | 1 | `sysctl tcp_keepalive_time=60` | 减少 NAT 空闲断连概率 | 一次性命令 |
 | 2 | `claude-resilience-proxy.py` | 吸收瞬时 socket 错误（形态①） | `nohup python3 ... &` |
-| 3 | `ANTHROPIC_BASE_URL=http://127.0.0.1:8787/anthropic` | 让 Claude 走代理 | `export` 或 shell 配置 |
+| 3 | `ANTHROPIC_BASE_URL=http://[IP已脱敏]:8787/anthropic` | 让 Claude 走代理 | `export` 或 shell 配置 |
 | 4 | `claude-network-guardian.sh` | 检测崩溃+等网络+自动恢复（形态②③） | `nohup bash ... &` |
 | 5 | `resume-prompt-header.txt` | 恢复时注入的正确 prompt | 写入文件 |
 | 6 | `task-state.json` + `context-dump.md` | Claude 执行任务时自动维护 | prompt 中嵌入规则 |

@@ -56,7 +56,7 @@ Layer 4  外部大脑     ─ context-dump.md 保存思维状态
 Layer 5  中断恢复     ─ task-state.json + progress.log 保存任务进度
 
 部署方式: bash claude-resilience-deploy.sh start
-使用方式: ANTHROPIC_BASE_URL=http://127.0.0.1:8787/anthropic claude
+使用方式: ANTHROPIC_BASE_URL=http://[IP已脱敏]:8787/anthropic claude
 ```
 
 ## 推导链路（现象→根因→方案）

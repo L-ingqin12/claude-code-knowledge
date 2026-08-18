@@ -44,7 +44,7 @@ T+3s    Claude 重新发 API 请求 → 通常这次就成功了
 
 ```
 之前: Claude → fetch("https://api.deepseek.com/...") → socket error → 报错停止
-之后: Claude → fetch("http://127.0.0.1:8787/...") → 代理 → 上游
+之后: Claude → fetch("http://[IP已脱敏]:8787/...") → 代理 → 上游
                                                    → socket error 
                                                    → 代理自动重试(1/3/8s)
                                                    → 成功 → 返回给 Claude
@@ -57,7 +57,7 @@ T+3s    Claude 重新发 API 请求 → 通常这次就成功了
 nohup python3 /root/claude-resilience-proxy.py > /root/.claude/proxy.log 2>&1 &
 
 # 2. 让 Claude 走代理
-export ANTHROPIC_BASE_URL=http://127.0.0.1:8787/anthropic
+export ANTHROPIC_BASE_URL=http://[IP已脱敏]:8787/anthropic
 claude --permission-mode accept-edits
 ```
 
@@ -161,7 +161,7 @@ sysctl -w net.ipv4.tcp_keepalive_probes=3
 nohup python3 /root/claude-resilience-proxy.py > /root/.claude/proxy.log 2>&1 &
 
 # 第三步：启动 Claude（走代理）
-ANTHROPIC_BASE_URL=http://127.0.0.1:8787/anthropic \
+ANTHROPIC_BASE_URL=http://[IP已脱敏]:8787/anthropic \
   claude --permission-mode accept-edits
 
 # 完成。网络抖动不再需要你输入"继续"。

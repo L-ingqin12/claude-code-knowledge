@@ -87,7 +87,7 @@ proxy.js 是**所有会话的唯一 API 通路**。在其内部修改控制流�
 
 1. 从 workspace 恢复正确版本：`cp ~/workspace/claude-code-knowledge/claude-resilience-proxy.js /root/claude-resilience-proxy.js`
 2. 重启 proxy 进程
-3. 验证：`curl -sI http://127.0.0.1:8787/` 返回正常
+3. 验证：`curl -sI http://[IP已脱敏]:8787/` 返回正常
 4. 确认会话恢复
 
 ## 五、教训与规则
@@ -101,7 +101,7 @@ proxy.js 是**所有会话的唯一 API 通路**。在其内部修改控制流�
 | 3 | **单点通路的修改必须有逃生通道**。在唯一代理上验证前，先确保 rollback 脚本可用 |
 | 4 | **修改前 git commit 当前状态**。确保 `git diff HEAD` 能精确显示改动内容 |
 | 5 | **重启代理前验证语法**：`node --check proxy.js && timeout 5 node -e "require('./proxy.js')"` 确保能启动 |
-| 6 | **修改代理后先 curl 验证**再让 Claude 会话使用：`curl -s -X POST http://127.0.0.1:8787/v1/messages ...` |
+| 6 | **修改代理后先 curl 验证**再让 Claude 会话使用：`curl -s -X POST http://[IP已脱敏]:8787/v1/messages ...` |
 
 ### 5.2 正确的诊断架构
 

@@ -10,7 +10,7 @@
 
 ### 1.1 模型路由器死循环 (已修复)
 
-**根因**: `model_router.py` 在 `main()` 中读取 `config["model"]["base_url"]` 作为上游地址，但该字段已被配成 `http://127.0.0.1:18888/v1` (指向路由器自己)，导致无限循环转发 → 超时 → 502。
+**根因**: `model_router.py` 在 `main()` 中读取 `config["model"]["base_url"]` 作为上游地址，但该字段已被配成 `http://[IP已脱敏]:18888/v1` (指向路由器自己)，导致无限循环转发 → 超时 → 502。
 
 ```
 修复前: Hermes → :18888 router → 读 config → base_url=:18888 → 自己 ↻ 超时

@@ -1,0 +1,218 @@
+{
+  "_meta": {
+    "description": "Log Search/Analysis System — Skill Registry Index",
+    "total_skills": 25,
+    "total_namespaces": 5,
+    "total_hard_dependencies": 15,
+    "total_optional_dependencies": 8,
+    "namespaces": [
+      "logs/shared",
+      "logs/queries",
+      "logs/alerts",
+      "logs/workflows",
+      "logs/dashboards"
+    ]
+  },
+  "skills": [
+    {
+      "name": "es-query-builder",
+      "description": "Build Elasticsearch DSL queries from natural language descriptions",
+      "namespace": "logs/shared",
+      "includes_count": 0,
+      "optional_count": 1,
+      "paths": ["**/elasticsearch/**", "**/es/**"]
+    },
+    {
+      "name": "loki-query-builder",
+      "description": "Build LogQL queries from natural language for Grafana Loki log retrieval",
+      "namespace": "logs/shared",
+      "includes_count": 0,
+      "optional_count": 0,
+      "paths": ["**/loki/**", "**/grafana/**"]
+    },
+    {
+      "name": "time-range-parser",
+      "description": "Parse relative time expressions like \"last hour\", \"yesterday\", \"last 7 days\" into absolute timestamps",
+      "namespace": "logs/shared",
+      "includes_count": 0,
+      "optional_count": 0,
+      "paths": []
+    },
+    {
+      "name": "result-formatter",
+      "description": "Format log query results as tables, JSON, or CSV with configurable output",
+      "namespace": "logs/shared",
+      "includes_count": 0,
+      "optional_count": 0,
+      "paths": []
+    },
+    {
+      "name": "auth-checker",
+      "description": "Role-based access control for log data with SRE, Developer, and Security role tiers",
+      "namespace": "logs/shared",
+      "includes_count": 0,
+      "optional_count": 0,
+      "paths": ["**/auth/**"]
+    },
+    {
+      "name": "error-search",
+      "description": "Search error logs using Elasticsearch DSL with optional time range filtering",
+      "namespace": "logs/queries",
+      "includes_count": 1,
+      "optional_count": 1,
+      "paths": ["**/errors/**", "**/logs/**"]
+    },
+    {
+      "name": "trace-search",
+      "description": "Search distributed traces using Elasticsearch DSL with trace ID or service filters",
+      "namespace": "logs/queries",
+      "includes_count": 1,
+      "optional_count": 0,
+      "paths": ["**/traces/**"]
+    },
+    {
+      "name": "container-log-search",
+      "description": "Search container and pod logs using Loki LogQL with label-based filtering",
+      "namespace": "logs/queries",
+      "includes_count": 1,
+      "optional_count": 0,
+      "paths": ["**/containers/**", "**/pods/**"]
+    },
+    {
+      "name": "slow-query-search",
+      "description": "Detect and analyze slow database queries with performance metrics",
+      "namespace": "logs/queries",
+      "includes_count": 2,
+      "optional_count": 0,
+      "paths": ["**/database/**", "**/queries/**"]
+    },
+    {
+      "name": "security-audit-search",
+      "description": "Search security audit logs with access control enforcement",
+      "namespace": "logs/queries",
+      "includes_count": 2,
+      "optional_count": 0,
+      "paths": ["**/audit/**", "**/auth.log"]
+    },
+    {
+      "name": "app-log-search",
+      "description": "Full-text search across application logs with structured field filtering",
+      "namespace": "logs/queries",
+      "includes_count": 1,
+      "optional_count": 0,
+      "paths": ["**/app/**"]
+    },
+    {
+      "name": "metric-query",
+      "description": "Query time-series metrics from ClickHouse with time range and formatting",
+      "namespace": "logs/queries",
+      "includes_count": 2,
+      "optional_count": 0,
+      "paths": ["**/metrics/**"]
+    },
+    {
+      "name": "log-aggregation",
+      "description": "Aggregate and group log entries using Elasticsearch bucket aggregations",
+      "namespace": "logs/queries",
+      "includes_count": 2,
+      "optional_count": 0,
+      "paths": ["**/aggregations/**"]
+    },
+    {
+      "name": "k8s-oom-alert",
+      "description": "Respond to Kubernetes OOMKilled pod alerts with error and slow query analysis",
+      "namespace": "logs/alerts",
+      "includes_count": 2,
+      "optional_count": 0,
+      "paths": ["**/alerts/**", "**/k8s/**"]
+    },
+    {
+      "name": "disk-full-alert",
+      "description": "Respond to disk full alerts by analyzing container logs for space consumption",
+      "namespace": "logs/alerts",
+      "includes_count": 1,
+      "optional_count": 0,
+      "paths": ["**/alerts/**"]
+    },
+    {
+      "name": "spike-detection",
+      "description": "Detect and analyze traffic or error rate spikes using Elasticsearch aggregations",
+      "namespace": "logs/alerts",
+      "includes_count": 2,
+      "optional_count": 0,
+      "paths": ["**/alerts/**", "**/monitoring/**"]
+    },
+    {
+      "name": "error-rate-alert",
+      "description": "Evaluate error rate threshold violations using error logs and metrics",
+      "namespace": "logs/alerts",
+      "includes_count": 2,
+      "optional_count": 0,
+      "paths": ["**/alerts/**"]
+    },
+    {
+      "name": "latency-alert",
+      "description": "Evaluate latency threshold violations using metric time-series data",
+      "namespace": "logs/alerts",
+      "includes_count": 1,
+      "optional_count": 0,
+      "paths": ["**/alerts/**"]
+    },
+    {
+      "name": "cert-expiry-alert",
+      "description": "Respond to TLS certificate expiry warnings with renewal guidance",
+      "namespace": "logs/alerts",
+      "includes_count": 0,
+      "optional_count": 0,
+      "paths": ["**/alerts/**", "**/certs/**"]
+    },
+    {
+      "name": "rca-pipeline",
+      "description": "Multi-step root cause analysis combining error search, trace search, and spike detection",
+      "namespace": "logs/workflows",
+      "includes_count": 3,
+      "optional_count": 1,
+      "paths": ["**/incidents/**", "**/postmortems/**"]
+    },
+    {
+      "name": "capacity-forecast",
+      "description": "Forecast resource capacity needs based on slow query trends and usage metrics",
+      "namespace": "logs/workflows",
+      "includes_count": 2,
+      "optional_count": 0,
+      "paths": ["**/capacity/**"]
+    },
+    {
+      "name": "alert-correlation",
+      "description": "Correlate multiple alerts to identify common root causes and alert storms",
+      "namespace": "logs/workflows",
+      "includes_count": 2,
+      "optional_count": 0,
+      "paths": ["**/alerts/**", "**/correlation/**"]
+    },
+    {
+      "name": "incident-report",
+      "description": "Generate structured incident reports with formatted timeline and action items",
+      "namespace": "logs/workflows",
+      "includes_count": 1,
+      "optional_count": 1,
+      "paths": ["**/incidents/**"]
+    },
+    {
+      "name": "sre-overview",
+      "description": "SRE overview dashboard with optional metric queries and error rate alerts",
+      "namespace": "logs/dashboards",
+      "includes_count": 0,
+      "optional_count": 2,
+      "paths": ["**/dashboards/**", "**/grafana/**"]
+    },
+    {
+      "name": "error-budget",
+      "description": "Error budget dashboard tracking SLO compliance with metric queries and formatted output",
+      "namespace": "logs/dashboards",
+      "includes_count": 2,
+      "optional_count": 0,
+      "paths": ["**/dashboards/**", "**/slo/**"]
+    }
+  ]
+}

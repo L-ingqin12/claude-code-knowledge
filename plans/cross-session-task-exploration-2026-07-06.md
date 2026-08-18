@@ -55,10 +55,10 @@ PRoot 下每个 session 的 I/O 路径独立。当前 fan-out 的 Agent 子代�
   通信目录: /tmp/claude-cross-session/
   
   任务文件: task-{id}.json
-    {"id":"task-001","prompt":"...","model":"claude-haiku-4-5","ttl":300,"status":"pending"}
+    {"id":"[已脱敏]","prompt":"...","model":"claude-haiku-4-5","ttl":300,"status":"pending"}
   
   结果文件: result-{id}.json  
-    {"id":"task-001","status":"done","output":"...","exit":0}
+    {"id":"[已脱敏]","status":"done","output":"...","exit":0}
   
   ack 文件:  ack-{id} (worker 创建, 表示已接手)
   

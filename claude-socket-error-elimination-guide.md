@@ -152,7 +152,7 @@ sysctl -w net.ipv4.tcp_fastopen=3 2>/dev/null
 
 # 4. 确保 DNS 缓存（减少 DNS 超时风险）
 # 如果 systemd-resolved 不可用，配置 /etc/resolv.conf 使用稳定 DNS
-echo "nameserver 8.8.8.8" > /etc/resolv.conf.head 2>/dev/null
+echo "nameserver [IP已脱敏]" > /etc/resolv.conf.head 2>/dev/null
 
 echo "[network-harden] Done."
 ```
@@ -169,7 +169,7 @@ echo "[network-harden] Done."
                → socket closed → crash
 
 之后:
-  Claude Code → fetch("http://127.0.0.1:8787/anthropic/...")
+  Claude Code → fetch("http://[IP已脱敏]:8787/anthropic/...")
                → 本地代理 → fetch("https://api.deepseek.com/anthropic/...")
                           → 连接池 + keepalive + 心跳
                           → socket closed → 自动重试(最多3次) → 成功
@@ -188,7 +188,7 @@ Claude API Resilience Proxy
 
 用法:
   python3 /root/claude-resilience-proxy.py &
-  ANTHROPIC_BASE_URL=http://127.0.0.1:8787/anthropic claude --permission-mode accept-edits
+  ANTHROPIC_BASE_URL=http://[IP已脱敏]:8787/anthropic claude --permission-mode accept-edits
 """
 
 import http.server
@@ -393,11 +393,11 @@ class ProxyHandler(http.server.BaseHTTPRequestHandler):
 if __name__ == '__main__':
     import socket  # Deferred import for connection pool
     
-    server = http.server.HTTPServer(('127.0.0.1', LISTEN_PORT), ProxyHandler)
+    server = http.server.HTTPServer(('[IP已脱敏]', LISTEN_PORT), ProxyHandler)
     # 设置 socket keepalive
     server.socket.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
     
-    print(f"[proxy] Claude Resilience Proxy listening on 127.0.0.1:{LISTEN_PORT}")
+    print(f"[proxy] Claude Resilience Proxy listening on [IP已脱敏]:{LISTEN_PORT}")
     print(f"[proxy] Forwarding to {TARGET_BASE}")
     print(f"[proxy] Retries: {MAX_RETRIES}, Backoff: {RETRY_BACKOFF}")
     print(f"[proxy] Heartbeat: every {HEARTBEAT_INTERVAL}s")
@@ -418,7 +418,7 @@ if __name__ == '__main__':
 ```
 ┌───────────────────────────────────────────────────┐
 │  Claude Code                                       │
-│  ANTHROPIC_BASE_URL=http://127.0.0.1:8787/anthropic│
+│  ANTHROPIC_BASE_URL=http://[IP已脱敏]:8787/anthropic│
 │  --permission-mode accept-edits                    │
 │    ↓                                                │
 │  localhost:8787 (Resilience Proxy)                  │
@@ -469,7 +469,7 @@ fi
 
 # ── Layer 2: 设置环境并启动 Claude ──
 echo "[2/3] Launching Claude with resilience..."
-export ANTHROPIC_BASE_URL="http://127.0.0.1:8787/anthropic"
+export ANTHROPIC_BASE_URL="http://[IP已脱敏]:8787/anthropic"
 
 # 注入中断恢复协议
 RESUME_HEADER="/root/.claude/resume-prompt-header.txt"
@@ -546,14 +546,14 @@ sysctl -w net.ipv4.tcp_keepalive_probes=3
 # 第二步：启动代理（选做，推荐）
 python3 /root/claude-resilience-proxy.py &
 # 验证代理存活
-curl -s http://127.0.0.1:8787/anthropic/v1/messages \
+curl -s http://[IP已脱敏]:8787/anthropic/v1/messages \
   -H "Authorization: Bearer $ANTHROPIC_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{"model":"claude-haiku-4-5","max_tokens":1,"messages":[{"role":"user","content":"ping"}]}' \
   | head -c 100
 
 # 第三步：使用
-ANTHROPIC_BASE_URL=http://127.0.0.1:8787/anthropic \
+ANTHROPIC_BASE_URL=http://[IP已脱敏]:8787/anthropic \
   claude --permission-mode accept-edits
 ```
 
@@ -564,7 +564,7 @@ ANTHROPIC_BASE_URL=http://127.0.0.1:8787/anthropic \
 ```
 ┌──────────────────────────────────────────────────────────────┐
 │                        Claude Code                             │
-│  ANTHROPIC_BASE_URL=http://127.0.0.1:8787/anthropic           │
+│  ANTHROPIC_BASE_URL=http://[IP已脱敏]:8787/anthropic           │
 │  --permission-mode accept-edits                                │
 └──────┬───────────────────────────────────────────────────────┘
        │

@@ -11,7 +11,7 @@ metadata:
     - repo-first
   priority: high
   trigger: before-any-code-change
-  originSessionId: b6eb8d1f-ac12-442d-8dc9-1a516ba4bad1
+  originSessionId: [已脱敏]
 ---
 
 # 代码变更工作流：先仓库，后部署

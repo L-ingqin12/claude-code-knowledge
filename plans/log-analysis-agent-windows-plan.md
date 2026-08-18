@@ -72,13 +72,13 @@
 python app.py --port 8801
 
 # 2. 验证本地可达
-curl http://127.0.0.1:8801/api/health
+curl http://[IP已脱敏]:8801/api/health
 
 # 3. 配置 Nginx 反向代理到 8801
 nginx -c conf/nginx.conf
 
 # 4. 验证通过 Nginx 可达
-curl http://127.0.0.1/api/health
+curl http://[IP已脱敏]/api/health
 ```
 
 ### 1.3 验证标准
@@ -86,7 +86,7 @@ curl http://127.0.0.1/api/health
 | 检查项 | 方法 | 期望结果 |
 |--------|------|---------|
 | Tornado 正常启动 | `python app.py --port 8801` | 监听 8801，无报错 |
-| Health endpoint | `curl http://127.0.0.1:8801/api/health` | 200 + `{"status":"ok"}` |
+| Health endpoint | `curl http://[IP已脱敏]:8801/api/health` | 200 + `{"status":"ok"}` |
 | Nginx 反向代理 | 通过 Nginx 访问 health | 200 + 同上 |
 | Agent 调用链路 | POST 一条示例日志 | 返回分析结果 |
 
@@ -144,10 +144,10 @@ http {
         # 备用: ip_hash 用于需要会话亲和性的场景
         # ip_hash;
 
-        server 127.0.0.1:8801 weight=1 max_fails=3 fail_timeout=30s;
-        server 127.0.0.1:8802 weight=1 max_fails=3 fail_timeout=30s;
-        server 127.0.0.1:8803 weight=1 max_fails=3 fail_timeout=30s;
-        server 127.0.0.1:8804 weight=1 max_fails=3 fail_timeout=30s;
+        server [IP已脱敏]:8801 weight=1 max_fails=3 fail_timeout=30s;
+        server [IP已脱敏]:8802 weight=1 max_fails=3 fail_timeout=30s;
+        server [IP已脱敏]:8803 weight=1 max_fails=3 fail_timeout=30s;
+        server [IP已脱敏]:8804 weight=1 max_fails=3 fail_timeout=30s;
 
         # 到后端的空闲长连接数
         keepalive 32;
@@ -212,7 +212,7 @@ nginx -t
 |--------|------|
 | 配置语法 | `nginx -t` |
 | 启动监听 | `netstat -ano | findstr ":80"` |
-| 分发到多后端 | 连续请求 `curl http://127.0.0.1/api/health`，检查各 Tornado 日志 |
+| 分发到多后端 | 连续请求 `curl http://[IP已脱敏]/api/health`，检查各 Tornado 日志 |
 | fail_timeout 生效 | 停止 8801，请求仍正常 (分发到其他端口) |
 | 日志文件正常 | `logs/access.log` 含 rt/urt 字段 |
 
@@ -480,7 +480,7 @@ def main():
 
     server = tornado.httpserver.HTTPServer(app)
     server.listen(args.port)
-    logging.info(f"Tornado worker 启动于 0.0.0.0:{args.port}")
+    logging.info(f"Tornado worker 启动于 [IP已脱敏]:{args.port}")
 
     # 优雅关闭
     def shutdown_handler(sig, frame):
@@ -592,8 +592,8 @@ Write-Host "所有 worker 已停止" -ForegroundColor Green
 | 检查项 | 方法 |
 |--------|------|
 | 多进程启动 | `netstat -ano | findstr "8801 8802 8803 8804"` |
-| 健康检查 | `curl http://127.0.0.1:8801/api/health` → 200 |
-| 分析请求 | `curl -X POST http://127.0.0.1:8801/api/analyze -H "Content-Type: application/json" -d '{"log_content":"ERROR: connection timeout"}'` |
+| 健康检查 | `curl http://[IP已脱敏]:8801/api/health` → 200 |
+| 分析请求 | `curl -X POST http://[IP已脱敏]:8801/api/analyze -H "Content-Type: application/json" -d '{"log_content":"ERROR: connection timeout"}'` |
 | 并发请求 | Apache Bench / wrk 压测 |
 | 超时返回 | 传入超大日志 + 短超时 → 504 |
 
@@ -760,7 +760,7 @@ $Timeout = 2000  # ms
 
 foreach ($port in $Ports) {
     try {
-        $req = [System.Net.WebRequest]::Create("http://127.0.0.1:$port/api/health")
+        $req = [System.Net.WebRequest]::Create("http://[IP已脱敏]:$port/api/health")
         $req.Timeout = $Timeout
         $resp = $req.GetResponse()
         $resp.Close()
@@ -773,7 +773,7 @@ foreach ($port in $Ports) {
 
 # 检查 Nginx 健康
 try {
-    $req = [System.Net.WebRequest]::Create("http://127.0.0.1/api/health")
+    $req = [System.Net.WebRequest]::Create("http://[IP已脱敏]/api/health")
     $req.Timeout = $Timeout
     $resp = $req.GetResponse()
     $resp.Close()
@@ -800,16 +800,16 @@ try {
 
 # 基线压测 — 单 worker
 ab -n 10000 -c 100 -p sample_log.json -T "application/json" `
-   http://127.0.0.1:8801/api/analyze
+   http://[IP已脱敏]:8801/api/analyze
 
 # 通过 Nginx 压测 — 4 workers
 ab -n 50000 -c 500 -p sample_log.json -T "application/json" `
-   http://127.0.0.1/api/analyze
+   http://[IP已脱敏]/api/analyze
 
 # 长连接压测
 wrk -t 12 -c 1000 -d 60s `
     -s post.lua `
-    http://127.0.0.1/api/analyze
+    http://[IP已脱敏]/api/analyze
 ```
 
 ### 6.2 监控指标

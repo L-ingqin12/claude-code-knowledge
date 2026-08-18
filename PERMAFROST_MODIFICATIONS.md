@@ -119,7 +119,7 @@ rm -rf ~/.claude/plugins/cache/permafrost/permafrost/0.3.0/proxy/__pycache__/
 bash /root/claude-permafrost-deploy.sh rollback && bash /root/claude-permafrost-deploy.sh start
 
 # 6. 验证
-curl -s http://127.0.0.1:8788/permafrost/doctor | python3 -c "
+curl -s http://[IP已脱敏]:8788/permafrost/doctor | python3 -c "
 import sys,json; last=json.load(sys.stdin)['last_request']
 print('date_stabilized:', 'date_stabilized' in last)
 print('tools_normalized:', 'tools_normalized' in last)

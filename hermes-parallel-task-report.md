@@ -243,7 +243,7 @@ Parent (kanban orchestrator)
 ## 六、当前运行状态
 
 ```
-树莓派 192.168.0.191:
+树莓派 [IP已脱敏]:
 
   model-router v3 (systemd)    ✅ :18888, upstream ARK
   hermes-gateway (default)     ✅ feishu connected
