@@ -3,7 +3,7 @@ title: 网络稳定性门控 — 不稳定时延迟发送，稳定后再发送
 aliases: []
 tags: [ai/ops, ai/agent]
 created: 2026-07-01
-updated: 2026-08-17
+updated: 2026-08-25
 status: review
 ---
 
@@ -97,7 +97,7 @@ Claude Code 的上游超时: 通常 120-180 秒
 
 最坏情况:
   代理挂起 90 秒 + API 调用 10 秒 = 100 秒 → Claude 等到结果 → 成功
-  代理挂起 90 秒 + 网络未恢复 → 超时 → Claude 看到超时(非 socket 错误)
+  代理挂起 90 秒 + 网络未恢复 → wait_for_stability 超时也返回 True (fail-open，与代码一致) → 请求照发，不阻塞主流程
 ```
 
 ## 四、实现
@@ -238,6 +238,8 @@ def _handle(self, method):
     is_thinking = is_thinking_request(body)
     threshold = STABILITY_THRESHOLD_THINKING if is_thinking else STABILITY_THRESHOLD
     
+    # streak 阈值随模式配置: 普通3/thinking5
+    # 注: 实现暂统一为 3（thinking 的 5 连胜阈值待参数化后生效）
     if tracker.score() < threshold or not tracker.recent_streak(3):
         if is_thinking:
             print(f"[proxy] Thinking request gated — network unstable "
@@ -251,7 +253,8 @@ def _handle(self, method):
         )
         
         if not ok:
-            # 挂起超时 → 返回错误而非盲目发送
+            # 防御性分支: 当前 wait_for_stability 超时也返回 True (fail-open)，
+            # 此分支不可达；保留以备未来改为 fail-closed 语义
             self._send_gate_timeout()
             return
     
@@ -280,8 +283,9 @@ def _handle(self, method):
 不加门控:
   T+0s   网络切换开始（WiFi 断, 蜂窝正在连接）
   T+1s   代理发送思考请求 → 走 WiFi 接口 → socket 断
-  T+2s   代理重试 → 还是断
-  T+5s   网络切换完成，代理第三次重试成功
+  T+2s   代理重试 (1s backoff) → 还是断
+  T+5s   代理二次重试 (3s backoff) → 仍断；此时网络切换完成
+  T≈13s  代理三次重试 (8s backoff) → 成功（1/3/8s backoff）
   浪费: 前两次请求的 input tokens + 可能的部分 thinking tokens
 
 加门控:

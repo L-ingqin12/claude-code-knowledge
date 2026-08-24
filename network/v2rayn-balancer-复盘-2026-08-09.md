@@ -3,7 +3,7 @@ title: v2rayN Balancer 生成 Bug 故障复盘
 aliases: [v2rayN balancer bug, Google 无法访问 2026-08-09, balancerTag 修复, outboundTag balancer]
 tags: [incident, network/proxy, network/analysis]
 created: 2026-08-09
-updated: 2026-08-09
+updated: 2026-08-25
 status: stable
 ---
 # v2rayN Balancer 生成 Bug — Google 无法访问完整复盘
@@ -20,15 +20,15 @@ See also: [[Network-KB-Home]] | [[ARCHITECTURE]] | [[GUIDE]] | [[参考-网络�
 
 ## 目录
 
-1. [现象与影响](#1-现象与影响)
-2. [诊断过程（排除法）](#2-诊断过程排除法)
-3. [根因分析](#3-根因分析)
-4. [关键证据：对照实验](#4-关键证据对照实验)
-5. [修复方案演进](#5-修复方案演进)
-6. [节点稳定性实测](#6-节点稳定性实测)
-7. [上游信息](#7-上游信息)
-8. [经验教训](#8-经验教训)
-9. [关联文档与脚本](#9-关联文档与脚本)
+1. [现象与影响](#1. 现象与影响)
+2. [诊断过程（排除法）](#2. 诊断过程（排除法）)
+3. [根因分析](#3. 根因分析)
+4. [关键证据：对照实验](#4. 关键证据：对照实验)
+5. [修复方案演进](#5. 修复方案演进)
+6. [节点稳定性实测](#6. 节点稳定性实测)
+7. [上游信息](#7. 上游信息)
+8. [经验教训](#8. 经验教训)
+9. [关联文档与脚本](#9. 关联文档与脚本)
 
 ---
 
@@ -59,7 +59,7 @@ See also: [[Network-KB-Home]] | [[ARCHITECTURE]] | [[GUIDE]] | [[参考-网络�
 ### 2.2 排除 DNS 问题
 
 - xray DNS 模块 geosite:google → Cloudflare DoH（无污染）
-- 本地系统 DNS（[IP已脱敏]）确实被污染（google → Facebook IP [IP已脱敏]），但只影响直连流量，代理流量走 xray 自己的 DNS，不受影响
+- 本地系统 DNS（[IP已脱敏], 勘误: 原记 [IP已脱敏]，与全库上游路由器口径统一）确实被污染（google → Facebook IP [IP已脱敏]），但只影响直连流量，代理流量走 xray 自己的 DNS，不受影响
 
 ### 2.3 定位配置层
 
@@ -139,6 +139,9 @@ v2rayN 重写 config.json
 
 ```powershell
 # 把 config.json 里该规则的 "outboundTag": "balancer" 改成 "balancerTag": "balancer"，重启 xray
+$cfg = "D:\Document\Download\v2rayN-windows-64-desktop\v2rayN-windows-64\binConfigs\config.json"  # <你的v2rayN目录>\binConfigs\config.json
+(Get-Content $cfg -Raw) -replace '"outboundTag"\s*:\s*"balancer"', '"balancerTag": "balancer"' | Set-Content $cfg -Encoding utf8NoBOM
+taskkill /F /IM xray.exe   # 结束后由 v2rayN 重启核心（或在 v2rayN 中手动重启）
 ```
 
 ---
@@ -161,6 +164,7 @@ live balancer 实测（2026-08-09），**运行池已换成 4 个稳定节点**�
 
 > [!warning] 遗留事项
 > v2rayN GUI 均衡组仍显示「新加坡2 + 韩国×2」。watcher 只修规则不换节点，若 v2rayN 重新生成配置会把不稳节点加回池 → **建议在 GUI 中把均衡组成员也改为 SG1/US1/US3/JP1**（一次性同步）。
+> **状态**: GUI 池同步为待办；未完成前以配置文件（balancer 池 SG1/US1/US3/JP1）为准。
 
 验证结果（新池，10808 live proxy）：Google generate_204 204 ×3（1.1s/1.1s/7.9s）、YouTube 200、出口 [IP已脱敏]。
 

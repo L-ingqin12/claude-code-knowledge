@@ -3,7 +3,7 @@ title: Claude-Ops-KB-Home
 aliases: [Claude Code 运维知识库, claude-ops, ClaudeOps]
 tags: [moc, ai/ops]
 created: 2026-08-17
-updated: 2026-08-17
+updated: 2026-08-25
 status: stable
 ---
 
@@ -124,30 +124,21 @@ See also: [[AGENTS]] · [[AI-Links-KB-Home]] · [[Network-KB-Home]]
 
 ## 关系图
 
-```mermaid
-graph TD
-    HOME[Claude-Ops-KB-Home]
-    OPS[运维方案与设计<br/>review × 23 · deprecated × 2]
-    INC[事故复盘<br/>stable × 8]
-    ARCH[Agent-架构模式<br/>stable × 13 + MEMORY-INDEX]
-    PLAN[Plans<br/>deprecated × 8]
-    AG[AGENTS]
-    AI[AI-Links-KB-Home]
+```
+Claude-Ops-KB-Home (HOME)
+├─ 运维方案与设计 (OPS) — review × 23 · deprecated × 2
+├─ 事故复盘 (INC) — stable × 8
+├─ Agent-架构模式 (ARCH) — stable × 14（含 MEMORY-INDEX）
+├─ Plans (PLAN) — deprecated × 8
+├─ AGENTS (AG)
+└─ AI-Links-KB-Home (AI)
 
-    HOME --> OPS
-    HOME --> INC
-    HOME --> ARCH
-    HOME --> PLAN
-    HOME --> AG
-    HOME --> AI
-
-    OPS --> INC
-    INC -.复盘反哺.-> OPS
-    ARCH --> OPS
-    ARCH --> PLAN
-    PLAN -.归档.-> ARCH
-    AG -.规范约束.-> HOME
-    AI -.姊妹子库.-> HOME
+交叉连线:
+├─ OPS → INC；INC -.复盘反哺.-> OPS
+├─ ARCH → OPS；ARCH → PLAN
+├─ PLAN -.归档.-> ARCH
+├─ AG -.规范约束.-> HOME
+└─ AI -.姊妹子库.-> HOME
 ```
 
 ## 标签索引
@@ -155,7 +146,7 @@ graph TD
 | 标签 | 用途 | 文档数 |
 |------|------|--------|
 | `#ai/ops` | Agent 无人值守运维（本子库全局） | 56 |
-| `#ai/agent` | 方案/设计/架构模式类 | 38 |
+| `#ai/agent` | 方案/设计/架构模式类 | 39 |
 | `#incident` | 事故复盘 | 8 |
 | `#moc` | MOC 首页 | 1 |
 
@@ -167,7 +158,7 @@ graph TD
 | 迁移日期 | 2026-08-17 |
 | 来源仓库 | `akb-remote` @ commit `f493130` |
 | status 分布 | review 23 · stable 21 · deprecated 10（不含 MOC/索引 2 篇 stable） |
-| 目录分布 | 运维方案与设计 25 · 事故复盘 8 · Agent-架构模式 13 · Plans 8 |
+| 目录分布 | 运维方案与设计 25 · 事故复盘 8 · Agent-架构模式 14（含 MEMORY-INDEX）· Plans 8（合计 55 + 本 MOC = 56） |
 
 ## 脚本清单
 

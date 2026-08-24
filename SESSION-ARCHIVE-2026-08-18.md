@@ -3,7 +3,7 @@ title: SESSION-ARCHIVE 2026-08-18 知识库合并与会话归档
 aliases: [会话归档2026-08-18, 知识库合并归档]
 tags: [meta]
 created: 2026-08-18
-updated: 2026-08-18
+updated: 2026-08-25
 status: stable
 ---
 
@@ -63,4 +63,5 @@ See also: [[AGENTS]] | [[Claude-Ops-KB-Home]] | [[AI-Links-KB-Home]] | [[Network
 - [[Claude-Ops-KB-Home]] — 新子库入口
 - [[AI-Links-KB-Home]] — AI 链接与 DSH 知识入口
 - [[DSH提效与Token插件调研]] — 插件调研归档
+- [[AI大模型开发]] — LLM 理论与开发笔记（Agent Plan 模型选择等交叉参考）
 - [[AGENTS]] — 规范（已增补 五·五 融合规范）

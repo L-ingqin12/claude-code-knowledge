@@ -3,7 +3,7 @@ title: Permafrost 本地修改记录
 aliases: []
 tags: [ai/ops, ai/agent]
 created: 2026-06-17
-updated: 2026-08-17
+updated: 2026-08-25
 status: review
 ---
 
@@ -31,8 +31,10 @@ See also: [[Claude-Ops-KB-Home]] · [[claude-cache-strategy]] · [[claude-patch-
 
 ### 1.1 新增 import os
 ```diff
--import hashlib\nimport json\nimport re
-+import hashlib\nimport json\nimport os\nimport re
+ import hashlib
+ import json
++import os
+ import re
 ```
 
 ### 1.2 新增 _RE_CURRENT_DATE 正则
@@ -124,6 +126,8 @@ cp /root/workspace/claude-code-knowledge/patches/model_router.py \
    ~/.claude/plugins/cache/permafrost/permafrost/0.3.0/proxy/model_router.py
 
 # 4. 手动检查 permafrost_proxy.py 的两个注入点
+grep -n "PERMAFROST_MODEL_ROUTING" ~/.claude/plugins/cache/permafrost/permafrost/0.3.0/proxy/permafrost_proxy.py
+# 期望输出两处: 2.1 请求前 route_model 调用 + 2.2 响应后 feedback_flash_response 调用
 
 # 5. 清缓存 + 重启
 rm -rf ~/.claude/plugins/cache/permafrost/permafrost/0.3.0/proxy/__pycache__/

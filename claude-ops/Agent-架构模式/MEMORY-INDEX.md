@@ -3,7 +3,7 @@ title: MEMORY-INDEX
 aliases: [Memory 索引, memory 知识索引, MEMORY 记忆索引]
 tags: [ai/ops, ai/agent]
 created: 2026-08-17
-updated: 2026-08-17
+updated: 2026-08-25
 status: stable
 ---
 
@@ -46,7 +46,7 @@ See also: [[Claude-Ops-KB-Home]] · [[AGENTS]] · [[AI-Links-KB-Home]]
 | occams-razor-principle.md | 如无必要勿增实体——设计全局约束 |
 | claude-code-upgrade-incident-2026-06-09.md | v2.1.150→v2.1.169 升级事故与标准流程 |
 | claude-code-preflight-checklist.md | ⚠️ 行动前强制检查清单（5 项检查 + 5 条硬规则） |
-| claude-code-environment-architecture.md | Termux+PRoot 混合环境、两条 npm 体系、PATH 优先级 |
+| claude-code-environment-architecture.md | Termux+PRoot 混合环境、两条 npm 体系、PATH 优先级（最接近本库文档: [[pi-vs-termux-guide]]） |
 | claude-code-npm-postinstall-mechanism.md | optionalDependency→原生二进制→linkSync 替换流程 |
 | raspberrypi-proxy-ipv6-fix-pending.md | 树莓派代理 IPv6 无路由修复待续 |
 

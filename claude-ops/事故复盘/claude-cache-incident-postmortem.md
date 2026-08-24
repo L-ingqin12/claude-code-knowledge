@@ -3,7 +3,7 @@ title: 缓存优化事故复盘
 aliases: []
 tags: [ai/ops, incident]
 created: 2026-06-16
-updated: 2026-08-17
+updated: 2026-08-25
 status: stable
 ---
 
@@ -62,7 +62,7 @@ See also: [[Claude-Ops-KB-Home]] · [[claude-cache-postmortem-2026-06-13]] · [[
 | 项目 | 说明 |
 |------|------|
 | 方案 C 架构 | permafrost → proxy → DeepSeek ✅ |
-| 四级逃生通道 | L1-L4 rollback 脚本 ✅ |
+| 四级逃生通道 | L1-L4 rollback 脚本 ✅（06-17 后扩充补丁级 L0m/L0a/L0b，完整梯队七级）|
 | 版本切换器 | `claude-version-switch.sh` ✅ |
 | 缓存监控 | `claude-cache-monitor.sh` ✅ |
 | 部署脚本端口修复 | deploy.sh 端口等待改为轮询 ✅ |

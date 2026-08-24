@@ -3,7 +3,8 @@ title: 路由器深度探索报告
 tags: [network/router, network]
 aliases: [路由器深度探索]
 created: 2026-07-28
-updated: 2026-07-28
+updated: 2026-08-25
+status: stable
 ---
 
 # 路由器深度探索报告 — Xiaomi R4CM 2.14.87
@@ -166,7 +167,7 @@ WiFi 状态变化时触发 `/data/etc/iwevent.d/*.sh`。可用于:
   root@[IP已脱敏]
 
 # Wrapper 脚本
-bash ~/.ssh/router_ssh.sh "command"
+bash scripts/router_ssh.sh "command"
 ```
 
 密钥认证不可用(dropbear 0.52 与 OpenSSH 密钥格式不兼容)。

@@ -3,10 +3,11 @@ title: "Loop Engineering 深度拆解 — 从产品功能集到方法论包装"
 aliases: [Loop Engineering, Addy Osmani, Loop方法论]
 tags: [ai/agent, ai/learning]
 created: 2026-06-25
-updated: 2026-08-17
+updated: 2026-08-25
 status: stable
 source: "微信公众号"
-source_url: "https://mp.weixin.qq.com/s/QXW2WbxjSDyOClg-PX2Sng"
+source_urls:
+  - "https://mp.weixin.qq.com/s/QXW2WbxjSDyOClg-PX2Sng"
 author: "靳岩岩"
 date: "2026-06-25"
 fetched_at: "2026-06-25"
@@ -18,7 +19,7 @@ See also: [[AI-Links-KB-Home]] | [[Articles-Index]] | [[Claude-Code记忆机制�
 
 ## 摘要
 
-2026 年 6 月，"Loop Engineering" 一词由 Google Chrome 工程主管 Addy Osmani 推上方法论位置。此前 Peter Steinberger（OpenAI）和 Boris Cherny（Anthropic Claude Code 负责人）已分别在社交媒体上使用 "loop" 一词。但深入对比发现：三个发明者对 "loop" 的定义互不一致，且 Loop Engineering 本质是 **Claude Code 2.1.139 功能集的外包装**——核心本体是 `/loop` 和 `/goal` 两个 slash command（共约 30 字符），外围四件（git worktree、SKILL.md、MCP、sub-agents）全是支撑设施。
+2026 年 6 月，"Loop Engineering" 一词由 Google Chrome 工程主管 Addy Osmani 推上方法论位置。此前 Peter Steinberger（OpenAI）和 Boris Cherny（Anthropic Claude Code 负责人）已分别在社交媒体上使用 "loop" 一词。但深入对比发现：三个发明者对 "loop" 的定义互不一致，且 Loop Engineering 本质是 **Claude Code 2.1.139 功能集的外包装**——核心本体是 `/loop` 和 `/goal` 两个 slash command（共 10 字符），外围四件（git worktree、SKILL.md、MCP、sub-agents）全是支撑设施。
 
 Addy 的贡献不在于发明新技术，而在于为 AI 工程造了一套三层词汇表：**Context Engineering → Harness Engineering → Loop Engineering**，三者均对应早就存在的旧技术（prompt+RAG / sandbox+system prompt / cron+ReAct），但作为招聘 JD 和立项理由的词汇非常有效。
 
@@ -56,6 +57,8 @@ Addy 的贡献不在于发明新技术，而在于为 AI 工程造了一套三�
 | MCP | 不是 — 外部接口 | Anthropic | 2024-11 | agent 连接外部系统（Jira/Slack/DB） |
 | Sub-agents | 不是 — 分工 | Anthropic | 2025 年中 | 独立 verifier agent 做验收 |
 | STATE.md | 不是 — 记忆 | 附赠 | — | 跨 session 状态持久化 |
+
+> [!note] STATE.md 不在 Addy「五件套」之列，是附赠的第 6 件——仅作跨 session 状态持久化补充，与 loop 本体无关。
 
 **结论**：五件套里只有第一件是 loop 本体，其余四件全是支持设施。五件套最小可用版 = git + python + 验证函数（Karpathy autoresearch，630 行）。
 

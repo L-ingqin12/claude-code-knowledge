@@ -3,7 +3,7 @@ title: Hermes 缓存分析 — 现状与优化方案
 aliases: []
 tags: [ai/ops, ai/agent]
 created: 2026-06-29
-updated: 2026-08-17
+updated: 2026-08-25
 status: review
 ---
 
@@ -52,8 +52,10 @@ See also: [[Claude-Ops-KB-Home]] · [[claude-cache-strategy]] · [[2026-06-24-he
 | 模型调用路径 | CC → permafrost → proxy → DeepSeek | Hermes → model-router → ARK |
 | 缓存对齐 | permafrost (去 cache_control + 工具排序 + currentDate 稳定化) | 无 |
 | 网络韧性 | proxy (重试3次 + keepalive 60s) | model-router 内置降级链 |
-| 工具集 | 10 tools (CC 原生) | 27+ tools (Hermes 全功能) |
+| 工具集 | 9 锚点 + ScheduleWakeup 等变数工具 (CC 原生) | 27+ tools (Hermes 全功能) |
 | 模型分层 | Pro/Flash (CC 内部) | L1-L5 (model-router 分类) |
+
+> [!note] 口径注: 「keepalive 60s」为 TCP keepalive 内核参数；「45s」为应用层心跳间隔（MOC 口径），两层独立，勿混用。
 
 ### 2.2 核心障碍
 

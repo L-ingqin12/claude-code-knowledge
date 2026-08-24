@@ -3,7 +3,7 @@ title: Claude Code 网络韧性参考
 aliases: [claude网络韧性, socket消除]
 tags: [network/proxy, reference, ai/ops]
 created: 2026-08-17
-updated: 2026-08-17
+updated: 2026-08-25
 status: review
 ---
 
@@ -33,7 +33,7 @@ status: review
 
 ## 二、代理门控 — 网络不稳时延迟发送
 
-核心文档：[[Claude-Ops-KB-Home]] 子库内 `claude-network-stability-gate`（网络稳定性门控）
+核心文档：[[Claude-Ops-KB-Home]] 子库内 [[claude-network-stability-gate]]（网络稳定性门控）
 
 **思想**：不只是"通不通"，而是"稳不稳"。用滑动窗口评估网络质量（延迟/成功率波动），网络不稳定时**挂起请求而非立即失败**，稳定后再放行发送，避免请求在链路抖动窗口内无谓消耗重试预算。
 

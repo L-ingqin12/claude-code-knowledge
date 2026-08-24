@@ -3,8 +3,13 @@ title: DSH 跨框架 Skills/MCP 加载指南
 aliases: [DSH加载外部技能, dsh-bridges, DSH MCP 配置]
 tags: [ai/agent, ai/skills, ai/links]
 created: 2026-08-17
-updated: 2026-08-17
+updated: 2026-08-25
 status: review
+source: "官方仓库 deepseek-ai/deepseek-harness + dsh-bridges 文档（2026-08 快照）"
+source_urls:
+  - "https://github.com/deepseek-ai/deepseek-harness"
+  - "https://github.com/yhlooo/dsh-bridges"
+fetched_at: 2026-08-19
 ---
 
 # DSH 跨框架 Skills/MCP 加载指南

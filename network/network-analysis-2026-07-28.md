@@ -3,7 +3,8 @@ title: 初始网络全栈分析
 aliases: [网络分析, 初始诊断]
 tags: [network/analysis, network]
 created: 2026-07-28
-updated: 2026-07-28
+updated: 2026-08-25
+status: review
 ---
 
 # 家庭网络全栈分析与优化 (2026-07-28)
@@ -41,8 +42,8 @@ Internet → [光猫/上游路由 [IP已脱敏]]
 |------|--------|------|
 | 频段/协议 | 2.4GHz / 802.11n | 差 — 无法用 5GHz |
 | 协商速率 | 72.2 Mbps (20MHz 单流) | 实际吞吐 ~35 Mbps |
-| 信号强度 | 88%, RSSI -58 dBm | 良好 |
-| 网关延迟 | 7ms ~ 457ms, 平均 134ms | 极差 — 严重抖动 |
+| 信号强度 | 88% (2026-07-27 初测), RSSI -58 dBm | 良好 |
+| 网关延迟 | 2ms ~ 541ms, 平均 154ms | 极差 — 严重抖动 |
 | 信道 | 6 (2.4GHz), 利用率 13% | 中等 |
 | 接入设备数 | 13 (含 8 个 ESP32 IoT) | 偏高 |
 | 网卡驱动 | 2021-05-19 v12.0.0.1118 | 过时 — 已知延迟问题 |
@@ -80,12 +81,12 @@ Internet → [光猫/上游路由 [IP已脱敏]]
 | 指标 | 当前值 | 评级 |
 |------|--------|------|
 | 代理节点数 | 1 (fuck.p1d2.com) | 差 — 无冗余 |
-| Mux 多路复用 | 关闭 | 差 — 每个连接独立 TCP |
+| Mux 多路复用 | 关闭 | 初始误判「差」— 复盘确认 Vision 下必须关闭（见下方勘误） |
 | 负载均衡 | 无 | 差 |
 | 健康检查 | 无 | 差 |
 | 直连策略 | CN 直连 + Google 代理 | 合理 |
 
-**可用代理节点 (17 个, 来自 4 个供应商)**:
+**可用代理节点 (节选 6 个, 全部 17 个来自 4 个供应商)**:
 
 | 节点 | 延迟 | 状态 |
 |------|------|------|
@@ -96,11 +97,14 @@ Internet → [光猫/上游路由 [IP已脱敏]]
 | us1.dengta.lat (美国) | 255ms | 可用 |
 | z3.dengta.lat (日本) | 370ms | 可用 |
 
-**优化后的配置**: 见 `xray-config-optimized.json`
+**优化后的配置**: 见 `scripts/xray-config-optimized.json`
 - 4 节点出站 (KR 主力 + P1D2 + SG + A1)
 - Mux 开启 (concurrency=8)
 - Observatory 健康检查 (每 2 分钟)
 - Balancer 负载均衡 (leastPing 策略, 自动故障转移)
+
+> [!warning] 勘误：Mux 开启为致障配置
+> 后续复盘确认「Mux 开启 (concurrency=8)」与 VLESS Vision 冲突（队头阻塞 → Telegram 视频卡死），已回退为 `mux: false`。本节「优化后的配置」对应 Phase 1 存档 `scripts/xray-config-optimized.json`，已被废弃。详见 [[v2rayn-balancer-复盘-2026-08-09]] 与 [[ARCHITECTURE#决策 2]]。
 
 ### L4 — 代理服务器层
 
@@ -116,7 +120,7 @@ Internet → [光猫/上游路由 [IP已脱敏]]
 
 | 测试路径 | 延迟 | 下载速度 | 备注 |
 |----------|------|----------|------|
-| Ping 网关 (WiFi) | 7-457ms (avg 134ms) | — | 极不稳定 |
+| Ping 网关 (WiFi) | 2-541ms (avg 154ms) | — | 极不稳定 |
 | Ping [IP已脱敏] (阿里 DNS) | 16-274ms (avg 92ms) | — | 经 WiFi+双 NAT |
 | Ping [IP已脱敏] | 212-248ms (avg 224ms) | — | 正常 (中国到美国) |
 | 直连 speedtest.tele2.net | — | ~16 KB/s | 基本被封 |
@@ -150,7 +154,7 @@ Internet → [光猫/上游路由 [IP已脱敏]]
 # 2. 备份当前配置
 cp binConfigs/config.json binConfigs/config.json.bak
 # 3. 替换为优化配置
-cp xray-config-optimized.json binConfigs/config.json
+cp D:/Document/local/knowledge/network/scripts/xray-config-optimized.json binConfigs/config.json
 # 4. 重启 v2rayN 代理
 ```
 
@@ -160,7 +164,7 @@ cp xray-config-optimized.json binConfigs/config.json
 1. 添加多个服务器配置 (dtwo1, p1d2, sg1, a1)
 2. 右键 → "测试服务器真连接延迟"
 3. 选择延迟最低的服务器
-4. 设置 → 参数设置 → 启用 Mux 多路复用 (并发 8)
+4. ~~设置 → 参数设置 → 启用 Mux 多路复用 (并发 8)~~（⚠️ 勘误: 勿启用 — Vision 下 Mux 致障，见 L3 勘误）
 
 ### 代理节点配置模板 (VLESS+Reality)
 
@@ -202,12 +206,19 @@ curl -s "$B/api/xqnetwork/set_wifi" --data "isolate=0"
 curl -s http://[IP已脱敏]/cgi-bin/luci/api/xqsystem/bdata
 ```
 
-### SSH 连接 (旧加密套件)
+### SSH 连接 (MobaXterm sshpass + 旧加密套件)
 ```bash
-ssh -o KexAlgorithms=+diffie-hellman-group1-sha1 \
-    -o HostKeyAlgorithms=+ssh-rsa \
-    -o MACs=+hmac-sha1-96,hmac-sha1,hmac-md5 \
-    root@[IP已脱敏]
+# 原生 Windows OpenSSH 已证实超时不可用，需 MobaXterm sshpass + 旧加密套件
+/d/Users/28064/AppData/Roaming/MobaXterm/slash/bin/sshpass -p [已脱敏] \
+  /d/Users/28064/AppData/Roaming/MobaXterm/slash/bin/ssh \
+  -o KexAlgorithms=+diffie-hellman-group1-sha1 \
+  -o HostKeyAlgorithms=+ssh-rsa \
+  -o MACs=+hmac-sha1-96,hmac-sha1,hmac-md5 \
+  -o StrictHostKeyChecking=no -o ConnectTimeout=8 \
+  root@[IP已脱敏] "<command>"
+
+# Wrapper
+bash scripts/router_ssh.sh "<command>"
 ```
 
 ### 永久关闭 AP 隔离 (需 SSH)
@@ -247,11 +258,11 @@ v2rayN 的订阅链接会定期更新节点列表。手动维护的 `config.json
 
 **方案 A: 自动生成脚本**
 
-使用 `generate-xray-config.sh` 在每次订阅更新后自动重建多节点配置:
+使用 `scripts/generate-xray-config.sh` 在每次订阅更新后自动重建多节点配置:
 
 ```bash
 # 订阅更新后执行
-bash D:/Document/local/knowledge/network/generate-xray-config.sh
+bash D:/Document/local/knowledge/network/scripts/generate-xray-config.sh
 cp D:/Document/Download/v2rayN-windows-64-desktop/v2rayN-windows-64/binConfigs/config-optimized.json \
    D:/Document/Download/v2rayN-windows-64-desktop/v2rayN-windows-64/binConfigs/config.json
 # 重启代理
@@ -272,7 +283,7 @@ cp D:/Document/Download/v2rayN-windows-64-desktop/v2rayN-windows-64/binConfigs/c
 
 ```bash
 # crontab: 每小时检查并更新
-0 * * * * cd /path/to/knowledge/network && bash generate-xray-config.sh && cp config-optimized.json <v2rayN-dir>/binConfigs/config.json
+0 * * * * cd "D:\Document\local\knowledge\network" && bash scripts/generate-xray-config.sh && cp scripts/xray-config-optimized.json <v2rayN-dir>/binConfigs/config.json
 ```
 
 ## 九、相关文件路径
@@ -281,11 +292,11 @@ cp D:/Document/Download/v2rayN-windows-64-desktop/v2rayN-windows-64/binConfigs/c
 |------|------|
 | v2rayN 主程序 | `D:\Document\Download\v2rayN-windows-64-desktop\v2rayN-windows-64\` |
 | xray 核心配置 (当前) | `.../binConfigs/config.json` |
-| xray 优化配置 (静态) | `D:\Document\local\knowledge\network\xray-config-optimized.json` |
-| 动态配置生成脚本 | `D:\Document\local\knowledge\network\generate-xray-config.sh` |
-| 代理节点数据库 | `D:\Document\local\knowledge\network\proxy-nodes.json` |
+| xray 优化配置 (静态) | `D:\Document\local\knowledge\network\scripts\xray-config-optimized.json` |
+| 动态配置生成脚本 | `D:\Document\local\knowledge\network\scripts\generate-xray-config.sh` |
+| 代理节点数据库 | `D:\Document\local\knowledge\network\scripts\proxy-nodes.json` |
 | v2rayN GUI 配置 | `.../guiConfigs/guiNConfig.json` |
 | v2rayN 节点数据库 | `.../guiConfigs/guiNDB.db` |
 | 本分析文档 | `D:\Document\local\knowledge\network\network-analysis-2026-07-28.md` |
 | 小米路由器 skill | `.claude/skills/xiaomi-router/SKILL.md` |
-| 历史事故报告 | `memory/incident-2026-07-21-pi-network-outage.md` |
+| 历史事故报告 | [[2026-07-21-树莓派网络故障与路由器破解完整复盘]] |

@@ -3,7 +3,7 @@ title: "日志检索分析系统——Skill 管理框架应用 Demo 设计"
 aliases: [日志系统Skill Demo, Skill管理Demo, 日志检索Skills]
 tags: [ai/skills, ai/learning]
 created: 2026-06-22
-updated: 2026-08-17
+updated: 2026-08-25
 status: review
 source: "系统设计"
 date: "2026-06-22"
@@ -71,8 +71,7 @@ logs/
 │
 └── dashboards/                     # namespace: logs/dashboards
     ├── sre-overview/               # SRE 总览看板
-    ├── error-budget/               # 错误预算看板
-    └── latency-heatmap/            # 延迟热力图
+    └── error-budget/               # 错误预算看板
 ```
 
 ### Demo 规模
@@ -108,6 +107,8 @@ logs/
 | 全量列出（25 skill） | ~750 token | 基线 |
 | 只列顶层入口 | ~200 token | 73% |
 | 检索式发现（search_skills + 依赖级联） | ~30 token | 96% |
+
+> [!note] 「只列顶层入口」的顶层集合口径 = workflows（4）+ alerts（6）两类入口；shared/queries 多为依赖目标，由 includes 级联加载，不占顶层名额。
 
 ## Skill 示例：rca-pipeline 的完整声明
 
@@ -169,6 +170,8 @@ table: timestamp | service | error_type | root_cause_candidate | confidence
 `auth-checker` 作为 shared 层 skill，在 queries/workflows/alerts 等 skill 的 `includes` 中被声明——每次数据访问前先过权限。
 
 ## Demo 文件结构
+
+以下为目标结构（规划稿），实际落盘见 scripts/claude-ops-deployments/demos/logsystem/skills/ 的 `<namespace>/<name>/SKILL.md` 三层结构：
 
 ```
 scripts/migration/demo-old-system/

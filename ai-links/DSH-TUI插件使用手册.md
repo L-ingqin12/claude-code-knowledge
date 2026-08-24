@@ -3,8 +3,13 @@ title: DSH TUI 插件使用手册
 aliases: [dsh-tui, DSH终端UI, TUI手册]
 tags: [ai/agent, ai/tools, ai/links]
 created: 2026-08-17
-updated: 2026-08-17
+updated: 2026-08-25
 status: review
+source: "官方手册 README.zh.md（MIT 许可）"
+source_urls:
+  - "https://github.com/dsh-tui/dsh-tui"
+  - "https://www.npmjs.com/package/@dsh-tui/dsh-tui"
+fetched_at: 2026-08-19
 ---
 
 # DSH TUI 插件使用手册

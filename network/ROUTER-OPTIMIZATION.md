@@ -3,7 +3,8 @@ title: 路由器优化分析
 tags: [network/router, network/optimization, network]
 aliases: [路由器优化]
 created: 2026-07-28
-updated: 2026-07-28
+updated: 2026-08-25
+status: stable
 ---
 
 # 路由器优化深度分析 — Xiaomi R4CM 2.14.87
@@ -15,10 +16,10 @@ See also: [[Network-KB-Home]] | [[GUIDE]] | [[ROUTER-FULL-CAPABILITY]] | [[ROUTE
 | 参数 | 规格 | 备注 |
 |------|------|------|
 | 型号 | R4CM | SoC: MT7628 (MIPS 24Kc) |
-| CPU | 单核 575MHz | 当前负载 5.4%，充裕 |
-| RAM | 64MB DDR2 @ 800MHz | 当前使用 46%，正常 |
+| CPU | 单核 575MHz | 当前负载 5.4%（2026-07-28 测量），充裕 |
+| RAM | 64MB DDR2 @ 800MHz | 当前使用 46%（2026-07-28 测量），正常 |
 | WiFi | 2.4GHz only (MT7628 内置) | **硬伤** — 无法 5GHz |
-| 固件 | 2.14.87 (OpenWrt 修改版) | 较新，API 有限 |
+| 固件 | 2.14.87 | 较新，API 有限 |
 | WAN | eth0.2 DHCP → [IP已脱敏] | 双 NAT |
 | LAN | [IP已脱敏]/24 | 设备 IP 池 |
 
@@ -43,9 +44,12 @@ See also: [[Network-KB-Home]] | [[GUIDE]] | [[ROUTER-FULL-CAPABILITY]] | [[ROUTE
   /api/xqsystem/upgrade_info    404
 ```
 
-**结论**: R4CM API 非常有限，高级设置（DNS/QoS/防火墙/WiFi高级参数）都需要 SSH 访问 UCI 或直接编辑 `/etc/config/*`。
+**结论**: R4CM API 非常有限，高级设置（DNS/QoS/防火墙/WiFi高级参数）都需 SSH 进入路由器 (root@[IP已脱敏]) 后通过 UCI 命令或直接编辑 `/etc/config/*` 完成，不可在 Windows 本机执行。
 
 ## 可优化点 (需 SSH)
+
+> [!warning] R4CM 实测无 uci 命令
+> R4CM 无 `uci` 命令（见 [[ROUTER-DEEP-EXPLORATION]]），以下 uci 示例仅为通用 OpenWrt 语法；在 R4CM 上需改用直接编辑 `/etc/config/*` 的方式执行（同样需先 SSH 进入 root@[IP已脱敏]）。
 
 ### 1. MTU 优化
 
@@ -53,7 +57,7 @@ See also: [[Network-KB-Home]] | [[GUIDE]] | [[ROUTER-FULL-CAPABILITY]] | [[ROUTE
 建议: 若上游是 PPPoE，MTU 应为 1492。当前双 NAT 环境可测试 1492 或 1480。
 
 ```bash
-# SSH 进入后
+# 需 SSH 进入路由器 (root@[IP已脱敏]) 后执行，勿在 Windows 本机运行
 uci set network.wan.mtu='1492'
 uci commit network
 ifup wan
@@ -66,6 +70,7 @@ ifup wan
 建议: 直接设置公共 DNS。
 
 ```bash
+# 需 SSH 进入路由器 (root@[IP已脱敏]) 后执行，勿在 Windows 本机运行
 uci set network.wan.peerdns='0'
 uci add_list network.wan.dns='[IP已脱敏]'
 uci add_list network.wan.dns='[IP已脱敏]'

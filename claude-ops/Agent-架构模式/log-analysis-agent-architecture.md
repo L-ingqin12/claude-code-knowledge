@@ -3,7 +3,7 @@ title: 日志分析 Agent — Windows 高并发架构参考
 aliases: []
 tags: [ai/ops, ai/agent]
 created: 2026-07-09
-updated: 2026-08-17
+updated: 2026-08-25
 status: stable
 ---
 
@@ -105,12 +105,12 @@ See also: [[Claude-Ops-KB-Home]] · [[log-analysis-agent-windows-architecture]] 
 - 与未来 Linux 迁移兼容
 
 **代价**:
-- Windows 版 Nginx 不支持 epoll，select 连接数上限 64/worker
+- Windows 版 Nginx 不支持 epoll，select 上限约 1024 个总连接（非每 worker 64）
 - 无动态 upstream (开源版)
 
 **缓解**:
 - 增大 worker_connections 到 8192
-- 多个 worker 进程分散连接
+- ⚠️ Windows 下 nginx 仅单 worker，多 worker 缓解方案不适用
 - 如需要动态 upstream，后续可升级 nginx-plus 或用 OpenResty
 
 ---
@@ -212,13 +212,13 @@ log-analysis-agent-windows-plan
     ├─[[opencode-multi-agent-architecture]]
     │   └─ Primary/Subagent 两层模型 → 日志分析主智能体 + 维度子智能体
     │
-    ├─[[hermes-parallel-task-communication]]
+    ├─[[hermes-parallel-task-report]]
     │   └─ delegate_task (短分析) vs Kanban (长分析, 需审计)
     │
     ├─[[claude-unattended-cross-platform-guide]]
     │   └─ 跨平台部署: Windows 特殊处理 (fork/epoll 不可用)
     │
-    ├─[[claude-interruption-resilience]]
+    ├─[[claude-interruption-resilience-guide]]
     │   └─ task-state.json 外部化 → 分析任务中断后可续
     │
     ├─[[state-machine-quality-gate-loop]]

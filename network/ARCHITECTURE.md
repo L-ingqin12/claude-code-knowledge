@@ -3,7 +3,8 @@ title: 架构设计文档
 aliases: [Architecture, 架构]
 tags: [network/architecture, network/proxy, network]
 created: 2026-07-28
-updated: 2026-08-09
+updated: 2026-08-25
+status: stable
 ---
 # 网络优化架构设计文档
 

@@ -3,7 +3,7 @@ title: Pi Agent 框架约束与能力参考
 aliases: []
 tags: [ai/ops, ai/agent]
 created: 2026-07-09
-updated: 2026-08-17
+updated: 2026-08-25
 status: stable
 ---
 
@@ -186,4 +186,4 @@ session.id ──→ message_1 ──→ message_2 ──→ message_3 (leaf)
 - [[fan-out-subagent-pattern]] — Pi Agent 的 parallel tools 实现 LLM 自主 Fan-Out
 - [[agent-async-isolation-pattern]] — Node.js 天然异步，此 pattern 在 Pi Agent 版中不适用
 - [[opencode-multi-agent-architecture]] — opencode 两层模型 vs Pi Agent 单 Agent 模型
-- [[claude-code-environment-architecture]] — Pi vs Termux 部署差异 (pi-vs-termux-guide.md)
+- [[pi-vs-termux-guide]] — Pi vs Termux 部署差异

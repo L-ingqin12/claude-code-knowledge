@@ -3,7 +3,8 @@ title: 完整优化总结
 aliases: [Final Summary, 总结]
 tags: [network/optimization, network/proxy, network/router, network]
 created: 2026-07-28
-updated: 2026-07-28
+updated: 2026-08-25
+status: stable
 ---
 
 > [!success] 核心结论
@@ -13,14 +14,17 @@ updated: 2026-07-28
 
 | 指标 | 当前值 | 评级 |
 |------|--------|------|
-| 代理出口 | [IP已脱敏] (p1d2) | ✅ 稳定 |
-| 下载速度 | ~375 KB/s (3.0 Mbps) | △ 勉强 720p |
+| 代理出口 | [IP已脱敏] (p1d2)（2026-07-28 实测） | ✅ 稳定 |
+| 下载速度 | ~375 KB/s (3.0 Mbps)（2026-07-28 实测） | △ 勉强 720p |
 | Telegram API | 1.5s | △ 偏慢 |
-| WiFi 网关延迟 | 2-31ms, avg **7ms** | ✅ 已达标 |
+| WiFi 网关延迟 | 2-113ms, avg **31ms** | ✅ 已达标 |
 | 信号 | 82%, RSSI -58 | ✅ |
 
 > [!info] 瓶颈已转移
-> WiFi 延迟从 541ms → 7ms (改善 96%)。当前瓶颈是**代理带宽 3 Mbps** — 刚好 720p 临界点，1080p 不够。换更快的代理节点是下一步关键。
+> WiFi 延迟从 541ms → 113ms (改善 79%)，平均延迟 154ms → 31ms (改善 80%)（基准: [[SESSION-ARCHIVE-2026-07-28]] Phase 4 测量表）。当前瓶颈是**代理带宽 3 Mbps** — 刚好 720p 临界点，1080p 不够。换更快的代理节点是下一步关键。
+
+> [!question] 信号强度口径（勘误: 库内曾并存 82/86/88%）
+> 信号百分比曾出现 88%（2026-07-27 初测，[[network-analysis-2026-07-28]]）、86%（[[ROUTER-FULL-CAPABILITY]] 原记）、82%（本页）。三处 RSSI 均为 **-58 dBm**；统一采用最保守的 **82%**，后续以 RSSI (dBm) 为唯一口径。
 
 ## 根因分析
 
@@ -41,9 +45,9 @@ updated: 2026-07-28
 - Linux 内核邮件列表: MT7628 (mt7603 驱动) 的 MCU 中断 `PKT_TYPE_TXS` 处理异常，帧缓冲导致 WiFi 传输完全停止。[lkml.indiana.edu](https://lkml.indiana.edu/hypermail/linux/kernel/2403.3/05496.html)
 - OpenWrt 社区: R4CM 特定型号在高流量下频繁出现 WiFi 断流，通过 debugfs 关闭 SKB loopback 可大幅改善。[OpenWrt Forum](https://forum.openwrt.org/t/openwrt-for-xiaomi-mi-router-4c/72175/129)
 
-### 主因 3: MT7628 TX Power 锁死 14 dBm
+### 主因 3: MT7628 TX Power 出厂锁 14 dBm（勘误：当前实测 18 dBm）
 
-**现象**: 出厂固件限制 WiFi 发射功率为 14 dBm (25mW)，而硬件支持 30 dBm (1000mW)。
+**现象**: 出厂固件默认限制 WiFi 发射功率为 14 dBm (25mW)，而硬件支持 30 dBm (1000mW)。**勘误**: 当前 iwinfo 实测 Tx-Power 为 **18 dBm**（已部分解锁），全库口径统一为 18 dBm，见 [[ROUTER-DEEP-EXPLORATION]] / [[ROUTER-FULL-CAPABILITY]]。
 
 **公开知识确认**:
 - anywlan 论坛: R4CM factory 分区偏移 0xA0 处 14 字节控制 TX power，改为 `FF` 解锁 30 dBm。[anywlan.com](https://www.anywlan.com/thread-447807-1-6.html)
@@ -78,7 +82,7 @@ P1 (本周 — 客户端侧)
 
 P2 (本月 — 路由器侧, 需SSH)
   ⬜ 禁用 MT7628 frames buffering (debugfs)
-  ⬜ 解锁 TX power 14→30 dBm (factory分区)
+  ⬜ 解锁 TX power 18→30 dBm (factory分区)（勘误：原记 14dBm）
   ⬜ 永久写入 AP 隔离 (/etc/config/wireless)
   ⬜ Beacon interval 100→200ms
   ⬜ 上游 DNS 改直连 [IP已脱敏]
@@ -110,24 +114,24 @@ P3 (长期 — 硬件)
 ## 当前生效配置
 
 ```
-Balancer: proxy(p1d2) only, fallback: us1
+Balancer: SG1 + US1 + US3 + JP1 (leastPing, 2026-08-09 换池), fallback: us1
 Observatory: 10分钟, 4节点健康检查
 DNS: 直连走 Alibaba, 境外走 Cloudflare via p1d2
 路由: CN → direct, Google → balancer, 其他 → balancer
-出站: proxy(p1d2) + us1 + usss1 + a2 (全部 mux:false)
+出站: SG1 + US1 + US3 + JP1 (全部 mux:false)
 ```
 
 ## 日常操作
 
 订阅更新后运行 (2-3分钟):
 ```powershell
-powershell -File "D:\Document\local\knowledge\network\enhance-config.ps1" -DryRun
-powershell -File "D:\Document\local\knowledge\network\enhance-config.ps1" -Apply
+powershell -File "D:\Document\local\knowledge\network\scripts\enhance-config.ps1" -DryRun
+powershell -File "D:\Document\local\knowledge\network\scripts\enhance-config.ps1" -Apply
 ```
 
 查看状态:
 ```powershell
-powershell -File "D:\Document\local\knowledge\network\enhance-config.ps1" -Status
+powershell -File "D:\Document\local\knowledge\network\scripts\enhance-config.ps1" -Status
 ```
 
 ---

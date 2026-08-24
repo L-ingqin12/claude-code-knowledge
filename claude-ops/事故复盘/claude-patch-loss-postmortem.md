@@ -3,7 +3,7 @@ title: Permafrost 补丁丢失事故复盘
 aliases: []
 tags: [ai/ops, incident]
 created: 2026-06-17
-updated: 2026-08-17
+updated: 2026-08-25
 status: stable
 ---
 
@@ -57,4 +57,4 @@ See also: [[Claude-Ops-KB-Home]] · [[PERMAFROST_MODIFICATIONS]] · [[claude-cac
 - 生产运行 ✅ 96%+ 命中率
 - deploy.sh 自检 ✅ 自动恢复
 - .orig 备份 ✅ 已更新为补丁版本
-- 逃生通道 ✅ L0a→L3 五级
+- 逃生通道 ✅ 完整梯队七级（补丁级 L0m/L0a/L0b + 结构级 L1-L4，定义见 claude-permafrost-rollback.sh）

@@ -3,7 +3,7 @@ title: Open-Magiviz — AI 视频创作平台
 aliases: [Magiviz, ItusiAI-Open-Magiviz]
 tags: [ai/links, ai/tools, reference]
 created: 2026-08-18
-updated: 2026-08-18
+updated: 2026-08-25
 status: review
 source_urls:
   - https://github.com/ItusiAI/Open-Magiviz
@@ -49,7 +49,7 @@ See also: [[AI-Links-KB-Home]] | [[2026-08-16-AI链接综述与归档]] | [[Arti
 - 前端：Next.js、TypeScript、Tailwind、shadcn/ui
 - 后端：Next.js API Routes、Drizzle ORM、PostgreSQL
 - 集成：Stripe（支付）、Pusher（实时推送）、FAL AI（视频合成）
-- 部署：Vercel 一键（推荐）；环境变量含数据库、Stripe、AI 服务密钥（`# 安全特性` 声明敏感配置环境隔离）
+- 部署：Vercel 一键（推荐）；环境变量含数据库、Stripe、AI 服务密钥（详见仓库 README『安全特性』小节：敏感配置环境隔离）
 - 注意：核心交互组件 `components/operate.tsx` 约 10,289 行（巨型组件，工程上可拆分的典型样本）
 
 ## 五、学习价值

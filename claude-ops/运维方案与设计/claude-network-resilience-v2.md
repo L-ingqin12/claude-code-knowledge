@@ -3,7 +3,7 @@ title: 网络中断无感 v2 — 基于实际场景的修正
 aliases: []
 tags: [ai/ops, ai/agent]
 created: 2026-07-01
-updated: 2026-08-17
+updated: 2026-08-25
 status: review
 ---
 
@@ -161,6 +161,8 @@ done
 **网络中断无感 = 代理拦截 + TCP keepalive。就这俩。**
 
 ## 七、部署即完结
+
+> [!warning] PRoot 环境不可用 sysctl，本节（内核 TCP 调优三步）仅适用于原生 Linux；Android/PRoot 下请用应用层 socket.setKeepAlive 替代。
 
 ```bash
 # 第一步：内核 TCP 调优（减少断连概率）

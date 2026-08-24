@@ -3,7 +3,7 @@ title: "给大语言模型做『脑扫描』——LLM 可解释性技术全景"
 aliases: [LLM脑扫描, 可解释性技术全景, LLM可解释性]
 tags: [ai/learning, reference]
 created: 2026-07-06
-updated: 2026-08-17
+updated: 2026-08-25
 status: stable
 source: "对话沉淀（内部 session）"
 source_urls:
@@ -11,7 +11,7 @@ source_urls:
   - "https://transformer-circuits.pub/2025/attribution-graphs/biology.html"
   - "https://github.com/TransformerLensOrg/TransformerLens"
   - "https://www.neuronpedia.org/"
-authors: "对话整理"
+author: "对话整理"
 date: "2026-07-06"
 fetched_at: "2026-07-06"
 ---
@@ -104,9 +104,9 @@ Anthropic 的最新路线，也是「给 Claude 做脑扫描」的字面实现�
 
 | 目标 | 最短路径 |
 |---|---|
-| 当天看到逐层扫描图 | GPT-2 small + TransformerLens 跑 **logit lens** → 现成脚本 [`scripts/interp/logit_lens_gpt2.py`](../scripts/interp/logit_lens_gpt2.py) |
-| 不写训练代码、只想看「点亮什么概念」 | 打开 **Neuronpedia** 网页，或 Gemma Scope + SAELens → 现成脚本 [`scripts/interp/gemma_scope_features.py`](../scripts/interp/gemma_scope_features.py) |
-| 复现「给 Claude 做脑扫描」那种电路图 | Anthropic 开源的 circuit-tracing 工具 + 开放模型 → 现成脚本 [`scripts/interp/circuit_tracer_attribution.py`](../scripts/interp/circuit_tracer_attribution.py)（或零代码：Neuronpedia 在线生成） |
+| 当天看到逐层扫描图 | GPT-2 small + TransformerLens 跑 **logit lens** → 现成脚本 [`../../scripts/claude-ops-deployments/demos/interp/logit_lens_gpt2.py`](../../scripts/claude-ops-deployments/demos/interp/logit_lens_gpt2.py) |
+| 不写训练代码、只想看「点亮什么概念」 | 打开 **Neuronpedia** 网页，或 Gemma Scope + SAELens → 现成脚本 [`../../scripts/claude-ops-deployments/demos/interp/gemma_scope_features.py`](../../scripts/claude-ops-deployments/demos/interp/gemma_scope_features.py) |
+| 复现「给 Claude 做脑扫描」那种电路图 | Anthropic 开源的 circuit-tracing 工具 + 开放模型 → 现成脚本 [`../../scripts/claude-ops-deployments/demos/interp/circuit_tracer_attribution.py`](../../scripts/claude-ops-deployments/demos/interp/circuit_tracer_attribution.py)（或零代码：Neuronpedia 在线生成） |
 
 ---
 

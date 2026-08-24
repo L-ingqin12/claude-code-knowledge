@@ -3,7 +3,7 @@ title: "Agent 驱动 Skill 系统迁移设计"
 aliases: [Skill迁移设计, Skill审计, Agent驱动迁移]
 tags: [ai/skills, ai/learning]
 created: 2026-06-22
-updated: 2026-08-17
+updated: 2026-08-25
 status: review
 source: "系统设计"
 date: "2026-06-22"
@@ -153,7 +153,7 @@ migration-session-{id}/
 
 | 决策类型 | HIGH（自动） | MEDIUM（人工确认） | LOW（必须人工） | ESCALATE（升级） |
 |---------|-------------|------------------|---------------|----------------|
-| namespace | > 0.9 | 0.7-0.9 | < 0.7 | < 0.2 |
+| namespace | > 0.9 | 0.7-0.9 | 0.2 – 0.7 | < 0.2 |
 | dependency | > 0.8 | 0.5-0.8 | < 0.5 | < 0.2 |
 | paths | — | — | 全部人工审核 | — |
 | conflict | > 0.85 | 0.6-0.85 | < 0.6 | — |

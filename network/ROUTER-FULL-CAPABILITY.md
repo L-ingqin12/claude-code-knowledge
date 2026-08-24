@@ -3,7 +3,8 @@ title: 路由器完全能力手册
 tags: [network/router, network]
 aliases: [路由器能力手册]
 created: 2026-07-28
-updated: 2026-07-28
+updated: 2026-08-25
+status: stable
 ---
 
 # 路由器完全能力手册 — Xiaomi R4CM 2.14.87
@@ -70,7 +71,9 @@ See also: [[Network-KB-Home]] | [[GUIDE]] | [[ROUTER-DEEP-EXPLORATION]] | [[ROUT
 | 9091 | [IP已脱敏] | plugincenter | 插件中心 |
 | 6010 | [IP已脱敏] | dropbear | SSH (loopback) |
 
-## 五、Busybox 工具清单 (146 个)
+## 五、Busybox 工具清单 (146 个 applet)
+
+> [!info] 口径: 146 = busybox applet 数；431 = 系统可用命令总数（含外部二进制，见 [[ROUTER-DEEP-EXPLORATION]]）。
 
 ### 网络工具
 `arp`, `arping`, `brctl`, `dnsd`, `dnsdomainname`, `ifconfig`, `nc`, `netstat`, `nslookup`, `ping`, `ping6`, `route`, `traceroute`, `udhcpc`, `wget`
@@ -164,7 +167,7 @@ busybox nslookup <domain>   # DNS 查询
   root@[IP已脱敏] "<command>"
 
 # Wrapper
-bash ~/.ssh/router_ssh.sh "command"
+bash scripts/router_ssh.sh "command"
 ```
 
 密钥免密不可用: dropbear 0.52 与现代 OpenSSH 密钥格式不兼容。
@@ -189,6 +192,7 @@ flag_boot_success=1  # 启动成功
 | `/api/xqnetwork/set_wifi` | POST | WiFi 参数修改 |
 | `/api/xqnetwork/wan_info` | GET | WAN 状态 |
 | `/api/xqnetwork/lan_info` | GET | LAN 状态 |
+| curl 调用示例 | — | 见 [[network-analysis-2026-07-28#六、路由器管理速查]]（含 stok 登录流程） |
 
 ## 十二、已执行的优化
 
@@ -204,7 +208,7 @@ flag_boot_success=1  # 启动成功
 > | DNS 缓存 2000 | ✅ 已持久化 |
 > | DNS rebind 保护 | ✅ 已启用 |
 > | 流量监测 | ✅ cron 每分钟 |
-> | 固定信道 11 | ⚠️ 固件覆盖(自动选频) |
+> | 固定信道 | ⚠️ 固件覆盖 (自动选频, 实测落在信道 8) |
 > | 40MHz 带宽 | ⚠️ 固件忽略 |
 > | WiFi 事件钩子 | ✅ iweventd |
 > | rc.local 持久化 | ✅ dropbear + 遥测kill |
@@ -215,7 +219,7 @@ flag_boot_success=1  # 启动成功
 > 
 > - 修改 mtd3 Factory 分区可解锁 TX power (18→30 dBm)
 > - **风险**: 校准数据损坏 → WiFi 永久失效, 且 R4CM 无引出 UART 难恢复
-> - **收益**: 信号增强, 但你的信号已 86%, 不解决 MT7628 帧缓冲 Bug
+> - **收益**: 信号增强, 但你的信号已 82% (RSSI -58 dBm; 原记 86%, 库内口径统一见 [[FINAL-SUMMARY]]), 不解决 MT7628 帧缓冲 Bug
 > - **结论**: 风险 >> 收益, 不建议
 
 ## Related

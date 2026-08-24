@@ -3,14 +3,15 @@ title: 箭头连接检查清单
 aliases: [Arrow Checklist]
 tags: [reference]
 created: 2026-07-28
-updated: 2026-08-17
+updated: 2026-08-25
+status: stable
 ---
 
 See also: [[AGENTS]] (绘图规范) | [[Network-DocGraph.excalidraw]] (文档关系图)
 
 # Excalidraw 箭头连接检查清单
 
-> [!note] 本清单服务于 `diagrams/` 目录下所有 Excalidraw 图的**箭头校验**：按表逐项核对源/目标元素与方向，修复悬空、错位箭头。绘图规范见 [[AGENTS#十一、图表与可视化约定]]。
+> [!note] 本清单已覆盖 6 张核心图的**箭头校验**（下表逐一列出）；其余新增图请在绘制时按本规范自检：逐项核对源/目标元素与方向，修复悬空、错位箭头。绘图规范见 [[AGENTS#十一、图表与可视化约定]]。
 
 > 操作：在 Obsidian 中打开 `.excalidraw.md` → 按 `A` 选箭头工具 → 从源矩形边缘拖到目标矩形边缘（自动吸附对齐）→ 保存
 

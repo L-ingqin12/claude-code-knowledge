@@ -3,7 +3,7 @@ title: Hermes 飞书助手全面瘫痪事故复盘
 aliases: []
 tags: [ai/ops, incident]
 created: 2026-06-24
-updated: 2026-08-17
+updated: 2026-08-25
 status: stable
 ---
 
@@ -13,7 +13,7 @@ See also: [[Claude-Ops-KB-Home]] · [[hermes-session-optimization-report]] · [[
 
 > **日期**: 2026-06-24  
 > **影响范围**: default + ranzi 两个飞书机器人完全无响应  
-> **持续时长**: ~80 分钟 (20:06 → 21:54 物理重启)  
+> **持续时长**: 约 108 分钟 (20:06 → 21:54 物理重启)  
 > **恢复方式**: 重启树莓派 (唯一恢复手段)  
 > **严重级别**: P0 (全面瘫痪, 无法远程恢复)
 

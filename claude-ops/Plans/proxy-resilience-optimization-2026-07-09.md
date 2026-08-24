@@ -3,7 +3,7 @@ title: Proxy 链路韧性优化方案
 aliases: []
 tags: [ai/ops]
 created: 2026-07-09
-updated: 2026-08-17
+updated: 2026-08-25
 status: deprecated
 ---
 
@@ -115,7 +115,7 @@ if (req.url === '/health') {
 写入 `/tmp/claude-proxy-status.json` 供 agent-gate 和 Claude 读取：
 
 ```json
-{"proxy":8787:"ok","permafrost":8788:"ok","deepseek":"ok","checked":"2026-07-09T12:00:00Z"}
+{"proxy":{"port":8787,"status":"ok"},"permafrost":{"port":8788,"status":"ok"},"deepseek":"ok","checked":"2026-07-09T12:00:00Z"}
 ```
 
 SessionStart hook 更新，agent-gate.sh `status` 展示。

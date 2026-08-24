@@ -3,7 +3,7 @@ title: Phase 2d: 资源类别感知调度方案
 aliases: []
 tags: [ai/ops]
 created: 2026-07-03
-updated: 2026-08-17
+updated: 2026-08-25
 status: deprecated
 ---
 
@@ -120,7 +120,7 @@ exit $RC
 
 ## Hook 配置
 
-新增的 hook (合并到 settings.local.json):
+新增的 hook（合并到 settings.local.json；历史草稿，未验证）：
 
 ```json
 "PreToolUse": [

@@ -3,7 +3,7 @@ title: Proxy 流式转发 + Model Router 协同方案
 aliases: []
 tags: [ai/ops, ai/agent]
 created: 2026-06-17
-updated: 2026-08-17
+updated: 2026-08-25
 status: review
 ---
 
@@ -11,7 +11,7 @@ status: review
 
 See also: [[Claude-Ops-KB-Home]] · [[claude-flash-primary-analysis]] · [[PERMAFROST_MODIFICATIONS]]
 
-> 日期: 2026-06-17 | 状态: 方案设计，待落实
+> 日期: 2026-06-17 | 状态: 代码已就绪，待隔离测试(:8789)
 
 ---
 
@@ -127,7 +127,7 @@ if os.environ.get("PERMAFROST_MODEL_ROUTING") == "1":
     feedback_flash_response(session, resp_text)
 ```
 
-**已实现，无需改动。**
+**代码已就绪，待隔离测试（无需改动）。**
 
 ---
 
@@ -173,7 +173,7 @@ DeepSeek 响应 → permafrost 收 chunk
 
 ---
 
-## 附2: Proxy 层工具归一化 (预研, 待落地)
+## 附1: Proxy 层工具归一化 (预研, 待落地)
 
 ### 方案
 proxy.js 第73行后插入 ~15行, 读取 `~/.claude/tool-anchor.json` 配置,

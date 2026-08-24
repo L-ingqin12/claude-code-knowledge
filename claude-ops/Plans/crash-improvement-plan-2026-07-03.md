@@ -3,7 +3,7 @@ title: 终端崩溃改进方案 — 实施计划
 aliases: []
 tags: [ai/ops]
 created: 2026-07-03
-updated: 2026-08-17
+updated: 2026-08-25
 status: deprecated
 ---
 
@@ -27,7 +27,7 @@ See also: [[Claude-Ops-KB-Home]] · [[subagent-resource-architecture-2026-07-03]
 | A: 代理层单点故障 | 57% (4起) | proxy.js 被直接编辑、诊断代码混入控制流、竞态条件 | TCP/HTTP 代理 |
 | B: Agent 资源耗尽 | 43% (3起) | fan out subagents 无并发限制、孤儿进程堆积、OOM | 进程/内存 |
 
-详见 [[crash-analysis-2026-07-03]]
+详见 crash-analysis-2026-07-03（⚠️ 原记忆文档未随迁移入库，本库无等价文件，见 [[MEMORY-INDEX]]）
 
 ---
 
@@ -192,9 +192,9 @@ See also: [[Claude-Ops-KB-Home]] · [[subagent-resource-architecture-2026-07-03]
 
 ## 相关记忆
 
-- [[claude-code-preflight-checklist]] — 行动前强制检查清单
-- [[claude-socket-error-elimination]] — 四层防御体系
-- [[claude-interruption-resilience]] — 中断恢复方案
-- [[hermes-parallel-task-communication]] — delegate_task vs Kanban 能力边界
+- claude-code-preflight-checklist（⚠️ 原文档未随迁移入库，见 [[MEMORY-INDEX]] 散落条目）— 行动前强制检查清单
+- [[claude-socket-error-elimination-guide]] — 四层防御体系
+- [[claude-interruption-resilience-guide]] — 中断恢复方案
+- [[hermes-parallel-task-report]] — delegate_task vs Kanban 能力边界
 - [[interactive-aware-subagent-plan-2026-07-03]] — Phase 2b: 交互感知动态资源分配（PreToolUse/Stop hook 状态机）
 - [[resource-class-scheduling-plan-2026-07-03]] — Phase 2d: 资源类别感知调度（cpu/io/net/mem 文件锁 + wrapper 脚本）

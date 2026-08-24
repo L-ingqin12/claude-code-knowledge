@@ -3,7 +3,7 @@ title: 日志分析 Agent 服务 — Windows 高并发部署方案
 aliases: []
 tags: [ai/ops]
 created: 2026-07-09
-updated: 2026-08-17
+updated: 2026-08-25
 status: deprecated
 ---
 
@@ -667,6 +667,9 @@ Write-Host "`n应用这些更改需要重启系统。" -ForegroundColor Yellow
 Write-Host "重启后验证: netsh int tcp show global" -ForegroundColor Yellow
 ```
 
+> [!warning] 勘误（2026-08-25）
+> 上述 `netsh int tcp set global chimney=enabled` / `netdma=enabled` 命令所依赖的 TCP Chimney Offload、NetDMA 技术已在现代 Windows 中移除，命令不再有效，仅作历史记录保留；`rss=enabled` 仍可用。
+
 ### 4.2 调优参数汇总
 
 | 参数 | 默认值 | 推荐值 | 位置 | 作用 |
@@ -677,7 +680,7 @@ Write-Host "重启后验证: netsh int tcp show global" -ForegroundColor Yellow
 | Tcp1323Opts | — | 3 | Registry | 窗口缩放 + 时间戳 |
 | RSS | varies | enabled | `netsh int tcp` | 多核接收 |
 | Chimney | varies | enabled | `netsh int tcp` | TCP 卸载 |
-| KeepAliveTime | 2h | 300000ms | Registry | TCP keepalive 间隔 |
+| KeepAliveTime | 2h | 300000ms（5 分钟） | Registry | TCP keepalive 间隔 |
 
 ### 4.3 验证
 
@@ -918,11 +921,11 @@ deployments/log-analysis-agent/
 
 ## 七、相关文档
 
-- [[claude-code-preflight-checklist]] — 行动前强制检查清单
+- claude-code-preflight-checklist（⚠️ 原文档未随迁移入库，见 [[MEMORY-INDEX]]）— 行动前强制检查清单
 - [[claude-unattended-cross-platform-guide]] — 跨平台无人值守指南
-- [[claude-interruption-resilience]] — 中断恢复方案
+- [[claude-interruption-resilience-guide]] — 中断恢复方案
 - [[opencode-multi-agent-architecture]] — OpenCode 多智能体架构
-- [[hermes-parallel-task-communication]] — 并行任务通信机制
+- [[hermes-parallel-task-report]] — 并行任务通信机制
 - [[fan-out-subagent-pattern]] — Fan-Out 子智能体分发
 - [[deploy-workflow-write-to-repo-first]] — ⚠️ 代码变更先归档仓库后部署
 

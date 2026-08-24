@@ -3,7 +3,7 @@ title: TYPORA-KB-Home
 aliases: [Typora 知识库, Typora MOC, Typora 技能]
 tags: [moc, software/typora]
 created: 2026-08-10
-updated: 2026-08-10
+updated: 2026-08-25
 status: stable
 ---
 # Typora 知识库 — MOC
@@ -24,12 +24,12 @@ See also: [[AGENTS]] | [[AI大模型开发]] | [[v2rayn-balancer-复盘-2026-08-
 | [[2026-08-10-Typora无补丁激活复盘与手册]] | ★ 主文档：复盘 + 可复用流程 + 验证清单 + 故障排查 |
 | [[TYPORA-KB-Home]] | 本页（入口） |
 
-```mermaid
-graph LR
-  HOME[TYPORA-KB-Home] --> MAIN[2026-08-10-Typora无补丁激活复盘与手册]
-  MAIN --> SCRIPTS[scripts/ 17 个脚本]
-  MAIN --> SKILL[~/.claude/skills/typora-activation]
-  MAIN --> AI[AI大模型开发]
+```text
+TYPORA-KB-Home（本页）
+└── 2026-08-10-Typora无补丁激活复盘与手册
+    ├── scripts/ （17 个脚本）
+    ├── ~/.claude/skills/typora-activation
+    └── [[AI大模型开发]]
 ```
 
 ## 关键数据

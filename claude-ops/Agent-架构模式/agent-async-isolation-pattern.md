@@ -3,7 +3,7 @@ title: Agent 同步调用异步隔离模式
 aliases: []
 tags: [ai/ops, ai/agent]
 created: 2026-08-10
-updated: 2026-08-17
+updated: 2026-08-25
 status: stable
 ---
 
@@ -54,8 +54,39 @@ async handler
 **Why:** Python 的 GIL 意味着 CPU 密集型 Agent 调用必须在线程池中执行才能释放事件循环。这是连接 async web framework 和 sync agent SDK 的桥梁模式。
 **How to apply:** 复制 `_run_agent_with_timeout` 方法模板，替换 `AgentClient.analyze_log` 为实际调用。
 
+## 最小配置示例 (settings.json 片段)
+
+```json
+{
+  "timeouts": {
+    "nginx_proxy_read": 120,
+    "asyncio_wait_for": 60,
+    "agent_client": 60
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "agent-guardian.sh preflight",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+**超时行为说明**:
+- 外层必须大于内层: nginx 120s > `asyncio.wait_for` 60s ≥ AgentClient 60s，否则外层先超时返回 504，内层仍在空转浪费线程。
+- `asyncio.wait_for` 超时 → 抛 `TimeoutError` 并记录日志；线程池中的线程无法被杀，靠 AgentClient 自身 timeout 兜底退出。
+- hook 的 `timeout: 30` 防止 hook 命令自身卡死；PreToolUse hook 超时/失败即阻断该工具执行。
+
 ## 关联
 
 - [[log-analysis-agent-windows-architecture]] — 本模式在日志分析服务中的具体应用
 - [[fan-out-subagent-pattern]] — 多维度分析时本模式的并行扩展
-- [[claude-interruption-resilience]] — 长任务恢复 (与本模式的超时互补)
+- [[claude-interruption-resilience-guide]] — 长任务恢复 (与本模式的超时互补)

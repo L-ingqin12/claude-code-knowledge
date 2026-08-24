@@ -1,10 +1,11 @@
 ---
 title: 家庭网络知识库
 aliases: [MOC, 网络知识库, Network KB, 000 Home]
-tags: [moc, network]
+tags: [moc, network, network/moc]
 cssclass: dashboard
 created: 2026-07-27
-updated: 2026-08-17
+updated: 2026-08-25
+status: stable
 ---
 
 # 家庭网络知识库
@@ -24,9 +25,11 @@ updated: 2026-08-17
 | 📡 [[ROUTER-FULL-CAPABILITY]] | 路由器完全能力手册 |
 | 🔬 [[ROUTER-DEEP-EXPLORATION]] | 路由器深度探索报告 |
 | 🔧 [[ROUTER-OPTIMIZATION]] | 路由器优化分析 |
+| 📹 [[ROUTER-VIDEO-REMOTE-MONITOR]] | 远程视频监控 — 视频 QoS/远程访问/流量监测 |
 | 🔍 [[network-analysis-2026-07-28]] | 初始 4 层瓶颈诊断 |
 | 🐛 [[v2rayn-balancer-复盘-2026-08-09]] | Google 无法访问事故复盘（v2rayN balancer 生成 bug + watcher 修复） |
 | 🛡️ [[参考-ClaudeCode网络韧性]] | Claude Code 网络韧性摘要（socket keepalive 四层消除 / 代理门控 / conntrack P0） |
+| 🗂️ [[SESSION-ARCHIVE-2026-07-28]] | 会话归档 — 2026-07-27~28 全流程记录 |
 
 ## 文档关系图
 
@@ -104,7 +107,7 @@ LIMIT 15
 
 ## Agent 协作
 
-本 Vault 包含 [[../AGENTS]] 定义了 AI 协作规范。关键规则：
+本 Vault 包含 [[AGENTS]] 定义了 AI 协作规范。关键规则：
 - 遵循 Wikilinks 进行关联探索
 - 新文档必须包含 frontmatter + 嵌套标签
 - 修改后更新 `updated` 字段和反向链接

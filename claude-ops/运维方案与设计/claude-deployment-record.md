@@ -3,7 +3,7 @@ title: Claude Code 韧性代理 — 部署记录与使用手册
 aliases: []
 tags: [ai/ops, ai/agent]
 created: 2026-06-11
-updated: 2026-08-17
+updated: 2026-08-25
 status: review
 ---
 
@@ -23,14 +23,14 @@ See also: [[Claude-Ops-KB-Home]] · [[claude-resilience-architecture]] · [[clau
 
 | 文件 | 行号 | 修改前 | 修改后 |
 |------|------|--------|--------|
-| `/root/.zshrc` | 107 | `export ANTHROPIC_BASE_URL="https://api.deepseek.com/anthropic"` | `export ANTHROPIC_BASE_URL="http://[IP已脱敏]:8787"` |
-| `/root/.bashrc` | 150 | `export ANTHROPIC_BASE_URL="https://api.deepseek.com/anthropic"` | `export ANTHROPIC_BASE_URL="http://[IP已脱敏]:8787"` |
+| `/root/.zshrc` | 107 | `export ANTHROPIC_BASE_URL="https://api.deepseek.com/anthropic"` | `export ANTHROPIC_BASE_URL="http://[IP已脱敏]:8787/anthropic"` |
+| `/root/.bashrc` | 150 | `export ANTHROPIC_BASE_URL="https://api.deepseek.com/anthropic"` | `export ANTHROPIC_BASE_URL="http://[IP已脱敏]:8787/anthropic"` |
 
 ### 新增文件（5 个）
 
 | 文件 | 用途 |
 |------|------|
-| `/root/claude-resilience-proxy.py` | 韧性代理 v2（核心组件，四道防线） |
+| `/root/claude-resilience-proxy.py` | 韧性代理 v2（历史阶段组件，现行核心为 proxy.js；四道防线设计） |
 | `/root/claude-resilience-deploy.sh` | 一键部署/启停脚本 |
 | `/root/claude-rollback.sh` | 🚨 逃生通道：一键回滚到部署前状态 |
 | `/root/.claude/resume-prompt-header.txt` | 中断恢复协议模板（供 Claude 任务使用） |
@@ -93,7 +93,7 @@ bash /root/claude-resilience-deploy.sh status
 
 ```bash
 # 拼接恢复协议头 + 你的任务
-ANTHROPIC_BASE_URL=http://[IP已脱敏]:8787 \
+ANTHROPIC_BASE_URL=http://[IP已脱敏]:8787/anthropic \
   claude -p "$(cat /root/.claude/resume-prompt-header.txt)
 
 你的任务描述" --permission-mode accept-edits
@@ -121,10 +121,10 @@ bash /root/claude-rollback.sh
 kill $(cat /root/.claude/proxy.pid) 2>/dev/null
 
 # 2. 恢复 .zshrc
-sed -i 's|export ANTHROPIC_BASE_URL="http://[IP已脱敏]:8787"|export ANTHROPIC_BASE_URL="https://api.deepseek.com/anthropic"|' /root/.zshrc
+sed -i 's|export ANTHROPIC_BASE_URL="http://[IP已脱敏]:8787/anthropic"|export ANTHROPIC_BASE_URL="https://api.deepseek.com/anthropic"|' /root/.zshrc
 
 # 3. 恢复 .bashrc
-sed -i 's|export ANTHROPIC_BASE_URL="http://[IP已脱敏]:8787"|export ANTHROPIC_BASE_URL="https://api.deepseek.com/anthropic"|' /root/.bashrc
+sed -i 's|export ANTHROPIC_BASE_URL="http://[IP已脱敏]:8787/anthropic"|export ANTHROPIC_BASE_URL="https://api.deepseek.com/anthropic"|' /root/.bashrc
 
 # 4. 当前会话生效
 export ANTHROPIC_BASE_URL="https://api.deepseek.com/anthropic"

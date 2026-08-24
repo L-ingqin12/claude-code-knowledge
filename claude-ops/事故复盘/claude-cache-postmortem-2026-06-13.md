@@ -3,7 +3,7 @@ title: Claude Code 缓存命中率下降 — 排查复盘报告
 aliases: []
 tags: [ai/ops, incident]
 created: 2026-06-12
-updated: 2026-08-17
+updated: 2026-08-25
 status: stable
 ---
 
@@ -158,6 +158,8 @@ def stabilize_current_date(body, report):
 | L2 | `permafrost-rollback.sh full` | C/B→直连 DeepSeek |
 | L3 | `permafrost-rollback.sh disable-auto` | auto-deploy 死循环 |
 | L4 | `permafrost-rollback.sh nuke` | 完全清零 |
+
+> [!note] 级数勘误 (2026-08-25): 本节是 06-13 时的四级（结构级 L1-L4）定义。06-17 补丁事故后通道扩充为七级 — 新增补丁级 L0m（关 model 路由）/L0a（关 tools 重排）/L0b（关全部补丁），权威定义见 `scripts/claude-ops-deployments/root-scripts/claude-permafrost-rollback.sh`。
 
 ### 3.6 版本快速切换器
 

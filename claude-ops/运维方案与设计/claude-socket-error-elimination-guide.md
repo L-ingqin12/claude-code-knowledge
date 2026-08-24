@@ -3,7 +3,7 @@ title: Socket 错误根源分析与消除方案
 aliases: []
 tags: [ai/ops, ai/agent]
 created: 2026-07-01
-updated: 2026-08-17
+updated: 2026-08-25
 status: review
 ---
 
@@ -31,7 +31,7 @@ Android 内核 TCP 栈
   │ sysctl tcp_keepalive_time = 7200s (默认2小时)
   ▼
 移动网络 (4G/5G/WiFi)
-  │ 运营商 NAT: 30-120s 空闲超时
+  │ 运营商 NAT: ~40s 空闲超时（实测 T+40s；早期估计 30-120s，保留为历史口径）
   │ 切换基站 → TCP RST
   ▼
 互联网
@@ -69,13 +69,13 @@ T+65s   Claude 执行完工具，准备发下一个 API 请求
 
 | 触发源 | 位置 | 空闲超时 | 可否控制 |
 |--------|------|----------|----------|
-| ① 移动运营商 NAT | 手机→基站 | 30-120s | ❌ 不可控制 |
-| ② Android 内核 TCP | 手机 OS | keepalive 默认 7200s | ✅ sysctl 可调 |
+| ① 移动运营商 NAT | 手机→基站 | ~40s（实测） | ❌ 不可控制 |
+| ② Android 内核 TCP | 手机 OS | keepalive 默认 7200s | ❌ PRoot/Android 无 sysctl 权限（改用应用层 keepalive） |
 | ③ Node.js HTTP Agent | 应用层 | keepAlive 默认 false→无连接复用 | ✅ 可配置 |
 | ④ CDN/Cloudflare | 服务器前端 | ~100s | ❌ 不可控制 |
 | ⑤ DeepSeek LB | 服务器后端 | ~60-120s | ❌ 不可控制 |
 
-**关键洞见**：你只能控制②和③，但②+③的优化足以在 99% 场景下防止空闲超时。对于那 1%（基站切换导致的物理断连），需要④透明重试。
+**关键洞见**：你只能控制②和③，但②+③的优化足以在 99% 场景下防止空闲超时。对于那 1%（基站切换导致的物理断连），需要透明重试机制。
 
 ---
 
@@ -86,34 +86,33 @@ T+65s   Claude 执行完工具，准备发下一个 API 请求
 当前你的 Android/Linux 内核默认的 TCP keepalive 参数：
 
 ```
-tcp_keepalive_time  = 7200s (2小时)  ← 远超过 NAT 的 30-120s
+tcp_keepalive_time  = 7200s (2小时)  ← 远超过 NAT 的 ~40s 空闲超时
 tcp_keepalive_intvl = 75s            ← 探测间隔
 tcp_keepalive_probes = 9             ← 探测次数
 ```
 
-问题：默认 2 小时后才发第一个 keepalive 探测包，对于 30-120s 的 NAT 超时完全无效。
+问题：默认 2 小时后才发第一个 keepalive 探测包，对于 ~40s 的 NAT 超时完全无效。
 
-**解决方案**：把 keepalive 时间降到低于最小空闲超时。
+**解决方案（本环境）**：应用层 keepalive——把探测间隔降到低于最小空闲超时：
+
+> [!warning] PRoot/Android 无 sysctl 权限——内核 TCP 参数在本环境不可调，必须用应用层方案；历史 sysctl 方案仅适用于原生 Linux（保留备查）。
+
+```javascript
+// proxy.js（现行 Node.js 代理）：socket 级 keepalive
+socket.setKeepAlive(true, 60000);   // 60s 无活动发一次 keepalive 探测
+```
 
 ```bash
-# 立即生效（重启后需重设）
+# 历史方案：内核 sysctl（仅原生 Linux 有效，PRoot/Android 无效）
 sysctl -w net.ipv4.tcp_keepalive_time=60
 sysctl -w net.ipv4.tcp_keepalive_intvl=10
 sysctl -w net.ipv4.tcp_keepalive_probes=3
-
-# 持久化
-cat >> /etc/sysctl.conf << EOF
-net.ipv4.tcp_keepalive_time = 60
-net.ipv4.tcp_keepalive_intvl = 10
-net.ipv4.tcp_keepalive_probes = 3
-EOF
-sysctl -p
 ```
 
 效果：
 ```
-之前: 连接空闲 30s → NAT 发送 RST → 数据来了才发现 → crash
-之后: 连接空闲 60s → 内核发 keepalive 探测 → NAT 收到包刷新超时 → 连接保持
+之前: 连接空闲 40s → NAT 发送 RST → 数据来了才发现 → crash
+之后: 连接空闲 60s → 应用层 keepalive 探测（setKeepAlive）→ NAT 收到包刷新超时 → 连接保持
      如果探测无响应 → 10s后重试 → 3次失败 → 内核关闭 socket → Node.js 立即感知
 ```
 
@@ -505,10 +504,10 @@ echo "[3/3] Claude exited. Proxy still running (PID $PROXY_PID)."
 
 | 断连场景 | 之前 | 之后 |
 |----------|------|------|
-| NAT 30s 空闲超时 | ❌ Crash (socket closed) | ✅ Keepalive 每 60s 刷新 NAT → 连接不超时 |
+| NAT 40s 空闲超时 | ❌ Crash (socket closed) | ✅ Keepalive 每 60s 刷新 NAT → 连接不超时 |
 | 基站切换 | ❌ TCP RST → Crash | ✅ RST 被代理检测→自动重试(1s)→成功 |
 | DeepSeek LB 空闲超时 | ❌ Crash | ✅ 代理心跳保持活跃 + 失败重试 |
-| Wi-Fi→蜂窝切换 | ❌ IP 变化→连接全断→Crash | ✅ 代理检测死连接→新建→重试(最长 3+8=11s 恢复) |
+| Wi-Fi→蜂窝切换 | ❌ IP 变化→连接全断→Crash | ✅ 代理检测死连接→新建→重试(最长 1+3+8=12s 恢复) |
 | 瞬时网络抖动 (丢包) | ❌ 可能触发 socket 错误 | ✅ 代理在重试窗口中吸收 |
 | 服务器返回 5xx | ❌ 可能被解读为 socket 错误 | ✅ 代理区分协议错误和网络错误，前者透传 |
 | 代理 3 次重试后仍失败 | — | ❌ 返回 502 + 保存上下文 → 守护脚本检测 → 自动恢复 |
@@ -557,10 +556,11 @@ sysctl -w net.ipv4.tcp_keepalive_probes=3
 # 第二步：启动代理（选做，推荐）
 python3 /root/claude-resilience-proxy.py &
 # 验证代理存活
+# 注: ANTHROPIC_BASE_URL 指向 DeepSeek 兼容端点时，模型名映射为 deepseek-chat（原 claude-haiku-4-5 为 Anthropic 模型名）
 curl -s http://[IP已脱敏]:8787/anthropic/v1/messages \
   -H "Authorization: Bearer $ANTHROPIC_API_KEY" \
   -H "Content-Type: application/json" \
-  -d '{"model":"claude-haiku-4-5","max_tokens":1,"messages":[{"role":"user","content":"ping"}]}' \
+  -d '{"model":"deepseek-chat","max_tokens":1,"messages":[{"role":"user","content":"ping"}]}' \
   | head -c 100
 
 # 第三步：使用
@@ -610,7 +610,7 @@ ANTHROPIC_BASE_URL=http://[IP已脱敏]:8787/anthropic \
 │  ├─ 读取 context-dump.md 恢复思维状态                          │
 │  ├─ 读取 task-state.json 获取任务进度                          │
 │  ├─ 注入恢复 prompt：禁止推翻 Decision + 从断点继续             │
-│  └─ claude --resume → 无缝接续                                 │
+│  └─ 新会话 + 恢复 prompt 注入（--resume 不接续上下文，历史口径） │
 └──────────────────────────────────────────────────────────────┘
 ```
 
@@ -618,6 +618,6 @@ ANTHROPIC_BASE_URL=http://[IP已脱敏]:8787/anthropic \
 | 层 | 职责 | 失败概率 | 恢复代价 |
 |----|------|----------|----------|
 | L0 内核 TCP | 防止 NAT 空闲超时断开 | 5%（物理链路中断无法防止） | 0 |
-| L1 透明代理 | 自动重试 socket 错误 | 1%（3次重试全部失败） | 1-11s 延迟 |
+| L1 透明代理 | 自动重试 socket 错误 | 1%（3次重试全部失败） | 1-12s 延迟 |
 | L2 外部大脑 | 保存思维状态 + 精确恢复 | 0% | ~300 tokens |
 | L3 守护脚本 | 自动检测 + 拉起 + 注入 prompt | 0% | 0（用户无感） |

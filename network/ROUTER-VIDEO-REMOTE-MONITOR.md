@@ -3,7 +3,7 @@ title: 路由器视频/远程/监测方案
 aliases: [QoS, 远程访问, 流量监测]
 tags: [network/router, network/optimization]
 created: 2026-07-28
-updated: 2026-07-28
+updated: 2026-08-25
 status: stable
 ---
 
@@ -80,6 +80,16 @@ xl2tpd 二进制已存在 (/usr/sbin/xl2tpd, 97KB):
 # 启动: /etc/init.d/xl2tpd start
 ```
 
+最小配置示例 (`/data/etc/xl2tpd/xl2tpd.conf`):
+
+```ini
+[lac remote]
+lns = <你的VPN服务器IP>
+pppoptfile = /data/etc/xl2tpd/options
+require chap = yes
+ppp debug = no
+```
+
 优点: 路由器原生支持, 2 层隧道, 可路由整个子网
 缺点: 需要远程 L2TP 服务器; 配置复杂
 
@@ -87,8 +97,10 @@ xl2tpd 二进制已存在 (/usr/sbin/xl2tpd, 97KB):
 
 ```bash
 # 从路由器转发端口到外部服务器
+mkfifo /tmp/fifo   # 仅需执行一次; nc 循环需配合 sleep, 防止无数据时忙等
 while true; do
   busybox nc <remote_server> <remote_port> < /tmp/fifo | busybox nc localhost 80 > /tmp/fifo
+  sleep 1   # 连接断开后稍歇再重试
 done &
 ```
 
@@ -148,7 +160,7 @@ cat /proc/net/dev | grep eth0.2
 ```bash
 # 通过 API 获取每个设备的实时速率
 curl "http://[IP已脱敏]/cgi-bin/luci/;stok=TOKEN/api/misystem/devicelist"
-# 返回每个设备的 upspeed/downspeed (单位: B/s?)
+# 返回每个设备的 upspeed/downspeed (单位: B/s, 待实测确认)
 ```
 
 ### 扩展: 远程日志

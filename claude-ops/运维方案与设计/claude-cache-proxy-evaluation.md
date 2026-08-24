@@ -3,11 +3,13 @@ title: Proxy 内建缓存优化 — 评估结论：已废弃
 aliases: []
 tags: [ai/ops, ai/agent]
 created: 2026-06-12
-updated: 2026-08-17
-status: review
+updated: 2026-08-25
+status: deprecated
 ---
 
 # Proxy 内建缓存优化 — 评估结论：已废弃
+
+> [!warning] 此文档结论已废弃，参见 [[claude-cache-strategy]]
 
 See also: [[Claude-Ops-KB-Home]] · [[claude-cache-optimization]] · [[claude-cache-strategy]]
 

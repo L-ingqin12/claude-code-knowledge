@@ -3,7 +3,7 @@ title: Claude Code 无人值守 — 跨平台架构指南
 aliases: []
 tags: [ai/ops, ai/agent]
 created: 2026-07-01
-updated: 2026-08-17
+updated: 2026-08-25
 status: review
 ---
 
@@ -325,13 +325,13 @@ Register-ScheduledTask -TaskName "ClaudeCodeDailyCheck" `
 **方案C — NSSM 将 WSL 进程注册为 Windows Service**（不推荐，权限模型复杂）
 
 **Windows 特殊注意事项**：
-- WSL2 默认会在空闲 8 秒后关闭——需在 `.wslconfig` 中配置：
+- WSL2 在发行版内无进程运行约 8 秒后，VM 自动回收内存——注意：这是内存回收，并非关闭发行版；`.wslconfig` 中无对应设置项：
   ```ini
   # %USERPROFILE%\.wslconfig
   [wsl2]
   kernelCommandLine = vsyscall=emulate
   memory=4GB
-  # 不让 WSL 自动关闭
+  # 注: 无"禁止自动回收/关闭"设置项，此处仅为内存上限配置
   ```
 - 如果笔记本合盖休眠，WSL 也会挂起——用 `DontStopIfGoingOnBatteries`
 
@@ -380,13 +380,18 @@ services:
     image: alpine
     restart: unless-stopped
     volumes:
-      - ./cron-scripts:/scripts:ro
+      - ./workspace:/workspace        # cron 任务 cd /workspace 所需
     entrypoint: |
       /bin/sh -c "
+      # 修正: 原配置 alpine 内无 node/claude，任务必然失败；先安装再写 cron
+      apk add --no-cache nodejs npm >/dev/null 2>&1
+      npm install -g @anthropic-ai/claude-code >/dev/null 2>&1
       echo '7 */2 * * * cd /workspace && claude -p \"检查状态\" --permission-mode accept-edits' > /etc/crontabs/root
       crond -f -l 2
       "
 ```
+
+> [!note] 修正说明: 原 `image: alpine` 容器内既无 node 也无 claude，cron 任务执行 `claude -p` 必然失败；上例在 entrypoint 中补了安装步骤（也可改用含 claude 的镜像）。
 
 ```bash
 # 启动
@@ -732,7 +737,8 @@ sudo systemctl enable --now claude-daemon
 # 5) 验证
 ps aux | grep claude
 systemctl status claude-daemon
-claude -p "回复: ok" --model claude-haiku-4-5
+# 注: ANTHROPIC_BASE_URL 指向 DeepSeek 兼容端点时，模型名用 deepseek-chat（原 claude-haiku-4-5 为 Anthropic 模型名）
+claude -p "回复: ok" --model deepseek-chat
 ```
 
 ### 6.2 macOS

@@ -3,7 +3,7 @@ title: "Skill 规模化管理——从渐进式披露到检索式发现"
 aliases: [Skill规模化管理, 检索式发现, Skill Discovery]
 tags: [ai/skills, ai/learning]
 created: 2026-06-22
-updated: 2026-08-17
+updated: 2026-08-25
 status: review
 source: "基于 Claude Code Skills 体系推演"
 date: "2026-06-22"
@@ -383,7 +383,7 @@ class SkillLoader:
 
 | 阶段 | 全部列出 | 只列顶层 + 检索 | 顶层 + 检索 + 依赖链 |
 |------|---------|---------------|-------------------|
-| 100 Skill | 3000 | 300（search_skills） | 30（search_skills 工具声明） |
+| 100 Skill | 3000 | 150（top-5 结果） | 30（search_skills 工具声明） |
 | 1000 Skill | 30000 | 150（top-5 结果） | 30 + 子 Skill 自动级联 |
 | 瓶颈 | system prompt 被淹没 | LLM 选择器候选池 | 无——规模完全解耦 |
 
@@ -430,5 +430,3 @@ Phase 4（增长到 5000+ 个 skill）
 ```
 
 核心原则不变：**任何时刻 context 里只放当前这一步真正用得上的部分。** 对文档成立、对记忆成立、对 Skill 成立——依赖声明和检索发现是这条原则在 Skill 管理上的两种互补实现。
-
-核心原则不变：**任何时刻 context 里只放当前这一步真正用得上的那部分。** 这句话对文档成立、对记忆成立、对 Skill 同样成立。

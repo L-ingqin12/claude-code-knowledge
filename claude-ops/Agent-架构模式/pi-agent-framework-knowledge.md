@@ -3,7 +3,7 @@ title: Pi Agent 框架知识
 aliases: []
 tags: [ai/ops, ai/agent]
 created: 2026-08-10
-updated: 2026-08-17
+updated: 2026-08-25
 status: stable
 ---
 
@@ -38,7 +38,7 @@ Pi Agent (Mario Zechner/badlogic) 是 TypeScript 编写的 AI Agent 工具包，
 
 | 维度 | Pi Agent | opencode |
 |------|----------|----------|
-| 语言 | TypeScript (Node.js) | Python |
+| 语言 | TypeScript (Node.js) | TypeScript（TUI 部分为 Go） |
 | 工具模型 | 4 原子工具 | 丰富工具集 |
 | 并行 | toolExecution: "parallel" (LLM 自主) | 依赖插件 (agent-intercom) |
 | 嵌入 | SDK in-process | subprocess / HTTP |
@@ -51,7 +51,7 @@ Pi Agent (Mario Zechner/badlogic) 是 TypeScript 编写的 AI Agent 工具包，
 - 分析指令通过 Skills (渐进式) 注入，不占 system prompt
 - LLM 自主决定并行维度 → 更灵活但可控性低于代码固定的 ThreadPoolExecutor
 
-**Why:** Pi Agent 和 opencode 是两种完全不同的 Agent 框架范式 — TypeScript SDK 嵌入 vs Python subprocess 调用。选择哪个决定了整个 HTTP 服务的技术栈。
+**Why:** Pi Agent 和 opencode 是两种完全不同的 Agent 框架范式 — TypeScript SDK 嵌入 vs TypeScript CLI subprocess 调用（TUI 为 Go）。选择哪个决定了整个 HTTP 服务的技术栈。
 **How to apply:** 设计基于 Pi Agent 的服务时，始终从 "4 工具 + 800 token + SDK in-process" 的约束出发，不要照搬 opencode 的方案。
 
 ## 关联

@@ -3,13 +3,13 @@ title: "SAE 视觉特征单义性——NeurIPS 2025"
 aliases: [SAE单义性, SAE NeurIPS 2025, 稀疏自编码器单义特征]
 tags: [ai/learning, reference]
 created: 2025-04-03
-updated: 2026-08-17
+updated: 2026-08-25
 status: stable
 source: "论文 + 微信公众号解读"
 source_urls:
   - "https://arxiv.org/abs/2504.02821"
   - "https://mp.weixin.qq.com/s/A_JvAATI7tSkfYAhuUXMTQ"
-authors: "Mateusz Pach, Shyamgopal Karthik, Quentin Bouniot, Serge Belongie, Zeynep Akata"
+author: "Mateusz Pach, Shyamgopal Karthik, Quentin Bouniot, Serge Belongie, Zeynep Akata"
 venue: "NeurIPS 2025"
 date: "2025-04-03"
 fetched_at: "2026-06-17"
@@ -109,7 +109,7 @@ LLaVA-1.5 的视觉管道：图片 → CLIP ViT-L/14 → 576 个 patch token（�
 
 ## 四、关键实验结果
 
-### 4.1 MS 量化对比——两个数量级提升
+### 4.1 MS 量化对比——近两个数量级提升
 
 | 视觉编码器 | 原始 MS | SAE ε=1 | SAE ε=4 |
 |------------|---------|---------|---------|
@@ -118,7 +118,7 @@ LLaVA-1.5 的视觉管道：图片 → CLIP ViT-L/14 → 576 个 patch token（�
 | WebSSL MAE-300m/14-224px | 0.01 | 0.79 | 0.92 |
 | AIMv2 L/14-224px | 0.01 | 0.59 | 0.85 |
 
-**跨架构普遍有效**——四种编码器（对比学习/自回归/MAE/AIMv2）全有效。AIMv2 的 ε=1 只有 0.59，说明预训练方式影响特征的可拆解程度——自监督预训练学出来的表征纠缠模式与对比学习不同。
+**跨架构普遍有效**——四种编码器（对比学习（CLIP/SigLIP）/ MAE / 自回归（AIMv2））全有效。AIMv2 的 ε=1 只有 0.59，说明预训练方式影响特征的可拆解程度——自监督预训练学出来的表征纠缠模式与对比学习不同。
 
 ### 4.2 人类实验——MTurk 验证
 
@@ -207,11 +207,11 @@ SAE 重建不是无损的。残差里有结构化信息，不是噪声——是 
 
 ### 7.1 已验证的事实
 
-1. **SAE 在视觉表征上也有效**——四个编码器、两个数量级的 MS 提升
+1. **SAE 在视觉表征上也有效**——四个编码器、近两个数量级的 MS 提升
 2. **单义性是真实的**——MTurk 82.8% 人类一致率，差距大时 100%
 3. **因果性成立**——改一个 SAE 神经元就能控制 LLM 的视觉理解输出
 4. **跨架构泛化**——CLIP/SigLIP/MAE/AIMv2 都有效，但预训练方式影响可拆解程度
-5. **稀疏性 > 宽度的交互**——BatchTopK（硬稀疏）比 L1（软稀疏）效果更好
+5. **稀疏机制对比：BatchTopK 优于 L1**——BatchTopK（硬稀疏）比 L1（软稀疏）效果更好
 
 ### 7.2 方法论贡献
 

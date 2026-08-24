@@ -3,7 +3,7 @@ title: AI 文章库索引（子 MOC）
 aliases: [Articles Index, 文章索引, AI文章库, Articles-MOC]
 tags: [moc, ai/learning]
 created: 2026-08-17
-updated: 2026-08-17
+updated: 2026-08-25
 status: review
 ---
 
@@ -72,49 +72,40 @@ Agent 产品内部是怎么实现的。
 
 ## 文档关系图
 
-```mermaid
-graph LR
-  HOME[AI-Links-KB-Home] --> IDX[Articles-Index]
-  IDX --> INTERP[可解释性/SAE: 3 篇]
-  IDX --> CTX[上下文工程: 2 篇]
-  IDX --> SKILL[Skill 系统: 5 篇]
-  IDX --> MECH[机制拆解: 3 篇]
-  IDX --> TRAIN[训练实录: 1 篇]
-
-  INTERP --> SCAN[给LLM做脑扫描-可解释性技术全景]
-  INTERP --> SAE[SAE-视觉特征单义性-NeurIPS2025]
-  INTERP --> PATCH[PatchSAE-概念重映射-ICLR2025]
-  SAE <--> PATCH
-  SCAN --> SAE
-  SCAN --> PATCH
-
-  CTX --> THEORY[上下文工程-注意力预算与四层解法]
-  CTX --> PRACTICE[上下文工程落地实践-从理论到Claude-Code实现]
-  THEORY --> PRACTICE
-
-  SKILL --> REF[Claude-Code实用Skills参考]
-  SKILL --> SCALE[Skill规模化管理-从渐进式披露到检索式发现]
-  SKILL --> MIG[Agent驱动Skill迁移设计]
-  SKILL --> DEMO[日志检索分析系统-Skill管理Demo设计]
-  SKILL --> ANTHRO[Anthropic-Skill系统深度分析]
-  SCALE --> MIG
-  SCALE --> DEMO
-  MIG --> DEMO
-  ANTHRO --> REF
-
-  MECH --> MEM[Claude-Code记忆机制源码拆解]
-  MECH --> LOOP[Loop-Engineering-深度拆解-从产品功能集到方法论包装]
-  MECH --> RESIL[Agent韧性架构分析-微信转载]
-
-  TRAIN --> K3[预训练迷你Kimi-K3实录-章节总结]
-  K3 --> AI[AI大模型开发]
-
-  PRACTICE --> MEM
-  SCALE --> MEM
-  THEORY --> PRACTICE
-  IDX --> AI[AI大模型开发]
-  IDX --> REV[2026-08-16-AI链接综述与归档]
-```
+    AI-Links-KB-Home
+    └─ Articles-Index
+        ├─ 可解释性/SAE: 3 篇
+        │   ├─ 给LLM做脑扫描-可解释性技术全景
+        │   │   ├─ → SAE-视觉特征单义性-NeurIPS2025
+        │   │   └─ → PatchSAE-概念重映射-ICLR2025
+        │   ├─ SAE-视觉特征单义性-NeurIPS2025
+        │   │   └─ ↔ PatchSAE-概念重映射-ICLR2025
+        │   └─ PatchSAE-概念重映射-ICLR2025
+        ├─ 上下文工程: 2 篇
+        │   ├─ 上下文工程-注意力预算与四层解法
+        │   │   └─ → 上下文工程落地实践-从理论到Claude-Code实现
+        │   └─ 上下文工程落地实践-从理论到Claude-Code实现
+        │       └─ → Claude-Code记忆机制源码拆解
+        ├─ Skill 系统: 5 篇
+        │   ├─ Claude-Code实用Skills参考
+        │   ├─ Skill规模化管理-从渐进式披露到检索式发现
+        │   │   ├─ → Agent驱动Skill迁移设计
+        │   │   ├─ → 日志检索分析系统-Skill管理Demo设计
+        │   │   └─ → Claude-Code记忆机制源码拆解
+        │   ├─ Agent驱动Skill迁移设计
+        │   │   └─ → 日志检索分析系统-Skill管理Demo设计
+        │   ├─ 日志检索分析系统-Skill管理Demo设计
+        │   └─ Anthropic-Skill系统深度分析
+        │       └─ → Claude-Code实用Skills参考
+        ├─ 机制拆解: 3 篇
+        │   ├─ Claude-Code记忆机制源码拆解
+        │   ├─ Loop-Engineering-深度拆解-从产品功能集到方法论包装
+        │   └─ Agent韧性架构分析-微信转载
+        ├─ 训练实录: 1 篇
+        │   └─ 预训练迷你Kimi-K3实录-章节总结
+        │       └─ → AI大模型开发
+        ├─ → AI大模型开发
+        └─ → 2026-08-16-AI链接综述与归档
 
 ---
 
@@ -136,8 +127,8 @@ graph LR
 | 文章总数 | 14（articles/ 11 篇 + 仓库根目录 2 篇 + 2026-08-18 新增 K3 章节总结 1 篇） |
 | 分组 | 5 组：可解释性 3 / 上下文工程 2 / Skill 5 / 机制拆解 3 / 训练实录 1 |
 | 迁移日期 | 2026-08-17（源：`_install-tmp/akb-remote`，只读源未改动） |
-| status 分布 | stable 10 篇 / review 3 篇（设计/Demo 类） |
-| 命名调整 | 2 篇英文文件名改为中文：`Agent韧性架构分析-微信转载.md`、`Anthropic-Skill系统深度分析.md` |
+| status 分布 | stable 11 篇 / review 3 篇（设计/Demo 类） |
+| 命名调整 | 2 篇改为主语义中文命名：`Agent韧性架构分析-微信转载.md`、`Anthropic-Skill系统深度分析.md` |
 
 ---
 

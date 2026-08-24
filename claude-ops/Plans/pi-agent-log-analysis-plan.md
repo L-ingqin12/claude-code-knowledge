@@ -3,7 +3,7 @@ title: 日志分析 Agent 服务 — Pi Agent 版技术方案
 aliases: []
 tags: [ai/ops]
 created: 2026-07-09
-updated: 2026-08-17
+updated: 2026-08-25
 status: deprecated
 ---
 
@@ -619,10 +619,10 @@ pi-agent-log-analysis-plan
     ├─ [[agent-async-isolation-pattern]]
     │   └─ Node.js 天然异步，无需额外隔离层 ← 关键差异
     │
-    ├─[[pi-agent-constraints-analysis]] (新建)
+    ├─[[pi-agent-constraints-reference]]（原计划新建 pi-agent-constraints-analysis，未落地）
     │   └─ 4 tools + 800 tokens + parallel execution
     │
-    ├─ [[hermes-parallel-task-communication]]
+    ├─ [[hermes-parallel-task-report]]
     │   └─ delegate_task (短分析) vs Kanban (长分析, 需审计)
     │
     └─ [[state-machine-quality-gate-loop]]

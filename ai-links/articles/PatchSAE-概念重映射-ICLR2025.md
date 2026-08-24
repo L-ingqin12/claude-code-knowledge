@@ -3,11 +3,12 @@ title: "PatchSAE 概念重映射——ICLR 2025"
 aliases: [PatchSAE, 概念重映射, SAE ICLR 2025]
 tags: [ai/learning, reference]
 created: 2024-12-06
-updated: 2026-08-17
+updated: 2026-08-25
 status: stable
 source: "论文"
-source_url: "https://arxiv.org/abs/2412.05276"
-authors: "Hyesu Lim, Jinho Choi, Jaegul Choo, Steffen Schneider"
+source_urls:
+  - "https://arxiv.org/abs/2412.05276"
+author: "Hyesu Lim, Jinho Choi, Jaegul Choo, Steffen Schneider"
 venue: "ICLR 2025"
 date: "2024-12-06"
 fetched_at: "2026-06-17"
@@ -30,7 +31,7 @@ See also: [[AI-Links-KB-Home]] | [[Articles-Index]] | [[SAE-视觉特征单义�
 
 | 维度 | NeurIPS 2025 (Pach et al.) | PatchSAE (Lim et al.) |
 |------|---------------------------|----------------------|
-| **SAE 输入** | CLS token（全局汇总向量） | **所有 token**（CLS + 577 patch tokens） |
+| **SAE 输入** | CLS token（全局汇总向量） | **所有 token**（1 CLS + 576 patch tokens = 577（ViT-L/14 @336px）） |
 | **空间定位** | 只知道「图里有狗」 | 知道「狗在第 3 行第 5 列 patch 上」 |
 | **核心问题** | SAE 特征是不是单义的？能因果控制输出吗？ | Adaptation 时内部发生了什么？学新概念还是重用旧概念？ |
 | **方法论贡献** | MS 指标 + MTurk 人类实验 + 因果干预 | 空间归因 + latent masking 消融 + adaptation 机制分析 |
@@ -44,7 +45,7 @@ See also: [[AI-Links-KB-Home]] | [[Articles-Index]] | [[SAE-视觉特征单义�
 ### 2.1 核心设计：对所有 token 训 SAE
 
 ```
-CLIP ViT 残差流输出 z ∈ ℝ^(N+1)×d  (N=577 patches + 1 CLS token, d=1024)
+CLIP ViT 残差流输出 z ∈ ℝ^(N+1)×d  (N=576 patches + 1 CLS token，共 577, d=1024)
   → 逐 token 独立过 SAE
   → 每个 token 得到稀疏激活向量
   → 每个 SAE latent 同时有语义含义 + 空间位置信息

@@ -3,9 +3,14 @@ title: "Anthropic Claude Code Skill 系统：设计方案与实现方法深度�
 aliases: [Anthropic Skill系统, Skill Creator, Skill系统深度分析]
 tags: [ai/skills, ai/learning]
 created: 2026-06-12
-updated: 2026-08-17
+updated: 2026-08-25
 status: stable
 source: "Anthropic 官方博客 + 社区资料分析"
+source_urls:
+  - "https://claude.com/blog/lessons-from-building-claude-code-how-we-use-skills"
+  - "https://skywork.ai/blog/claude-code-skill-creator-ultimate-guide/"
+  - "https://github.com/anthropics/skills"
+  - "https://shellypalmer.com/2026/03/the-recursive-advantage/"
 date: "2026-06-12"
 ---
 
@@ -56,7 +61,7 @@ Skill 是 Claude Code 的**模块化能力扩展单元**。它是一个包含指
 │  │  Agent 根据 skill description (frontmatter)    │  │
 │  │  从 available_skills 列表中选择匹配的 skill     │  │
 │  └───────────────────────────────────────────────┘  │
-│  输入: 用户 prompt + 所有 skill metadata (~100词/个)  │
+│  输入: 用户 prompt + 所有 skill metadata (~100 tokens/个)  │
 │  输出: 选中的 skill (或 none)                         │
 └─────────────────────┬───────────────────────────────┘
                       │ skill 被触发
@@ -65,7 +70,7 @@ Skill 是 Claude Code 的**模块化能力扩展单元**。它是一个包含指
 │              渐进式加载层 (Progressive Disclosure)    │
 │                                                     │
 │  Level 1: Metadata (name + description)             │
-│           → 始终在上下文中 (~100 词)                  │
+│           → 始终在上下文中 (~100 tokens)              │
 │                                                     │
 │  Level 2: SKILL.md 正文                              │
 │           → skill 触发时加载 (<500 行 / <5k 词)       │
@@ -84,7 +89,7 @@ Skill 是 Claude Code 的**模块化能力扩展单元**。它是一个包含指
 | 层级 | 内容 | 加载时机 | Token 成本 | 设计约束 |
 |------|------|---------|-----------|---------|
 | **Metadata** | YAML frontmatter (name, description) | 始终在上下文 | ~100 tokens/skill | description ≤ 1024 字符，必须同时包含"做什么"和"何时用" |
-| **SKILL.md 正文** | 核心指令、工作流、示例 | skill 触发时 | <5k 词（推荐上限） | 只放核心流程；接近上限时拆到 references/ |
+| **SKILL.md 正文** | 核心指令、工作流、示例 | skill 触发时 | <5k 词（推荐上限） | 只放核心流程；接近上限时拆到 references/；官方规范 <5000 字符级上限，插件实践建议 1500-2000 |
 | **捆绑资源** | scripts/, references/, assets/ | 按需 | 无限制（scripts 不占上下文） | references 大文件 (>300行) 需有目录 |
 
 **关键洞察**: 为什么每个 skill 都检入 repo 会增加上下文负担？因为 **Level 1 metadata 是所有 skill 同时加载的**。一个 50 个 skill 的项目，即使没触发任何 skill，也要消耗 ~5000 tokens 在 description 上。
@@ -98,7 +103,7 @@ Agent 决定是否触发 skill 的核心逻辑：
 3. **关键**: Agent 只会为其**无法轻松独立处理**的任务触发 skill — 简单的单步查询即使 description 匹配完美也可能不触发
 4. 复杂、多步骤、专业化的查询最容易触发 skill
 
-因此：**description 是写给人（Agent）看的，不是给用户看的**。它不是功能摘要，而是触发条件描述。
+因此：**description 是写给模型（Agent）看的，不是给用户看的**。它不是功能摘要，而是触发条件描述。
 
 ---
 
@@ -352,7 +357,7 @@ Step 5: 读取用户反馈
 
 ```
 Step 1: 生成触发评估查询集
-  ├── 20 个查询: 8-10 个 should-trigger + 8-10 个 should-not-trigger
+  ├── 约 20 个查询（should-trigger 与 should-not-trigger 各 8-10）
   ├── 查询必须是真实用户会输入的内容
   ├── should-not-trigger 最有价值的是「近失」(near-miss) 查询
   └── 避免太简单的负样本（太简单不测试任何东西）

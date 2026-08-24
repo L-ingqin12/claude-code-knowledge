@@ -3,7 +3,7 @@ title: 状态机式质量门控回环
 aliases: []
 tags: [ai/ops, ai/agent]
 created: 2026-07-01
-updated: 2026-08-17
+updated: 2026-08-25
 status: stable
 ---
 
@@ -18,8 +18,10 @@ https://github.com/L-ingqin12/opencode-multi-agent-system
 
 ## 核心设计
 
-7 个状态: START → ANALYZE → DELEGATE → VERIFY → INTEGRATE → DONE
+7 个状态: START → ANALYZE → DELEGATE → VERIFY → INTEGRATE → DONE + ESCALATE（超限上报终态）
 2 个分支: RETRY (携带反馈回环) + ESCALATE (超限上报)
+
+> [!note] 勘误 (2026-08-25): 原文标注 7 个状态但列表仅列 6 个；按本文档的 ESCALATE 分支补入超限上报终态。上游仓库 (L-ingqin12/opencode-multi-agent-system) 当前不可达，第 7 状态名待原作者确认。
 
 ## 关键规则
 - 每个子任务独立状态机，一个 RETRY 不阻塞其他

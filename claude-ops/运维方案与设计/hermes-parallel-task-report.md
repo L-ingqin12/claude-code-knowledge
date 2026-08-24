@@ -3,7 +3,7 @@ title: Hermes 并行任务调度与通信机制
 aliases: []
 tags: [ai/ops, ai/agent]
 created: 2026-06-16
-updated: 2026-08-17
+updated: 2026-08-25
 status: review
 ---
 
@@ -13,7 +13,7 @@ See also: [[Claude-Ops-KB-Home]] · [[MEMORY-INDEX]] · [[claude-resource-protoc
 
 > 分析日期: 2026-06-16  
 > 分析环境: Raspberry Pi 4B (raspberrypi, aarch64, Debian)  
-> Hermes 版本: 最新 (deepseek-v4-pro-260425, custom endpoint)
+> Hermes 版本: 未记录（原记"最新"，建议后续固定版本号）| 模型: deepseek-v4-pro-260425 (custom endpoint)
 
 ---
 

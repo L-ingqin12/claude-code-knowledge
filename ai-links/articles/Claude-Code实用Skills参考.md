@@ -3,16 +3,17 @@ title: "Claude Code 实用 Skills 参考"
 aliases: [Claude Code Skills, 实用Skills清单, 小金AI Skills]
 tags: [ai/skills, ai/learning]
 created: 2026-06-17
-updated: 2026-08-17
+updated: 2026-08-25
 status: stable
 source: "微信公众号"
-source_url: "https://mp.weixin.qq.com/s/gRzmPovqR3ygTDuxkMX-4w"
+source_urls:
+  - "https://mp.weixin.qq.com/s/gRzmPovqR3ygTDuxkMX-4w"
 author: "小金AI"
 date: "2026-06-17"
 fetched_at: "2026-06-22"
 ---
 
-# 10 个 Claude Code 实用 Skills 参考
+# Claude Code 实用 Skills 参考
 
 See also: [[AI-Links-KB-Home]] | [[Articles-Index]] | [[Anthropic-Skill系统深度分析]] | [[Skill规模化管理-从渐进式披露到检索式发现]] | [[上下文工程落地实践-从理论到Claude-Code实现]]
 

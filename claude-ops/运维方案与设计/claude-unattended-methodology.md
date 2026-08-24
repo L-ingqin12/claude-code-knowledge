@@ -3,7 +3,7 @@ title: Claude Code 无人值守 — 分析链路与推导方法论
 aliases: []
 tags: [ai/ops, ai/agent]
 created: 2026-07-01
-updated: 2026-08-17
+updated: 2026-08-25
 status: review
 ---
 
@@ -13,6 +13,8 @@ See also: [[Claude-Ops-KB-Home]] · [[claude-unattended-operation-plan]] · [[cl
 
 > 本文档记录从"想实现无人值守"到"六层防御体系完整方案"的完整推导过程。
 > 重思路、重推导链路、重组网方式——而非重复具体方案内容。
+
+> [!note] 口径注: 本文「六层」为职能分层（权限/持久化/调度/通知/中断恢复/错误消除），与 MOC 的网络分层 Layer 0-5 是两套体系，勿混用。
 
 ---
 
@@ -284,7 +286,7 @@ Docker → restart policy
 
 ---
 
-## 六：本文档自身在知识库中的位置
+## 六、本文档自身在知识库中的位置
 
 ```
 claude-code-knowledge/

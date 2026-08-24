@@ -3,26 +3,35 @@ title: AI 大模型开发笔记
 aliases: [AI开发, LLM, 云服务器]
 tags: [ai, reference]
 created: 2026-07-24
-updated: 2026-08-16
+updated: 2026-08-25
 status: review
 ---
 # AI 大模型开发笔记
 
-See also: [[AGENTS]]
+See also: [[AGENTS]] · [[AI-Dev-KB-Home]] — LLM 应用开发实战专题库（本文件"在线大模型开发实战"的深入展开）
 
-www.autodl.com
+## 云 GPU 环境 (AutoDL)
 
-- 尽量按量计费比较划算 
-- 西北B区 北京B区 北京A区
-- 4090 正常情况下1卡
-- PyTorch/2.1.0/3.10/12.1
+> [!info] 原始笔记整理
+> 平台: www.autodl.com。以下为作者使用经验，补充说明见各条目后括号。
+
+- 尽量按量计费比较划算 （按卡时计费、随开随关，适合实验；包月/包日仅在长期连续训练时更划算）
+- 西北B区 北京B区 北京A区 （区域决定库存与价格波动；同一账号不同区域互不相通数据盘，选离自己近/有货的区域即可）
+- 4090 正常情况下1卡 （单卡 RTX 4090 24GB 显存，7B 模型 FP16 推理 / LoRA 微调的主力配置）
+- PyTorch/2.1.0/3.10/12.1 （镜像含义 = PyTorch 2.1.0 + Python 3.10 + CUDA 12.1，三者版本必须互相兼容；驱动由平台管理）
 
 ## 大白话解释大模型原理
 
 1. 成语接龙和暴力穷举（类似，而并非真实穷举，根据向量？）
 
+   > [!info] AI 补充 — 准确表述
+   > LLM 的生成像"成语接龙"：每步只预测**下一个 token**，但不是暴力穷举所有句子——而是给词表中每个候选 token 打分 (logit)，经 softmax 变成概率分布后采样一个。词表只有几万~十几万项，每步只是"一次前向 + 一次采样"，与"穷举整句话"的指数爆炸完全不同。"根据向量"的直觉是对的：打分依据正是上下文经 Transformer 编码后的向量表示。详见 [[#4. Softmax & Temperature (温度)]] 与 [[#9. Logits → 下一个 Token 预测]]。
+
 2. 大模型根据什么理解人类语言？
    二进制的机器语言 从现实问题转化为数学问题，找到数学和实际直接的联系，让电脑知道存的是什么东西
+
+   > [!info] AI 补充 — 一句话概括
+   > 核心思路：**把语言变成向量（几何空间中的点），把"理解"变成向量之间的运算**——语义相近 → 距离相近；类比推理 → 向量加减；上下文关系 → 注意力加权。这样语言问题就完全落在数学的可计算范围内。
 
    - **向量化** 科学的方法
 
@@ -39,20 +48,83 @@ www.autodl.com
    
    - 通用人工智能领域的一座高山 自然语言：理解整个文明的成果的能力，和人类无缝交流的能力
 
+     > [!tip] AI 补充 — CNN/RNN 局限的准确说法
+     > - **CNN 用于文本**：卷积核只能覆盖局部窗口（3~5 词），捕捉不了长距离依赖——即"找不到像提取图像特征那样有效的方法来提取语言的长程特征"；且 CNN 的平移不变性契合图像空间结构，不契合语言的长依赖结构。
+     > - **RNN 的两个硬伤**：① 按时间步串行计算无法并行、训练慢；② 长序列信息多步传递会衰减遗忘（LSTM 门控只是缓解）。原文"按附近语义预测、不符合通篇语义"正是长距离依赖丢失的表现。
+     > - **Transformer 的解法**：自注意力让任意两词**一步直达**（路径 O(1)）且整段可并行，同时解决"长依赖 + 并行化"。
+
 ### 向量化到梯度下降 — 直观流程图
 
 ![[AI-Word2Vec-LossGradient.excalidraw]]
 
 > 上图展示了从"向量化"到"梯度下降收敛"的完整路径：东西→向量→计算结果→与正确结果对比→计算差距(损失函数)→数学方法(梯度下降)缩小差距→不断收敛。
 
+### Word2Vec 与梯度下降最小 Demo
+
+> [!info] 对应上图的可运行代码
+> 用 PyTorch 实现 skip-gram Word2Vec，直观看到"向量 → 打分 → 损失 → 梯度收敛"全流程。CPU 上几秒即可跑完。
+
+```python
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+
+# 语料: 5 个词的小词表, 演示用
+vocab = ["我", "爱", "自然", "语言", "处理"]
+word2idx = {w: i for i, w in enumerate(vocab)}
+
+# 训练样本 (中心词, 上下文词) —— 真实场景由滑动窗口扫描语料得到
+pairs = [(0, 1), (1, 2), (2, 3), (2, 4), (1, 3), (3, 4)]
+
+class Word2Vec(nn.Module):
+    """Skip-gram: 用中心词预测上下文词。
+    两个矩阵: W_in (嵌入层, 查表得中心词向量)
+              W_out (输出投影, 给每个候选词打分)
+    """
+    def __init__(self, vocab_size=5, dim=8):
+        super().__init__()
+        self.W_in  = nn.Embedding(vocab_size, dim)   # 词 → 向量
+        self.W_out = nn.Linear(dim, vocab_size, bias=False)  # 向量 → 各词打分
+
+    def forward(self, center_ids):
+        v = self.W_in(center_ids)          # (batch, dim)  ← "东西变向量"
+        logits = self.W_out(v)             # (batch, vocab) ← "向量可计算, 打分"
+        return logits
+
+model = Word2Vec()
+optimizer = torch.optim.SGD(model.parameters(), lr=0.05)
+
+centers  = torch.tensor([p[0] for p in pairs])
+contexts = torch.tensor([p[1] for p in pairs])
+
+for epoch in range(200):
+    logits = model(centers)
+    loss = F.cross_entropy(logits, contexts)   # ← "与正确结果的差距"
+    optimizer.zero_grad()
+    loss.backward()                            # ← "梯度: 最快缩减差距的方向"
+    optimizer.step()                           # ← "不断收敛"
+    if epoch % 50 == 0:
+        print(f"epoch {epoch:3d}  loss={loss.item():.4f}")
+
+# 训练完成后: W_in 权重矩阵就是每个词的稠密向量 (语义坐标)
+emb = model.W_in.weight.detach()
+sim = F.cosine_similarity(emb[2].unsqueeze(0), emb)  # 与"自然"的相似度
+for w, s in zip(vocab, sim.tolist()):
+    print(f"cos('自然', {w}) = {s:+.3f}")
+```
+
+> [!tip] 观察点
+> - `loss` 单调下降 = 梯度下降在收敛；`W_in.weight` 就是学到的嵌入矩阵。
+> - 这正是 [[#2. Embedding (嵌入/词向量)]] 中"查表"的来源：`nn.Embedding` 本质是可学习的查找表。
+> - 局限印证 [[#前置知识]]：每个词只有一个静态向量，"苹果"(水果/公司) 无法区分 → 引出 ELMo/Transformer 的动态表示。
+
 ## 手推 Transformer
 
 > [!abstract] 核心公式
 > $Attention(Q,K,V) = softmax(\frac{QK^T}{\sqrt{d_k}})V$
 
-> [!info] 架构图推荐使用 Excalidraw
-> 以下 Mermaid 图为快速参考。建议在 Obsidian 中创建 Excalidraw 版本以便自由标注和手绘风格展示，更直观。
-> 参见 [[AGENTS#十一、图表与可视化约定]]
+> [!info] 架构图均为 Excalidraw
+> 本节所有架构/流程图已使用 Excalidraw 绘制（`diagrams/` 目录），在 Obsidian 中点击嵌入即可查看，可自由标注。绘图规范见 [[AGENTS#十一、图表与可视化约定]] 与 [[ARROW-CHECKLIST]]。
 
 ### 整体架构图
 
@@ -66,8 +138,6 @@ www.autodl.com
 
 现代大模型 (GPT-4, Claude, DeepSeek, LLaMA) 只用 Decoder 部分：
 ![[GPT-DecoderOnly.excalidraw]]
-
-### Self-Attention 计算流程图
 
 ### 前置知识
 
@@ -102,6 +172,9 @@ www.autodl.com
 3. Softmax 归一化 → 概率分布
 4. 加权求和: $Output = softmax(S/\sqrt{d_k}) \cdot V$
 
+> [!tip] 为什么除以 √d_k — 精确原因
+> 假设 Q、K 各分量是均值 0、方差 1 的独立随机变量，则点积 $q \cdot k = \sum_{i=1}^{d_k} q_i k_i$ 的方差为 $d_k$。$d_k=64$ 时分数标准差达 8，喂给 softmax 会落入饱和区（输出接近 one-hot），反向传播梯度趋近 0。除以 $\sqrt{d_k}$ 把方差拉回 1，softmax 保持"有梯度的中间状态"。这是原论文 3.2.1 节的原始论证。
+
 ### Self-Attention 计算流程图
 
 ![[SelfAttention-Flow.excalidraw]]
@@ -125,6 +198,11 @@ www.autodl.com
 - 语法关系 (主谓宾)
 - 语义关系 (同义/反义)
 - 位置关系 (远近依赖)
+
+> [!info] 为什么每个头会学到不同模式？
+> 每个头有**独立的** $W_q, W_k, W_v$（见源码节 [[#2. Multi-Head Attention — 多头拆分与合并]]）。初始化随机 + 各头只看到自己那份 64 维子空间，训练中自然分化出互补的"视角"；可视化研究（如 *What Does BERT Look At?*）证实部分头专门追踪语法依存、部分头关注相邻位置。
+>
+> **代价与收益**：8 个头总计算量 ≈ 1 个 512 维头（因为拆分后每头只有 64 维），但表达能力 = 8 个不同子空间的组合——"同样的算力，多个视角"。
 
 ### Positional Encoding (位置编码) — 深度理解
 
@@ -278,14 +356,30 @@ Step 4 — 可学习的 γ, β 让模型"恢复"有用的数值幅度:
 
 > Attention 放大数值 → 残差叠加 → LayerNorm 拉回稳定 → FFN 再次放大 → 残差叠加 → LayerNorm 再次拉回。**两个 LayerNorm 是关键：防止数值逐层失控。**
 
-### Transformer Block
-
-### Transformer Block
+### Transformer Block — 组装完整一层
 
 ```
 Input → Self-Attention → Add&Norm → FFN → Add&Norm → Output
           ↑ 残差连接                   ↑ 残差连接
 ```
+
+> [!info] Block = "交流" + "思考" 两步
+> 一个 Transformer 层干两件事：
+> 1. **Self-Attention（词间交流）**：每个 token 从全序列收集相关信息，解决"谁和谁有关"
+> 2. **FFN（逐词思考）**：对收集完信息的每个位置独立做非线性变换，解决"这些信息意味着什么"——FFN 参数量约占整层 2/3，模型的"知识"主要存储在 FFN 权重中
+>
+> 两者各配一对"残差 + LayerNorm"，保证深叠 N 层时梯度健康、数值稳定（见上文数值流实验）。
+
+| 组件 | 职责 | 类比 |
+|------|------|------|
+| Self-Attention | 信息聚合（横向） | 开会收集各方意见 |
+| FFN | 特征变换（纵向） | 会后独立消化整理笔记 |
+| 残差 | 保留原始信息通道 | 原始记录不被覆盖 |
+| LayerNorm | 数值稳定器 | 音量归一 |
+
+- Encoder Block: Self-Attention + FFN（双向可见），代表: BERT
+- Decoder Block: Masked Self-Attention + Cross-Attention + FFN（只看过去），代表: GPT
+- 现代 LLM 的差异点集中在：Pre-Norm/Post-Norm、激活函数 (ReLU→SwiGLU)、位置编码 (绝对→RoPE/ALiBi)，对比见 [[#不同模型对应不同的结构 训练数据 训练目标 训练时间]]
 
 ## 核心术语深度解析
 
@@ -950,26 +1044,39 @@ One-Hot → Word2Vec → ELMo → Transformer → BERT/GPT → GPT-4/Claude/Deep
 
 
 
-## Open GPT不同版本对比
+## GPT 不同版本对比
 
 ### 不同模型对应不同的结构 训练数据 训练目标 训练时间
+
+> [!info] 表格解读
+> 纵向看是"架构选型"的演进：位置编码从绝对 (sinusoidal/learned) → 相对 (RoPE/ALiBi)；激活从 ReLU → 平滑门控 (SwiGLU/GeGLU)；Norm 从 Post → Pre。每一项改进都指向同一个目标：**更深网络下的训练稳定性 + 长上下文外推能力**（原理见 [[#Positional Encoding (位置编码) — 深度理解]]、[[#Layer Normalization — 深度理解]]）。
 
 | 模型            | 结构            | 位置编码       | 激活函数 | layer normal方法 |
 | --------------- | --------------- | -------------- | -------- | ---------------- |
 | 原生Transformer | Encoder-Decoder | sinusoidal编码 | ReLU     | Post layer norm  |
 | BERT            | Encoder         | 绝对位置编码   | GeLU     | Post layer norm  |
-| LLaMA           | Casual Decoder  | ROPE           | SwiGLU   | Pre Layer norm   |
+| LLaMA           | Causal Decoder  | RoPE           | SwiGLU   | Pre Layer norm   |
 | ChatGLM-6B      | Prefix decoder  | RoPE           | GeGLU    | Post Deep Norm   |
-| Bloom           | Casual decoder  | ALiBi          | GeLU     | Pre Layer Norm   |
+| Bloom           | Causal Decoder  | ALiBi          | GeLU     | Pre Layer Norm   |
+
+> [!note] 三种 Decoder 变体的区别
+> - **Causal Decoder** (GPT 系)：因果掩码自回归，只看左侧上下文——当前 LLM 主流
+> - **Prefix Decoder** (ChatGLM/PaLM 前身)：前缀部分双向可见，生成部分单向
+> - **Encoder-Decoder** (T5/BART)：完整原架构，翻译/摘要类任务仍常用
 
 ### GPT系列对比
 
-| 对比维度        | GPT1                                                         | GPT@                                                         | GPT#                                                         | GPT3.5                  | GPT4.0       |
+| 对比维度        | GPT-1                                                        | GPT-2                                                        | GPT-3                                                        | GPT-3.5                 | GPT-4        |
 | --------------- | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ | ----------------------- | ------------ |
-| 模型规模        | 117M                                                         | 1.5B                                                         | 175B                                                         | 175B                    | 万亿（~1.8） |
+| 模型规模        | 117M                                                         | 1.5B                                                         | 175B                                                         | 175B                    | ~1.8T (未官方证实) |
 | Transformer层数 | 12                                                           | 48                                                           | 96                                                           | 96                      | 120          |
-| 主要贡献        | 1）提出基于生成式预训练的语言理解方法<br />2)展示预训练模型在多种下游任务上的性能提升 | 1）提出无监督多任务学习的语言模型<br />2）扩展了模型规模和预训练数据集规模 | 1）引入少样本学习的能力<br />2）提出prompt engineering<br />3)进一步增大了模型规模和训练数据集规模 | 发布世界级产品，ChatGpt | AI多模态模型 |
+| 主要贡献        | 1）提出基于生成式预训练的语言理解方法<br />2)展示预训练模型在多种下游任务上的性能提升 | 1）提出无监督多任务学习的语言模型<br />2）扩展了模型规模和预训练数据集规模 | 1）引入少样本学习的能力<br />2）提出prompt engineering<br />3)进一步增大了模型规模和训练数据集规模 | 发布世界级产品 ChatGPT（引入 RLHF 对齐对话能力） | AI多模态模型（图文输入） |
 | 发布时间        | 2018                                                         | 2019                                                         | 2020                                                         | 2022                    | 2023         |
+
+> [!warning] 数据口径说明
+> - GPT-3.5 官方未公布参数量，表中 175B 为社区普遍推测（基于与 GPT-3 同源）
+> - GPT-4 的 1.8T 参数为泄露传闻（MoE 架构，8×220B 专家），OpenAI 从未官方确认；层数同理
+> - 规模数字的意义在于**数量级的跃迁**：117M→1.5B→175B，每一步都带来质的涌现能力（in-context learning 等）
 
 # 在线大模型开发实战
 
@@ -979,6 +1086,110 @@ One-Hot → Word2Vec → ELMo → Transformer → BERT/GPT → GPT-4/Claude/Deep
 >
 > chat模型是Completion模型的升级，核心优势在于理解人类意图的能力，带来了更低的交互门槛，核心功能是对话能力
 
+> [!info] AI 补充 — 两代 API 的精确对比
+> | 维度 | Legacy Completion (`/v1/completions`) | Chat Completion (`/v1/chat/completions`) |
+> |------|------|------|
+> | 输入 | 单个字符串 `prompt` | `messages` 数组 (role + content) |
+> | 角色感知 | ❌ 无，靠文本约定 | ✅ system / user / assistant 结构化角色 |
+> | 多轮对话 | 需手动拼接全文，模型分不清"谁说的" | 天然按轮次组织，上下文边界清晰 |
+> | 训练目标差异 | 纯文本续写分布 | 对话分布（RLHF 对齐后更听指令） |
+> | 现状 | **已废弃** (OpenAI 已标记 legacy，新模型不再支持) | 行业标准：OpenAI/DeepSeek/Moonshot/GLM/Ark 全部兼容此格式 |
+>
+> **本质区别**：Chat API 不只是"格式变了"——chat 模型是在对话数据上继续训练并对齐过的，同一套 Transformer 骨架，但 token 分布已完全不同。用补全方式调用 chat 模型会得到答非所问的结果。
+
+### 消息角色 (roles) 语义
+
+| role | 含义 | 典型用途 |
+|------|------|----------|
+| `system` | 设定身份、规则、边界（权重之外的"人设"） | "你是资深翻译，只输出译文" |
+| `user` | 终端用户输入 | 提问、指令 |
+| `assistant` | 模型历史回复 | 多轮上下文回传；few-shot 示例 |
+| `tool` | 工具执行结果回传（配合 function calling） | 见 [[Function-Calling工具调用实战]] |
+
+### 最小可用 Demo
+
+```python
+# pip install openai>=1.0   — OpenAI SDK 格式已是行业通用协议
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="[已脱敏]",
+    base_url="https://api.deepseek.com",  # 换 base_url 即可切换 DeepSeek/Kimi/GLM 等兼容服务
+)
+
+response = client.chat.completions.create(
+    model="deepseek-chat",
+    messages=[
+        {"role": "system",    "content": "你是一位严谨的技术翻译。"},
+        {"role": "user",      "content": "把下句译成英文: 大模型正在改变软件开发。"},
+        {"role": "assistant", "content": "LLMs are transforming software development."},  # few-shot 示例轮
+        {"role": "user",      "content": "把下句译成英文: 注意力机制是核心创新。"},
+    ],
+    temperature=0.2,   # 翻译要确定性强 → 低温
+    max_tokens=200,
+)
+print(response.choices[0].message.content)
+print(response.usage)   # prompt_tokens / completion_tokens → 计费依据, 见 [[参考-Ark-Agent-Plan计费与配置]]
+```
+
+等价 curl：
+
+```bash
+curl https://api.deepseek.com/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $API_KEY" \
+  -d '{
+    "model": "deepseek-chat",
+    "messages": [{"role":"user","content":"你好"}],
+    "temperature": 0.7
+  }'
+```
+
+### 关键采样参数速查
+
+| 参数 | 作用 | 经验值 |
+|------|------|--------|
+| `temperature` | 分布尖锐度（原理见 [[#4. Softmax & Temperature (温度)]]） | 翻译/抽取 0~0.3；创作 0.7~1.0 |
+| `top_p` (nucleus) | 只从累计概率 ≥p 的候选中采样，与 temperature 二选一调 | 默认 1.0，一般不动 |
+| `max_tokens` | 输出长度上限（截断时 finish_reason=length） | 按需设置，防跑飞 |
+| `stop` | 停止序列 | 解析结构化输出时常用 |
+| `stream=True` | SSE 流式返回 token | 聊天界面必备，首字延迟 ↓ |
+
+### 流式输出 Demo
+
+```python
+stream = client.chat.completions.create(
+    model="deepseek-chat",
+    messages=[{"role": "user", "content": "用三句话解释 KV Cache"}],
+    stream=True,                       # 服务端逐 token 推送 (SSE)
+)
+for chunk in stream:                   # 每个 chunk 是增量 delta
+    delta = chunk.choices[0].delta.content
+    if delta:
+        print(delta, end="", flush=True)
+```
+
+> [!warning] 常见坑
+> 1. **无状态**：API 不记历史，多轮对话必须把历史 messages 每次完整回传——这正是 [[Claude-Code记忆机制源码拆解]] 中"记忆 = 上下文拼接"的原因
+> 2. **上下文窗口有限**：历史太长要做截断/摘要策略，见 [[上下文工程-注意力预算与四层解法]]
+> 3. **计费双向**：输入+输出都计费，长 system prompt 反复发送很贵 → 提示词缓存 (prompt caching) 可降本
+> 4. **finish_reason 必查**：`length`=被截断, `stop`=正常结束, `tool_calls`=需执行工具后回传结果
+
+### 本文件后续实战路线图
+
+> [!abstract] 从"会用 API"到"工程化开发"的六个专题
+> 以上只是最基础的单轮调用。完整的 LLM 应用开发知识树按"一文档一问题"原则拆分为独立专题文档：
+>
+> | 专题 | 文档 | 解决什么问题 |
+> |------|------|--------------|
+> | 提示工程 | [[Prompt-Engineering入门与Demo]] | 如何写好 prompt：few-shot / CoT / 结构化输出 |
+> | 工具调用 | [[Function-Calling工具调用实战]] | 让模型调用函数/API，从"说"到"做" |
+> | 检索增强 | [[RAG检索增强生成实战]] | 接入私有知识，解决幻觉与时效性 |
+> | Agent | [[LLM-Agent开发基础]] | 循环决策 + 工具编排，ReAct 模式 |
+> | 微调 | [[LoRA参数高效微调实战]] | 用领域数据定制模型行为 |
+> | 推理部署 | [[LLM推理部署与量化]] | vLLM 自托管、KV Cache、量化压缩 |
+>
+> 入口 MOC: [[AI-Dev-KB-Home]]
 
 
 
@@ -986,9 +1197,82 @@ One-Hot → Word2Vec → ELMo → Transformer → BERT/GPT → GPT-4/Claude/Deep
 
 
 
+
+
+## 统一多模态模型：Janus 系列的解耦视觉编码（课程第 29 章）
+
+> [!abstract] 一句话定位
+> DeepSeek 的 Janus / Janus-Pro 回答了一个根本问题：**能不能用一个 Transformer 同时做好"看懂图"和"画出图"？** 它的答案是——LLM 骨干统一，但**视觉编码解耦**：理解走 SigLIP（高层语义），生成走 VQ tokenizer（底层像素），两条通路汇入同一个自回归骨架做统一的 next-token 预测。
+
+### 为什么必须"解耦"
+
+此前统一多模态的两条路线各有一个死结：
+
+| 路线 | 代表 | 死结 |
+|---|---|---|
+| 单编码器离散化 | Chameleon | 理解需要高层语义抽象，生成需要细粒度像素细节，一个 VQ 编码器顾此失彼——理解任务被生成需求拖累 |
+| 扩散外挂 | GPT-4o 原版 + DALL·E | 理解用 Transformer、生成交给扩散模型，两套目标函数、两套权重，谈不上"统一" |
+
+Janus 的洞察：冲突不在"任务"，而在**表征需求的矛盾**——把视觉编码拆成两个独立编码器，冲突就地消解；而 LLM 骨干仍然共享，理解与生成可以互相增益（论文消融显示解耦后理解与生成双双提升，而非此消彼长）。
+
+### 架构与训练
+
+```
+图像 ─┬─ SigLIP 编码器(理解) ──语义 token──┐
+      └─ VQ tokenizer(生成) ──码本 token──┤
+文本 ────── Llama 分词器 ─────────────────┤
+                                          ▼
+                    统一 Transformer(Llama3 兼容) ← 自回归 next-token 预测
+                                          │
+                              文本头输出 / 图像反量化→去噪解码器出图
+```
+
+训练三阶段（Janus-Pro 调整了各阶段配比并扩充数据）：①适配器 + 图像头在 ImageNet 上对齐 → ②图文统一预训练（含文生图数据）→ ③指令微调。Janus-Pro 相对初代的三项改进 = 训练策略（阶段配比）、数据规模与配比、模型放大到 **1B / 7B** 两档开源权重（HuggingFace `deepseek-ai/Janus-Pro-*`）。
+
+### 成绩单
+
+| 基准 | Janus-Pro-7B | 说明 |
+|---|---|---|
+| GenEval（文生图一致性） | **0.80** | 发布时超过 SDXL / SD3 / DALL·E 3 同口径成绩 |
+| MMBench（多模态理解） | **79.2** | 与专职理解模型同档，证明"解耦"没有牺牲理解 |
+
+> [!tip] 与本库其他知识的连接
+> - "统一 next-token 预测"思想与上文 [[#大白话解释大模型原理]] 的自回归采样一脉相承——图像生成也被收编为 token 预测
+> - 开源权重可按 [[LLM推理部署与量化]] 的 Ollama/vLLM 思路本地化部署（需支持其自定义架构的推理栈）
+> - 三阶段训练法是 [[微调数据工程与模型蒸馏]] 中 SFT 流程的多模态放大版
+
+参考资料：
+- [Janus: Decoupling Visual Encoding for Unified Multimodal Understanding and Generation (arXiv:2410.13848)](https://arxiv.org/abs/2410.13848)
+- [Janus-Pro: Unified Multimodal Understanding and Generation with Data and Model Scaling (arXiv:2501.17801)](https://arxiv.org/abs/2501.17801)
+- [deepseek-ai/Janus-Pro-1B (HuggingFace)](https://huggingface.co/deepseek-ai/Janus-Pro-1B)
+- [Awesome-VLM-Architectures: Janus-Pro 解耦架构条目](https://github.com/gokayfem/awesome-vlm-architectures)
+
+## 课程知识地图 — 2026 AI 大模型应用开发工程师系统课
+
+> [!abstract] 来源与用法
+> 本节将《西瓜老师·2026 年 AI 大模型应用开发工程师【系统课】》38 个章节映射为本库学习路径：理论部分保留在本文件上半部；实战部分按"一文档一问题"原则拆分至 [[AI-Dev-KB-Home]] 专题库；配套流程图统一为 Excalidraw（`diagrams/` 目录）。
+
+| 学习阶段 | 课程章节 | 对应文档 |
+|----------|----------|----------|
+| ① 理论基础 | 1 导读/云 GPU · 2 大模型基础/手推 Transformer/GPT 对比 | 本文件上文各节 |
+| ② API 开发 | 3 在线大模型开发 · 28 DeepSeek API 实战 | [[#Completion API 和 Chat Completion API]] · [[Function-Calling工具调用实战]] |
+| ③ 私有化部署 | 4 Ollama · 5 vLLM · 6 Ray 多机多卡 | [[LLM推理部署与量化]] |
+| ④ 提示词与 FC | 7 提示词工程和 Function 进阶 | [[Prompt-Engineering入门与Demo]] · [[Function-Calling工具调用实战]] |
+| ⑤ Agent 基础 | 8 Agent 架构 · 9 ReAct · 10/11 MCP · 12 A2A · 13 Skills · 15 Harness Engineering | [[LLM-Agent开发基础]] · [[MCP协议开发实战]] · [[A2A多智能体协作协议]] · [[Agent-Skills技能开发实战]] |
+| ⑥ 框架 | 16 Dify · 17/18 LangChain · 19 LangGraph | [[LangChain-LangGraph框架实战]] |
+| ⑦ RAG | 23 架构演进 · 24 选型 · 25 性能优化 · 26 GraphRAG · 27 商业项目 | [[RAG检索增强生成实战]] · [[GraphRAG知识图谱增强实战]] |
+| ⑧ 微调 | 30 行业微调 · 31 蒸馏 · 33 LoRA/QLoRA · 34 RLHF/DPO/GRPO · 35 数据工程 · 36 Llama-Factory · 37 Embedding 微调 · 38 金融垂直大模型 | [[LoRA参数高效微调实战]] · [[强化学习对齐-RLHF到GRPO]] · [[微调数据工程与模型蒸馏]] |
+| ⑨ 大型项目 | 20 ChatBI · 21 多模态 Agent 平台 · 22 企业智能问数 · 32 企业智能体客服 | 各专题文档内嵌项目注解 + [[多模态Agent平台实战]] + [[AI-Dev-KB-Home]] 项目地图 |
+
+> [!note] 未单独成文的知识点
+> - **14 OpenClaw 二次开发 / 15 Harness Engineering**：其方法论与本库 [[Loop-Engineering-深度拆解-从产品功能集到方法论包装]]、[[Anthropic-Skill系统深度分析]] 及 claude-ops 子库高度重叠，建议对照阅读互为印证
+> - **29 统一多模态模型**（DeepSeek Janus 系）：已展开，见上文 [[#统一多模态模型：Janus 系列的解耦视觉编码（课程第 29 章）]]
+> - **13 Skills / 21 多模态 Agent 平台**：课程标注"即将更新"，已按公开规范与社区实践先行补齐为 [[Agent-Skills技能开发实战]] 与 [[多模态Agent平台实战]]；课程上线后对照增补
+> - **时效性缺口雷达**（课程内容相对 2026 行业演进可能滞后）：Prompt Caching、Agent 可观测性、Guardrails、Computer/Browser Use 等——覆盖状态见 [[AI-Dev-KB-Home]] 的"课程外增补雷达"
 
 ## Related
 
 - [[AGENTS]] — AI 协作规范
 - [[参考-Ark-Agent-Plan计费与配置]] — Ark API 参考
 - [[AI-Links-KB-Home]] — AI 链接收藏库（Agent/Skills/推理工程综述）
+- [[AI-Dev-KB-Home]] — LLM 应用开发实战专题库 MOC

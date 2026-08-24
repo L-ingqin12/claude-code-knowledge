@@ -3,7 +3,7 @@ title: Claude Code 语境连续性方案
 aliases: []
 tags: [ai/ops, ai/agent]
 created: 2026-07-01
-updated: 2026-08-17
+updated: 2026-08-25
 status: review
 ---
 
@@ -217,7 +217,7 @@ See also: [[Claude-Ops-KB-Home]] · [[claude-interruption-resilience-guide]] · 
 
 ```
 写入频率: 每 2-5 个步骤写一次
-每次写入开销: ~200-500 tokens (只写增量)
+单次写入开销: ≤200 tokens (只写增量)；累计写入开销 ≤500 tokens
 总开销: < 任务总 tokens 的 3%
 
 对比恢复时省下的:
@@ -355,7 +355,7 @@ claude --permission-mode accept-edits -p "$(cat $RECOVERY_PROMPT)"
 - 做技术选型时必写
 - 发现关键信息时必写
 - 恢复时先读 context-dump.md，禁止推翻已有的 Decisions
-- 写入开销控制在每次 200 tokens 以内
+- 写入开销控制在单次 ≤200 tokens、累计 ≤500 tokens
 ```
 
 把这个加到 `resume-prompt-header.txt` 中（上一个方案创建的），两步合一。
@@ -379,7 +379,7 @@ claude --permission-mode accept-edits -p "$(cat $RECOVERY_PROMPT)"
 
 ```
 单个 5 步任务，中断 1 次:
-  无措施: 5000 tok (恢复) + 500 ok (原任务) = 10000 tok
+  无措施: 5000 tok (恢复) + 5000 ok (原任务) = 10000 tok
   有措施: 300 tok (恢复)  + 5000 tok (原任务) + 200*3 tok (3次dump写入) = 5900 tok
   节省: 41%
 
@@ -391,7 +391,7 @@ claude --permission-mode accept-edits -p "$(cat $RECOVERY_PROMPT)"
 每周运行 5 个任务，平均中断 2 次/任务:
   无措施: 5 × 2 × 5000 = 50000 tok (纯恢复开销!)
   有措施: 5 × 2 × 300  = 3000 tok
-  周节省: 47000 tok ≈ $0.70 (Sonnet) ~ $7.00 (Opus)
+  周节省: 47000 tok（恢复开销从 50000 降至 3000 tok，约 16.7 倍；具体金额按后端实际单价折算——原 Sonnet/Opus 报价无依据，已删除）
 ```
 
 ---

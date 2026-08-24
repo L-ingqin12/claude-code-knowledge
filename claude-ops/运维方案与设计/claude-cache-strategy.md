@@ -3,7 +3,7 @@ title: Claude Code 缓存优化 — 会话策略
 aliases: []
 tags: [ai/ops, ai/agent]
 created: 2026-06-16
-updated: 2026-08-17
+updated: 2026-08-25
 status: review
 ---
 
@@ -39,7 +39,7 @@ CLAUDE_CODE_SKIP_UPDATE_CHECK=1
 ### 升级前检查清单
 
 1. 在隔离环境安装新版本
-2. 发一条请求，dump 工具集：`cat /root/.permafrost/dumps/req-XXX.json | jq '.tools[].name'`
+2. 发一条请求，dump 工具集：`cat /root/.permafrost/dumps/req-XXX.json | jq '.tools[].name'`（注: req-XXX.json 为占位符，XXX 替换为实际 dump 文件名）
 3. 对比工具集是否变化
 4. 如果工具集变了 → 新锚点 → 需要接受 24-48h 的冷启动成本
 5. 如果工具集不变 → 安全升级，缓存不受影响
@@ -61,10 +61,12 @@ bash /root/claude-version-switch.sh rollback
 
 ### 规则：所有 session 使用相同工具集
 
-v2.1.174 基准工具集 (10 tools):
+v2.1.174 基准锚点工具集 (9 tools):
 ```
-Agent, AskUserQuestion, Bash, Edit, Read, ScheduleWakeup, Skill, ToolSearch, Workflow, Write
+Agent, AskUserQuestion, Bash, Edit, Read, Skill, ToolSearch, Workflow, Write
 ```
+
+> [!note] 口径注: 锚点工具为 9 个（与 [[hermes-cache-analysis]]/[[PERMAFROST_MODIFICATIONS]] 口径一致）；ScheduleWakeup 属变数工具，排在锚点集末尾，不参与锚点定义。
 
 **禁止**：
 - 在 session 中途添加/移除工具

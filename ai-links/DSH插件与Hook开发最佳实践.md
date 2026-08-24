@@ -3,8 +3,14 @@ title: DSH 插件与 Hook 开发最佳实践
 aliases: [DSH插件开发, DSH Hooks, Cordis插件]
 tags: [ai/agent, ai/skills, ai/links]
 created: 2026-08-17
-updated: 2026-08-17
+updated: 2026-08-25
 status: review
+source: "官方仓库 deepseek-harness-official + deepseek-harness-desktop-src + dsh-tui-repo 文档（2026-08 快照）"
+source_urls:
+  - "https://github.com/deepseek-harness-official"
+  - "https://github.com/deepseek-harness-desktop-src"
+  - "https://github.com/dsh-tui/dsh-tui"
+fetched_at: 2026-08-19
 ---
 
 # DSH 插件与 Hook 开发最佳实践

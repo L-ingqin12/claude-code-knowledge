@@ -3,7 +3,7 @@ title: 最优韧性设计 — 四目标约束下的决策推导
 aliases: []
 tags: [ai/ops, ai/agent]
 created: 2026-07-01
-updated: 2026-08-17
+updated: 2026-08-25
 status: deprecated
 ---
 
@@ -208,7 +208,7 @@ See also: [[Claude-Ops-KB-Home]] · [[claude-network-resilience-v2]] · [[claude
 | 重试次数 | 3 | 平衡: 太少→错误到达Claude, 太多→浪费token |
 | 重试间隔 | 1s / 3s / 8s | 指数回退, 8s上限防过度等待 |
 | 普通请求稳定性阈值 | 0.8 | 80%成功率即可发送, 不追求完美 |
-| thinking 请求稳定性阈值 | 0.9 | 提高20%, 避免最贵的浪费 |
+| thinking 请求稳定性阈值 | 0.9 | 提高 12.5%, 避免最贵的浪费 |
 | thinking 确认连胜次数 | 5 | 比普通请求多2次确认, 对抖动更敏感 |
 | 最大挂起时间 | 90s | 留给Claude 30-90s 处理请求 |
 | 确认延迟 | 2s | 连续两次探测都成功才算稳 |

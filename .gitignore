@@ -1,5 +1,6 @@
 # 本地临时与敏感内容（不进入 git/不推送）
 _install-tmp/
+*.dll
 *.pyc
 __pycache__/
 scripts/claude-ops-dumps/

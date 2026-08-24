@@ -3,7 +3,8 @@ title: 日常使用指南
 aliases: [使用指南, 操作手册]
 tags: [network/guide, network]
 created: 2026-07-27
-updated: 2026-08-09
+updated: 2026-08-25
+status: stable
 ---
 
 # 日常使用指南
@@ -31,7 +32,9 @@ powershell -File "scripts/enhance-config.ps1" -Status
 ### 应急回滚
 
 ```powershell
-copy "scripts/config.json.bak-20260728" "v2rayN路径/binConfigs/config.json"
+# 目标为 v2rayN 的 binConfigs 目录（<你的v2rayN目录> 替换为实际路径）
+# 本机实际: D:\Document\Download\v2rayN-windows-64-desktop\v2rayN-windows-64\binConfigs\config.json
+copy "scripts/config.json.bak-20260728" "<你的v2rayN目录>\binConfigs\config.json"
 ```
 
 > [!note] 代理架构
@@ -52,7 +55,7 @@ bash scripts/router_ssh.sh "command"   # SSH
 | 代理不可用 | xray 未运行 | 重启 v2rayN 核心 |
 | Google/YouTube 打不开但其他正常 | v2rayN 生成 balancer 无效规则（outboundTag） | [[v2rayn-balancer-复盘-2026-08-09]]（watcher 已自动修复） |
 | 视频卡顿 | WiFi 延迟尖峰 | [[FINAL-SUMMARY]] |
-| 路由器连不上 | dropbear 挂掉 | [[ROUTER-FULL-CAPABILITY#SSH 连接]] |
+| 路由器连不上 | dropbear 挂掉 | [[ROUTER-FULL-CAPABILITY#九、SSH 连接]] |
 
 ## 相关知识
 

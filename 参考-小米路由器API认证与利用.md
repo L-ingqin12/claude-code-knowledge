@@ -3,12 +3,14 @@ title: 小米路由器 API 认证与利用参考
 aliases: [小米API, 路由器漏洞, CVE-2019-18370]
 tags: [reference/router, reference, network/router]
 created: 2026-07-22
-updated: 2026-08-17
+updated: 2026-08-25
 status: stable
+source_urls: [https://github.com/acecilia/OpenWRTInvasion, https://nvd.nist.gov/vuln/detail/CVE-2019-18370, https://github.com/openwrt-xiaomi/xmir-patcher]
 ---
 
-See also: [[Network-KB-Home]] | [[ROUTER-FULL-CAPABILITY]] | [[ROUTER-DEEP-EXPLORATION]] | [[2026-07-21-树莓派网络故障与路由器破解完整复盘]]
 # 小米路由器 API 认证与漏洞利用 — 知识参考
+
+See also: [[Network-KB-Home]] | [[ROUTER-FULL-CAPABILITY]] | [[ROUTER-DEEP-EXPLORATION]] | [[2026-07-21-树莓派网络故障与路由器破解完整复盘]]
 
 > 本文档帮助理解小米路由器的 Web API 架构、认证机制和已知漏洞原理。
 > 配合《树莓派网络故障与路由器破解完整复盘》阅读。
@@ -65,7 +67,7 @@ Step 5: POST 到 /api/xqsystem/login
 ```
 
 **为什么这样设计？**
-- key 是前端加密密钥，防止中间人直接获取明文密码
+- key 是前端密钥：`password_hash = SHA1(nonce + SHA1(password + key))` 是带密钥的签名式参数——作用是**防止明文密码直接出现在传输中、使哈希不可被替换/篡改（签名）**，而非防中间人：登录页与 key 均经 HTTP 明文下发，中间人可截获 key 与哈希做离线猜测（2026-08-25 按实际机制修正）
 - nonce 包含时间戳和随机数，防止重放攻击
 - 双重 SHA1 使得暴力破解成本更高
 - 但**管理员密码通常等于 WiFi 密码**，这是一个巨大的安全弱点
@@ -81,12 +83,12 @@ Step 5: POST 到 /api/xqsystem/login
 | `/cgi-bin/luci/web/home` | 登录页 HTML，包含加密 key 和 deviceId |
 | `/cgi-bin/luci/api/xqsystem` | SSH/Telnet 状态、固件版本 |
 | `/cgi-bin/luci/api/xqsystem/bdata` | 路由器硬件信息（型号、SN、MAC） |
+| `/api/xqsystem/login` | 登录接口：提交凭据返回 stok（本身无需 stok） |
 
 ### 需要 stok 的端点
 
 | 端点 | 方法 | 功能 |
 |------|------|------|
-| `/api/xqsystem/login` | POST | 登录获取 stok |
 | `/api/misystem/devicelist` | GET | 已连接设备列表（IP、MAC、在线状态） |
 | `/api/xqnetwork` | GET | WiFi 状态（SSID、up/down） |
 | `/api/xqnetwork/set_wifi` | POST | 修改 WiFi 设置（信道、隔离等） |
@@ -112,6 +114,9 @@ Step 5: POST 到 /api/xqsystem/login
 | 修复 | 升级到 2.28.23-stable 或更高 |
 | 受影响型号 | R3G, R4CM, R4A, 4C, 3Gv2, 3C, R3P 等多款 |
 
+> [!note] 口径说明（2026-08-25）
+> 版本机制以复盘为准：[[2026-07-21-树莓派网络故障与路由器破解完整复盘]] §8 实测 **R4CM fw 2.14.87** 上 OpenWRTInvasion v0.0.1 有效（master 无效）。上表「修复于 2.28.23」为公开情报，与本页表「v2 PoC 需要 fw 2.30.20+」存在出入（后者暗示 2.30.20+ 仍有可利用变体）——受影响版本范围的具体边界以复盘实测记录为准。
+
 ### 组合利用链
 
 这是**两个功能的组合利用**，每个单独看都不是漏洞：
@@ -122,6 +127,9 @@ Step 5: POST 到 /api/xqsystem/login
 - **不验证压缩包内容**，攻击者可以控制 /tmp/ 下的任何文件
 - API 路径：`/api/misystem/c_upload`
 - 上传字段名：`image`（multipart/form-data）
+
+> [!note] 口径说明（2026-08-25）
+> 提取路径以复盘为准：[[2026-07-21-树莓派网络故障与路由器破解完整复盘]] §8 实测记录为「提取到 `/tmp/build/`」——payload.tar.gz 含 `build/` 目录结构，`script.sh` 实际落点 `/tmp/build/script.sh`；本页「`/tmp/`」为解压根目录的简化表述（`speedtest_urls.xml` 落于 `/tmp/speedtest_urls.xml`）。
 
 **功能 2：netspeed（网络测速）**
 - 路由器有一个测速脚本，从 `/tmp/speedtest_urls.xml` 读取 URL 列表
@@ -269,7 +277,7 @@ Xiaomi 路由器所有进程以 **root** 权限运行，任意命令注入 = 完
 | CVE | CVSS | 注入点 | 参数 | 认证 | 说明 |
 |-----|------|--------|------|:--:|------|
 | **CVE-2019-18370** | 9.8 | `c_upload` + `netspeed` | speedtest URL | 需要 | tar.gz 提取到 /tmp，netspeed 读 XML 执行 |
-| **CVE-2020-14100** | 9.8 | `set_wan6` | `dns1`（`\n` 绕过） | 无需 | 影响 R3600 < 1.0.66 |
+| **CVE-2020-14100** | 9.8 | `set_wan6` | `dns1`（`\n` 绕过） | 无需 | 影响 R3600 ROM < 1.0.66（[NVD 描述](https://nvd.nist.gov/vuln/detail/cve-2020-14100)与 cvedetails 同口径，修复版本即 1.0.66，升级可解） |
 | **CVE-2020-14140** | 7.5 | 多个无需认证 API | — | 无需 | API 暴露导致 WiFi 密码泄漏 |
 | **CVE-2023-26319** | 7.2 | `request_smartcontroller` | `mac` | 需要 | 注入格式：`;&lt;CMD&gt;;#` |
 | **CVE-2023-26317** | 7.0 | 外部接口 | 响应过滤不足 | — | 劫持 ISP/上级路由时可用 |

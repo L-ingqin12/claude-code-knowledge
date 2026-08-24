@@ -3,7 +3,7 @@ title: AGENTS
 aliases: [AI指令, Agent配置, 智能体规则]
 tags: [meta, agents, system]
 created: 2026-07-28
-updated: 2026-08-17
+updated: 2026-08-25
 cssclass: agents-manifest
 ---
 
@@ -12,13 +12,15 @@ cssclass: agents-manifest
 > [!abstract] 本文档定义了 AI Agent 与本地知识库的交互协议。
 > 面向模型: Claude Code、Obsidian Copilot、及任何能读取此 Vault 的 AI 系统。
 
+> [!danger] ⛔ 全局铁律 — 模型路由（不可豁免）
+> 全局整体使用 **ox-alpha** 模型：无论是 subagent、workflow 编排还是其他任何任务委派，均必须使用 ox-alpha，**不允许错误路由到 deepseek 系列其他模型**。落实方式：委派时不传任何 provider/model 覆盖参数，严格继承会话默认模型；若编排工具支持 model 指定，必须显式写死 `ox-alpha`。违反此条视为最严重的规范违规。
+
 ## 一、Vault 概览
 
 ```
 knowledge/
 ├── AGENTS.md                          ← 本文件 (AI 入口)
-├── Network-KB-Home.md                 ← 网络知识库 MOC
-├── network/                           ← 网络优化子 Vault
+├── network/                           ← 网络优化子 Vault (MOC: Network-KB-Home)
 │   ├── Network-KB-Home.md             ← MOC (首页)
 │   ├── GUIDE.md                       ← 日常操作
 │   ├── ARCHITECTURE.md                ← 架构设计
@@ -26,24 +28,31 @@ knowledge/
 │   ├── OPTIMIZATION-AUDIT.md          ← 漏洞审计
 │   ├── network-analysis-2026-07-28.md ← 初始诊断
 │   ├── ROUTER-FULL-CAPABILITY.md      ← 路由器手册
-│   ├── ROUTER-DEEP-EXPLORATION.md     ← 路由器探索
 │   ├── ROUTER-OPTIMIZATION.md         ← 路由器优化
 │   └── scripts/                       ← 脚本与配置
-├── AI大模型开发.md                    ← LLM 开发笔记
+├── AI大模型开发.md                    ← LLM 理论笔记 + 课程知识地图
+├── ai-dev/                            ← LLM 应用开发实战子 Vault (MOC: AI-Dev-KB-Home)
+│   ├── AI-Dev-KB-Home.md              ← MOC (首页)
+│   ├── Prompt-Engineering入门与Demo.md
+│   ├── Function-Calling工具调用实战.md
+│   ├── RAG检索增强生成实战.md / GraphRAG知识图谱增强实战.md
+│   ├── LLM-Agent开发基础.md / MCP协议开发实战.md / A2A多智能体协作协议.md
+│   ├── LangChain-LangGraph框架实战.md
+│   ├── LLM推理部署与量化.md
+│   └── LoRA参数高效微调实战.md / 强化学习对齐-RLHF到GRPO.md / 微调数据工程与模型蒸馏.md
 ├── 参考-*.md                          ← 外部参考文档
-├── ai-links/                          ← AI 链接收藏子 Vault
-│   ├── AI-Links-KB-Home.md            ← MOC (首页)
-│   ├── 2026-08-16-AI链接综述与归档.md  ← 16 链接调研综述
-│   ├── DSH跨框架Skills与MCP加载.md      ← 跨框架技能/MCP 桥接
-│   ├── DSH-TUI插件使用手册.md           ← 终端 UI 插件手册
-│   └── DSH插件与Hook开发最佳实践.md     ← 插件/Hook 开发实践
-├── claude-ops/                        ← Claude Code 运维子 Vault
-│   ├── Claude-Ops-KB-Home.md          ← MOC (首页)
+├── ai-links/                          ← AI 链接收藏子 Vault (MOC: AI-Links-KB-Home)
+│   ├── articles/                      ← 文章拆解收藏
+│   └── DSH*.md 等                     ← 插件/Hook/Skills 实践
+├── claude-ops/                        ← Claude Code 运维子 Vault (MOC: Claude-Ops-KB-Home)
 │   ├── 运维方案与设计/                 ← 方案/设计/指南
 │   ├── 事故复盘/                       ← postmortem/incident
-│   ├── Agent-架构模式/                 ← 架构模式与记忆
+│   ├── Agent-架构模式/                 ← 架构模式与记忆 (含 MEMORY-INDEX)
 │   └── Plans/                         ← 归档计划 (deprecated)
-└── 2026-07-21-*.md                    ← 事故报告
+├── typora/                            ← Typora 激活复盘子 Vault (MOC: TYPORA-KB-Home)
+├── diagrams/                          ← Excalidraw 图表库 + ARROW-CHECKLIST
+├── scripts/                           ← 跨库脚本 (claude-ops-deployments/dumps)
+└── SESSION-ARCHIVE-*.md               ← 会话归档
 ```
 
 ## 二、Wiki 链接约定
@@ -99,6 +108,7 @@ status: draft | review | stable | deprecated
 #ai/skills            Agent Skills 技能开发
 #ai/learning          AI 教程与学习路线
 #ai/links             AI 链接收藏与综述
+#ai/tools             AI 工具收藏 (DSH 插件、终端工具等)
 #ai/ops               Agent 无人值守运维 (claude-ops 子库)
 #meta                  元文档 (AGENTS, MOC, 会话归档)
 ```
@@ -139,10 +149,10 @@ status: draft | review | stable | deprecated
 ```
 
 > [!tip] 活的知识网络
-> - Vault 内 18 个文档, 100+ Wikilinks, 15 个标签
+> - Vault 内 170+ 个文档, 500+ Wikilinks, 20+ 标签
 > - 每个文档至少链接 3 个其他文档
 > - Graph 视图中无孤立节点
-> - MOC 首页有 Mermaid 关系图可视化
+> - MOC 首页有关系图可视化（Excalidraw 或文字树）
 
 ### 对话归档
 
@@ -160,8 +170,10 @@ status: draft | review | stable | deprecated
 | 网络优化 | [[Network-KB-Home]] |
 | AI 链接收藏 | [[AI-Links-KB-Home]] |
 | Claude Code 运维 | [[Claude-Ops-KB-Home]] |
+| LLM 应用开发实战 | [[AI-Dev-KB-Home]] |
+| Typora 激活复盘 | [[TYPORA-KB-Home]] |
 
-MOC 应包含：概述、文档地图、Mermaid 关系图、标签索引、关键数据、脚本清单。
+MOC 应包含：概述、文档地图、关系图（**Excalidraw 嵌入或缩进文字树**——Markdown 中禁止 Mermaid，见第十一节）、标签索引、关键数据、脚本清单。
 
 ## 五·五、远程知识库融合补充规范（2026-08-17）
 
@@ -186,7 +198,7 @@ MOC 应包含：概述、文档地图、Mermaid 关系图、标签索引、关�
 3. 编写内容，使用 callouts (> [!note]) 和表格
 4. 添加到 MOC 的文档地图 + 标签索引
 5. 在相关文档中添加反向 Wikilink
-6. 更新 MOC 的 Mermaid 图 (如有)
+6. 更新 MOC 关系图 (Excalidraw/文字树, 如有)
 
 ### 修改知识
 
@@ -235,6 +247,8 @@ MOC 应包含：概述、文档地图、Mermaid 关系图、标签索引、关�
 6. **Graph 友好** — 新文档至少链接 3 个已有文档
 7. **保持脚本可执行** — `scripts/` 下的代码不变 (除非专门优化)
 8. **敏感信息** — 密码/IP 可以保留在知识库内 (本地 Vault), 但不要复制到外部
+9. **模型铁律** — 一切 subagent / workflow / 任务委派均须使用 `ox-alpha` 模型（继承会话默认，不传 model 覆盖），禁止路由到 deepseek 系列其他模型，见文首全局铁律
+10. **Python 环境** — 全局解释器固定为 `D:\ProgramData\miniconda3\python.exe`（Python 3.13）；验证文档中 Demo/脚本时一律用此路径，勿假设 `python` 在 PATH
 
 ## 十一、图表与可视化约定
 
@@ -413,8 +427,8 @@ tags: [excalidraw]
 | 架构/系统图 | Excalidraw | `{Subject}-Architecture.excalidraw` |
 | 流程图 | Excalidraw | `{Subject}-Flow.excalidraw` |
 | 运行时序列图 | Excalidraw | `{Subject}-Sequence.excalidraw` |
-| 文档关系图 | Mermaid (MOC 中) | 内嵌 |
-| 简单关系图 | Mermaid | 内嵌 (标记"可升为Excalidraw") |
+| 文档关系图 | 文字树/表格 (MOC 中) | 内嵌 |
+| 简单关系图 | Excalidraw | `{Subject}-Flow.excalidraw` |
 
 ## 十、知识-作者协同进化
 

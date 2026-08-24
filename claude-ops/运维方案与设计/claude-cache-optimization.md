@@ -3,7 +3,7 @@ title: Claude Code × DeepSeek 缓存命中率优化方案
 aliases: []
 tags: [ai/ops, ai/agent]
 created: 2026-06-12
-updated: 2026-08-17
+updated: 2026-08-25
 status: review
 ---
 
@@ -11,7 +11,8 @@ status: review
 
 See also: [[Claude-Ops-KB-Home]] · [[claude-cache-strategy]] · [[claude-cache-incident-postmortem]]
 
-> 部署日期: 2026-06-12 | 当前版本: 方案 B (应急) → 目标: 方案 C (双层)
+> 部署日期: 2026-06-12 | 当前运行: Node.js 代理 + Permafrost (与 [[claude-resilience-architecture]] 口径一致) → 目标: 方案 C (双层)
+> [!note] 方案 B (应急) 为历史应急方案（proxy 不可用时的降级链路），现行运行链路见 [[claude-resilience-architecture]]。
 
 ---
 
@@ -176,9 +177,9 @@ B→直连: 完全绕过所有代理, CC 直连 DeepSeek
 | 4c43... | 8 | 87.1% | 702,848 |
 | 9b34... | 28 | 83.6% | 1,093,120 |
 | 9bbb... | 15 | 86.7% | 2,774,784 |
-| **总体** | **58** | **85.98%** | **4,571,008** |
+| **总体** | **58** | **85.98%** | **4,570,752** |
 
-成本节省：83.1%（$0.75 → $0.13）
+成本节省：82.7%（$0.75 → $0.13）
 
 ### 5.2 方案 C 链路测试（2026-06-12）
 
@@ -196,7 +197,7 @@ L3  串联链路缓存命中 (128 tokens)      ✅ PASS
 |------|------|------|
 | DeepSeek 异步缓存写入 (~6-60s) | 首轮请求无法命中 | 冷锚点合并 (permafrost coalesce) |
 | 新会话需要先"预热"缓存 | 前几轮全价 | 后续命中可摊平 |
-| 前缀变化导致缓存全量失效 | 工具变化/模型切换/CLaUDE.md 变更 | aggressive 模式 env 冻结 |
+| 前缀变化导致缓存全量失效 | 工具变化/模型切换/CLAUDE.md 变更 | aggressive 模式 env 冻结 |
 | 无 systemd 自启 | permafrost/proxy 异常退出需手动恢复 | session_start hook 自动拉起 |
 | PRoot 环境无 sysctl | 内核 TCP 不可调 | 应用层 socket.setKeepAlive(60s) |
 
@@ -215,7 +216,7 @@ L3  串联链路缓存命中 (128 tokens)      ✅ PASS
 
 ### 8.1 Keepalive 评估
 
-DeepSeek 缓存 TTL 为「数小时到数天」（LRU 淘汰，无固定值），远长于 Claude 的 5 分钟。当前 97.47% 命中率说明缓存淘汰不是瓶颈。`PERMAFROST_KEEPALIVE_S` 开启会发出计费请求（命中价 ~$0.00003/次），**建议先不开启**，等长期运行数据出来再评估。
+DeepSeek 缓存 TTL 为「数小时到数天」（LRU 淘汰，无固定值），远长于 Claude 的 5 分钟。当前 97.47% 命中率说明缓存淘汰不是瓶颈。（口径注: 97.47% 为 2026-06-12 当次实测的单时段口径，区别于 §5.1 三 session 汇总的总体 85.98%。）`PERMAFROST_KEEPALIVE_S` 开启会发出计费请求（命中价 ~$0.00003/次），**建议先不开启**，等长期运行数据出来再评估。
 
 ### 8.2 监控增强
 

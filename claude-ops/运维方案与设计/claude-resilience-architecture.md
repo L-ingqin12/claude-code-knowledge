@@ -3,7 +3,7 @@ title: Claude Code 韧性代理 — 架构总览
 aliases: []
 tags: [ai/ops, ai/agent]
 created: 2026-06-12
-updated: 2026-08-17
+updated: 2026-08-25
 status: review
 ---
 
@@ -11,7 +11,7 @@ status: review
 
 See also: [[Claude-Ops-KB-Home]] · [[claude-resilience-usage]] · [[claude-deployment-record]]
 
-> 当前运行版本: Node.js 代理 + Permafrost 缓存层, 部署于 2026-06-12
+> 当前运行版本: Node.js 代理 + Permafrost 缓存层, 部署于 2026-06-12（现行链路 = 方案 C: CC → Permafrost :8788 → proxy :8787 → DeepSeek）
 > 缓存优化方案详见: [claude-cache-optimization.md](claude-cache-optimization.md)
 
 ---
@@ -48,7 +48,7 @@ See also: [[Claude-Ops-KB-Home]] · [[claude-resilience-usage]] · [[claude-depl
 
 ## 二、数据链路图
 
-### 当前架构 (方案 B — 应急)
+### 历史应急架构 (方案 B — 应急，proxy 不可用时降级链路)
 
 ```
 Claude Code
@@ -99,6 +99,8 @@ Claude Code
 │  api.deepseek.com (Anthropic 兼容层)     │
 └─────────────────────────────────────────┘
 ```
+
+> [!note] proxy 层位置注记: claude-resilience-proxy.js 位于 Permafrost 之后（:8787），CC 的请求先经 Permafrost :8788（缓存对齐）再转发至 proxy（韧性层），最后到 DeepSeek。
 
 ### 逃生路径
 

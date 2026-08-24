@@ -3,7 +3,7 @@ title: 预训练迷你 Kimi K3 — 实录章节总结
 aliases: [迷你K3, 252美元复刻K3, Pretraining-a-Mini-K3]
 tags: [ai/learning, reference, ai]
 created: 2026-08-18
-updated: 2026-08-18
+updated: 2026-08-25
 status: stable
 source: Vizuara Books — Pretraining a Mini K3, 章节 What We Actually Trained
 source_urls:
@@ -33,13 +33,13 @@ See also: [[Articles-Index]] | [[AI-Links-KB-Home]] | [[AI大模型开发]] | [[
 | 成本 | **$252.35** |
 
 - **Loss 起点是正确性检查**：词表 163,840 的均匀分布交叉熵 = ln(163,840) = **12.007**；step-0 loss 12.100 与之吻合，说明初始化与损失函数无误（微超额来自 embedding 与输出投影绑定时 logits 携带的少量结构）。此后的每个数字才是结果。
-- 「迷你」的含义：约 K3 总规模的 1/2000；从未指令微调，只做一件事——预测下一个 token；但拥有 K3 同款架构（同 3:1 注意力栈、同 aux-loss-free 的 MoE 路由、同激活函数、同 163,840 词表分词器）。
+- 「迷你」的含义：约 1/2700（2.8T ÷ 1.02B）；从未指令微调，只做一件事——预测下一个 token；但拥有 K3 同款架构（同 3:1 注意力栈、同 aux-loss-free 的 MoE 路由、同激活函数、同 163,840 词表分词器）。
 
 ## 二、语料与去污染
 
 - 5B tokens 抽取自 **104.80B tokens 六源语料**，分词前完成去污染。
 - 方法：对 8 个 benchmark 测试集构建 **13-gram 索引**（2,398,082 个唯一 n-gram），语料文档共享任一 13-gram 即整篇丢弃。扫描 107,291,411 篇 → 移除 138,064 篇（0.1287%）。
-- **分布比总数更能说明问题**：数学语料被移除率约为网页的 10 倍（finemath 0.7239%、open-web-math 0.6747% vs fineweb-edu 0.0856%）——因为 GSM8K/MMLU 数学内容在数学站点流传；若各源移除率均匀反而说明滤的是噪声。全书评估章节的 benchmark 分数之所以「可引用」，全靠这一步。全量数据清洗 CPU 成本约 **$17**。
+- **分布比总数更能说明问题**：数学语料被移除率约为网页的 8 倍（finemath 0.7239%、open-web-math 0.6747% vs fineweb-edu 0.0856%）——因为 GSM8K/MMLU 数学内容在数学站点流传；若各源移除率均匀反而说明滤的是噪声。全书评估章节的 benchmark 分数之所以「可引用」，全靠这一步。全量数据清洗 CPU 成本约 **$17**。
 
 ## 三、钱花到哪去了（全书最核心的一章：Making It Fast）
 

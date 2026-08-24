@@ -3,7 +3,7 @@ title: 日志分析 Agent — Windows 高并发部署架构
 aliases: []
 tags: [ai/ops, ai/agent]
 created: 2026-08-10
-updated: 2026-08-17
+updated: 2026-08-25
 status: stable
 ---
 
@@ -66,7 +66,7 @@ Nginx (80) → upstream least_conn → Tornado :8801-:8804
 
 - [[fan-out-subagent-pattern]] — 日志分析多维度并行分发
 - [[opencode-multi-agent-architecture]] — Agent 两层模型
-- [[hermes-parallel-task-communication]] — delegate_task vs Kanban 选择
+- [[hermes-parallel-task-report]] — delegate_task vs Kanban 选择
 - [[claude-unattended-cross-platform-guide]] — 跨平台部署差异处理
 - [[agent-async-isolation-pattern]] — ThreadPoolExecutor 异步隔离通用模式
 - [[state-machine-quality-gate-loop]] — 分析结果质量门控

@@ -3,7 +3,7 @@ title: Claude Code 无人值守方案
 aliases: []
 tags: [ai/ops, ai/agent]
 created: 2026-06-11
-updated: 2026-08-17
+updated: 2026-08-25
 status: review
 ---
 
@@ -45,7 +45,7 @@ Android (aarch64)
 | 能力 | 用途 | 命令/路径 |
 |------|------|-----------|
 | Claude daemon | 持久后台进程，管理 session 生命周期 | PID 21625，自动重启 |
-| `claude --resume` | 恢复之前的会话 | 已有 session: 27780, 29097, 30349 |
+| `claude --resume` | 恢复之前的会话 | 已有 session: 27780, 29097, 30349, 2990（共 4 个） |
 | `claude -p` | 非交互式一次性任务 | `claude -p "任务" --permission-mode accept-edits` |
 | `CronCreate` | 会话内定时任务 | 已在 `.claude/scheduled_tasks.json` 持久化 |
 | `/loop` | 自主循环执行 | `/loop 10m 检查CI状态并修复失败` |
@@ -297,7 +297,8 @@ proot-distro login ubuntu -- bash -c 'claude --resume --permission-mode accept-e
 # 在 Termux 侧设置 Termux job scheduler（需要 Termux:API）
 # 或简单地在 Termux 侧写 while 循环
 while true; do
-  proot-distro login ubuntu -- bash -c 'claude -p "ping" --model claude-haiku-4-5 --permission-mode bypass'
+  # 注: ANTHROPIC_BASE_URL 指向 DeepSeek 兼容端点时，模型名用 deepseek-chat（原 claude-haiku-4-5 为 Anthropic 模型名）
+  proot-distro login ubuntu -- bash -c 'claude -p "ping" --model deepseek-chat --permission-mode bypass'
   sleep 300
 done
 ```
@@ -486,7 +487,7 @@ termux-wake-unlock
 
 ```
 Daemon PID:     21625
-Claude binary:  /usr/lib/node_modules/@anthropic-ai/claude-code/bin/claude.exe
+Claude binary:  /usr/lib/node_modules/@anthropic-ai/claude-code/bin/claude  (Linux aarch64 无 .exe，原记 claude.exe 有误)
 Claude version: 2.1.172
 Active sessions: 27780, 29097, 30349, 2990
 Settings:        /root/.claude/settings.json + settings.local.json

@@ -3,15 +3,16 @@ title: "Agent 系统韧性架构深度剖析：容错 · 成本 · 认证 · 观
 aliases: [Agent韧性架构, Claude Code韧性, 错误处理与成本控制]
 tags: [ai/links, reference, ai/agent]
 created: 2026-06-13
-updated: 2026-08-17
+updated: 2026-08-25
 status: stable
 source: "微信公众号"
-source_url: "https://mp.weixin.qq.com/s/3RUJT5zKWpj9Aeqe3ubSHg"
+source_urls:
+  - "https://mp.weixin.qq.com/s/3RUJT5zKWpj9Aeqe3ubSHg"
 date: "2026-06-13 08:15:00"
-fetched_at: "2000-01-01"
+fetched_at: "2026-08-19"
 ---
 
-# Agent 系统韧性架构深度剖析
+# Agent 系统韧性架构深度剖析：容错 · 成本 · 认证 · 观测
 
 See also: [[AI-Links-KB-Home]] | [[Articles-Index]] | [[Claude-Code记忆机制源码拆解]] | [[Loop-Engineering-深度拆解-从产品功能集到方法论包装]] | [[2026-08-16-AI链接综述与归档]]
 

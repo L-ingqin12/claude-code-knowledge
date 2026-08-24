@@ -3,7 +3,7 @@ title: PRoot 端口重启问题 — 根因与修复
 aliases: []
 tags: [ai/ops, ai/agent]
 created: 2026-07-02
-updated: 2026-08-17
+updated: 2026-08-25
 status: review
 ---
 
@@ -17,7 +17,7 @@ See also: [[Claude-Ops-KB-Home]] · [[claude-proxy-restart-incident]] · [[claud
 
 ## 根因
 
-PRoot + Android 内核下，TCP 端口被释放后进入 TIME_WAIT 状态，**`SO_REUSEADDR` 无法覆盖**，端口永久占用（>60s 验证）。
+PRoot + Android 内核下，TCP 端口被释放后进入 TIME_WAIT 状态，**`SO_REUSEADDR` 无法覆盖**，端口长时间占用（实测 >60s，非永久）。
 
 ```
 kill 进程 → 端口 TIME_WAIT → bind 同一端口 → EADDRINUSE
@@ -34,9 +34,9 @@ server.on('listening', () => {
     // 实际上 Node.js http server 不直接暴露，需要在创建时设置
 });
 
-// 更简洁的方式: server.listen 时传 reusePort (Node 16.7+)
-server.listen(PORT, '[IP已脱敏]', () => { ... });
-// 但 http.createServer 的 listen 不接受 options 中的 reusePort
+// 正确方式: Node.js ≥13.9 支持 net.Server listen 的 options.reusePort
+// (http.createServer 返回的 server 继承 net.Server，其 listen 同样接受 options)
+net.createServer(handler).listen({ port: 8787, host: '[IP已脱敏]', reusePort: true });
 ```
 
 **Node.js 下的实施方式**：在 server 创建后、listen 前设置：
@@ -55,7 +55,7 @@ server.on('listening', () => {
 ```bash
 # deploy.sh start_proxy 改为:
 start_proxy() {
-    for port in 8787 8788 8789; do
+    for port in 8787 8789 8790; do   # 跳过 8788 (permafrost 固定端口)
         if ! curl -s "http://[IP已脱敏]:$port/" >/dev/null 2>&1; then
             PROXY_PORT=$port
             node /root/claude-resilience-proxy.js > /root/.claude/proxy.log 2>&1 &

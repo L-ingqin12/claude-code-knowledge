@@ -3,10 +3,11 @@ title: "Claude Code 记忆机制源码级拆解"
 aliases: [CLAUDE.md记忆机制, Memory机制拆解, Claude Code记忆系统]
 tags: [ai/agent, ai/learning]
 created: 2026-06-02
-updated: 2026-08-17
+updated: 2026-08-25
 status: stable
 source: "微信公众号"
-source_url: "https://mp.weixin.qq.com/s/CLIuogpYSPng2brQph7AHg"
+source_urls:
+  - "https://mp.weixin.qq.com/s/CLIuogpYSPng2brQph7AHg"
 author: "小林coding"
 date: "2026-06-02"
 fetched_at: "2026-06-22"

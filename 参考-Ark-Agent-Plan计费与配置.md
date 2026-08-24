@@ -3,12 +3,14 @@ title: Ark Agent Plan 计费与配置参考
 aliases: [Ark API, Agent Plan, 火山引擎]
 tags: [reference/ark, reference]
 created: 2026-07-22
-updated: 2026-07-28
+updated: 2026-08-25
 status: stable
+source_urls: [https://www.volcengine.com/docs/82379, https://www.volcengine.com/docs/82379/2516283]
 ---
 
-See also: [[AGENTS]] | [[AI大模型开发]]
 # Ark Agent Plan 计费与配置 — 知识参考
+
+See also: [[AGENTS]] | [[AI大模型开发]]
 
 > 本文档帮助理解火山引擎 Ark Agent Plan 的计费体系、API 配置和模型选择。
 > 配合《树莓派网络故障与路由器破解完整复盘》阅读。
@@ -130,7 +132,7 @@ AFP = (消耗的 tokens / 10,000) × 视频系数
 |------|------|---------|---------|---------|
 | 轻度编码 | deepseek-v4-flash | 2M tokens/天 | ~6,000 AFP/天 | ✓ 充足 |
 | 中度编码 | deepseek-v4-pro | 1M tokens/天 | ~12,000 AFP/天 | ✓ 可用 8 天 |
-| 重度 Agent | deepseek-v4-pro | 3M tokens/天 | ~36,000 AFP/天 | ⚠️ 仅 3 天 |
+| 重度 Agent | deepseek-v4-pro | 3M tokens/天 | ~36,000 AFP/天 | ❌ 首日即超周限额（36K/天 > 周 35K），无法连续使用 |
 | 智能路由 | ark-code-latest (Auto) | 2M tokens/天 | ~3,000 AFP/天 | ✓ 最经济 |
 
 > 注：精确系数以 Ark 控制台实时显示为准。以上为基于公开数据的估算。
@@ -273,7 +275,6 @@ Agent Plan 避免了这个问题——直接用 AFP 积分按 token 计费，更
 > **参考资源**
 > - 火山引擎方舟文档: https://www.volcengine.com/docs/82379
 > - Agent Plan 产品介绍: https://www.volcengine.com/docs/82379/2516283
-> - DeepSeek V4 上线方舟: https://cloud.tencent.com.cn/developer/article/2673192
 
 ## Related
 

@@ -1,9 +1,9 @@
 ---
 title: 会话复盘归档 (2026-07-28)
 aliases: [Session Archive, 会话归档, 2026-07-28 全记录]
-tags: [meta, incident]
+tags: [meta, incident, network/optimization]
 created: 2026-07-28
-updated: 2026-07-28
+updated: 2026-08-25
 status: stable
 ---
 
@@ -22,8 +22,8 @@ See also: [[Network-KB-Home]] | [[FINAL-SUMMARY]] | [[ARCHITECTURE]]
 
 | 指标 | 发现 | 严重度 |
 |------|------|--------|
-| WiFi 网关延迟 | 7ms~457ms, avg 134ms | 🔴 极差 |
-| 代理吞吐 | ~6 Mbps (761 KB/s) | 🟡 偏低 |
+| WiFi 网关延迟 | 2ms~541ms, avg 154ms（原记 7~457ms/avg 134ms，与 Phase 4 原始测量统一） | 🔴 极差 |
+| 代理吞吐 | ~6 Mbps (761 KB/s)（2026-07-27 实测） | 🟡 偏低 |
 | 代理服务器 | 仅 `fuck.p1d2.com` 单节点 | 🔴 无冗余 |
 | 代理协议 | VLESS+Reality, Mux 未开 | 🟡 |
 | 系统代理 | v2rayN 10808, 开启 | ✅ |
@@ -34,7 +34,7 @@ See also: [[Network-KB-Home]] | [[FINAL-SUMMARY]] | [[ARCHITECTURE]]
 - v2rayN 有 **17 个可用节点**（4 供应商），但只用了 1 个
 - 路由器确认: Xiaomi R4CM, fw 2.14.87, SSH 不通
 - 系统代理开启, 出口 IP [IP已脱敏]
-- WiFi: 2.4GHz, 802.11n, 72.2Mbps, 12 设备在线(含 8 ESP32 IoT)
+- WiFi: 2.4GHz, 802.11n, 72.2Mbps, 13 设备在线(含 8 ESP32 IoT)
 
 ---
 
@@ -134,10 +134,10 @@ bash scripts/router_ssh.sh "command"
 
 ### 关键发现
 
-- **431 个命令**可用, 但 **iptables/tcpdump/tc 不可用**
+- **431 个命令**可用（口径: 431=系统可用命令总数, 其中 busybox applet 146 个，见 [[ROUTER-FULL-CAPABILITY]]）, 但 **iptables/tcpdump/tc 不可用**
 - **insmod 存在** (busybox), 内核模块已全加载
 - **debugfs 不可用** → MT7628 帧缓冲 Bug 无法修复
-- **Factory 分区** mtd3 可解锁 TX power (14→30 dBm), 但风险 >> 收益, 不建议
+- **Factory 分区** mtd3 可解锁 TX power (14→30 dBm, 勘误: iwinfo 实测当前已 18 dBm，见 [[ROUTER-DEEP-EXPLORATION]]), 但风险 >> 收益, 不建议
 - **无固件签名** → 可刷 OpenWrt
 - **iweventd 钩子**可用来在 WiFi 事件时自动执行脚本
 
@@ -151,8 +151,8 @@ bash scripts/router_ssh.sh "command"
 
 - 9 个 Markdown 文档全部添加 YAML frontmatter
 - 嵌套标签体系: `#network/router`, `#network/proxy`, `#network/optimization`, `#network/architecture`, `#network/guide`, `#network/analysis`
-- **89 个内部 Wikilinks** — Graph 视图高度连通
-- Mermaid 关系图在 MOC 首页
+- **90+ 个内部 Wikilinks**（持续增长）— Graph 视图高度连通
+- Excalidraw 关系图 ![[Network-DocGraph.excalidraw]] 在 MOC 首页
 - Obsidian callouts (info/warning/danger/bug/success)
 - [[AGENTS]] 定义 AI 协作规范
 - 笔记模板 `scripts/new-note.md`
@@ -204,7 +204,7 @@ D:\Document\local\knowledge\
 ├── AGENTS.md                                    ← AI 协作规范
 ├── scripts/new-note.md                          ← 笔记模板
 └── network/
-    ├── Network-KB-Home.md                       ← MOC 首页 + Mermaid 图
+    ├── Network-KB-Home.md                       ← MOC 首页 + Excalidraw 关系图
     ├── GUIDE.md                                 ← 使用指南
     ├── ARCHITECTURE.md                          ← 架构设计 (4 阶段 + 7 决策)
     ├── FINAL-SUMMARY.md                         ← 优化总结
@@ -215,5 +215,5 @@ D:\Document\local\knowledge\
     ├── ROUTER-VIDEO-REMOTE-MONITOR.md           ← 视频/远程/监测方案
     ├── network-analysis-2026-07-28.md           ← 初始网络分析
     ├── SESSION-ARCHIVE-2026-07-28.md            ← 本归档
-    └── scripts/                                 ← 脚本与配置 (11 个文件)
+    └── scripts/                                 ← 脚本与配置 (15 个文件)
 ```

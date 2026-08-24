@@ -3,7 +3,7 @@ title: Pi (systemd) vs Termux (proot) — Agent 运维部署差异指南
 aliases: []
 tags: [ai/ops, ai/agent]
 created: 2026-06-29
-updated: 2026-08-17
+updated: 2026-08-25
 status: review
 ---
 
@@ -20,7 +20,7 @@ See also: [[Claude-Ops-KB-Home]] · [[claude-unattended-cross-platform-guide]] �
 | 维度 | Raspberry Pi 4B | Termux (Android) |
 |------|:-----------:|:----------------:|
 | **OS** | Debian (aarch64) | Android + Termux + PRoot Ubuntu |
-| **进程管理** | systemd (user) | 手动 nohup / tmux |
+| **进程管理** | systemd (user) | 无 tmux/screen，用 nohup 或 termux-services |
 | **Python** | 系统 python3 (3.11) | pkg install python |
 | **Node.js** | 系统 node | pkg install nodejs |
 | **包管理** | apt | pkg (Termux) + apt (PRoot) |
@@ -93,7 +93,7 @@ cp /path/to/claude-resilience-proxy.js ~/
 nohup node ~/claude-resilience-proxy.js > ~/.claude/proxy.log 2>&1 &
 
 # ⚠️ Termux 注意事项:
-#   - proxy 端口 8787 可能被占用 → 改为 8789
+#   - proxy 端口 8787 可能被占用 → 改为 8789（注意: 8789 已被 streaming-forward/hermes 方案占用，部署前先 ss -tlnp 查占）
 #   - Node.js 版本可能较旧 → 检查 async/await 语法支持
 #   - 无 sysctl → 跳过 TCP keepalive 内核参数优化
 ```
@@ -116,7 +116,7 @@ bash /home/pi/hermes-cache-monitor.sh daemon  # Hermes 专用
 # 1. 安装 termux-services (替代 systemd)
 pkg install termux-services
 
-# 2. 或使用 cron (termux 内置)
+# 2. 或使用 cron（需 termux-services/pkg 安装，Termux 默认无 cron）
 crontab -e
 # 添加: */5 * * * * bash ~/claude-cache-monitor.sh once
 
@@ -126,7 +126,7 @@ nohup bash -c 'while true; do bash ~/claude-cache-monitor.sh once; sleep 60; don
 
 **注意**: 
 - Termux 的 cron 需要 termux-services 保持后台运行
-- 最简单的方案是 tmux session 中运行监控脚本
+- 最简单的方案是 nohup 循环或 termux-services 中运行监控脚本（Termux 无 tmux/screen）
 
 ---
 
@@ -144,6 +144,8 @@ nohup bash -c 'while true; do bash ~/claude-cache-monitor.sh once; sleep 60; don
 }
 ```
 
+> [!note] `ark-xxx` 为占位符示例（ARK token 属 Hermes/model-router 链路）；CC 经 permafrost 走 DeepSeek 兼容端点时，`ANTHROPIC_AUTH_TOKEN` 应填 DeepSeek API key 而非 ark token。
+
 ### 5.2 Termux 配置
 
 ```json
@@ -155,6 +157,8 @@ nohup bash -c 'while true; do bash ~/claude-cache-monitor.sh once; sleep 60; don
   }
 }
 ```
+
+> [!note] 同上：`ark-xxx` 为占位符；CC 应走 DeepSeek 兼容端点（permafrost upstream），token 用 DeepSeek API key。
 
 **相同！** CC 配置不区分平台。关键是 permafrost 要在同一台机器上运行。
 

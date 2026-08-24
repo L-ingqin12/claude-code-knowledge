@@ -3,7 +3,8 @@ title: 优化审计报告
 aliases: [Optimization Audit, 优化审计, 设计漏洞]
 tags: [network/optimization, network/proxy, network/analysis, network]
 created: 2026-07-28
-updated: 2026-07-28
+updated: 2026-08-25
+status: review
 ---
 
 # 优化审计 — Telegram 视频卡顿根因与修复
@@ -16,7 +17,7 @@ See also: [[Network-KB-Home]] | [[FINAL-SUMMARY]] | [[ARCHITECTURE]] | [[ROUTER-
 |------|------|------|
 | 代理出口 IP | [IP已脱敏] (p1d2) | — |
 | 下载速度 | ~375 KB/s (3.0 Mbps) | >1 MB/s |
-| WiFi 网关延迟 | 2-31ms (avg **7ms**) ✅ | <10ms 稳定 (已达标) |
+| WiFi 网关延迟 | 2-113ms (avg **31ms**) ✅ | <10ms 稳定 (已大幅改善, 未完全达标) |
 | WiFi 速率 | 72.2 Mbps (2.4GHz 802.11n) | >150 Mbps |
 
 ## 四层优化清单
@@ -63,9 +64,9 @@ See also: [[Network-KB-Home]] | [[FINAL-SUMMARY]] | [[ARCHITECTURE]] | [[ROUTER-
 
 | # | 漏洞 | 方案 | 参考 |
 |---|------|------|------|
-| 1 | 评分仅用 Ping | guiNDB.db 复合评分 | [[ARCHITECTURE#决策 6]] |
+| 1 | 评分仅用 Ping | guiNDB.db 复合评分 | [[ARCHITECTURE#五、未来可能的增强]] |
 | 2 | 非自动触发 | FileSystemWatcher hook | [[ARCHITECTURE#Phase 3]] |
-| 3 | Balancer 频繁切换 | tolerance 容差 | [[ARCHITECTURE#决策 4]] |
+| 3 | Balancer 频繁切换 | tolerance 容差 | — (tolerance 未在 [[ARCHITECTURE]] 中定义) |
 | 4 | 无 Telegram 路由 | 加 IP 段规则 | — |
 | 5 | SSH 可能失效 | CVE-2019-18370 | [[ROUTER-DEEP-EXPLORATION]] |
 | 6 | 高延迟 US 节点 | proxy-only selector | ✅ 已修复 |
