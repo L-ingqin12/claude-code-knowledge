@@ -101,7 +101,7 @@ function Test-ConfigEnhanced {
 
 function Invoke-EnhanceApply {
     Log "[Config] Invoking enhance-config.ps1 -Apply"
-    $out = & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $ENHANCE_SCRIPT -Apply 2>&1 | Out-String
+    $out = & powershell.exe -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File $ENHANCE_SCRIPT -Apply 2>&1 | Out-String
     foreach ($line in ($out -split "`r?`n")) {
         if ($line.Trim()) { Log "[Enhance] $($line.Trim())" }
     }
@@ -139,8 +139,17 @@ function Register-ScheduledTask {
         Log "Removed existing task"
     }
 
-    $action = New-ScheduledTaskAction -Execute "powershell.exe" `
-        -Argument "-NoProfile -WindowStyle Hidden -File `"$SCRIPT_PATH`" -Action Run"
+    # wscript launches PowerShell fully hidden (no console flash), same
+    # pattern as the Startup-folder balancer watcher VBS
+    $vbsPath = Join-Path $SCRIPT_DIR "auto-optimizer-hidden.vbs"
+    $vbs = @"
+Set WshShell = CreateObject("WScript.Shell")
+WshShell.Run "powershell.exe -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File ""$SCRIPT_PATH"" -Action Run", 0, False
+"@
+    $vbs | Out-File $vbsPath -Encoding ascii -Force
+
+    $action = New-ScheduledTaskAction -Execute "wscript.exe" `
+        -Argument "`"$vbsPath`""
     # -Once + repetition: the -Daily -At parameter set fails to bind on PS 5.1
     $trigger = New-ScheduledTaskTrigger -Once -At (Get-Date).AddMinutes(1) `
         -RepetitionInterval (New-TimeSpan -Minutes 30) `
@@ -167,6 +176,7 @@ function Register-ScheduledTask {
 
 function Unregister-Task {
     Unregister-ScheduledTask -TaskName "NetworkAutoOptimizer" -Confirm:$false -EA 0
+    Remove-Item (Join-Path $SCRIPT_DIR "auto-optimizer-hidden.vbs") -Force -EA 0
     Write-Host "Task unregistered."
 }
 

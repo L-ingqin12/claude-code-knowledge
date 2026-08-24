@@ -33,6 +33,10 @@ param(
 $ErrorActionPreference = "Stop"
 $STATE_DIR = "$env:LOCALAPPDATA\network-optimizer"
 if (-not (Test-Path $STATE_DIR)) { $null = New-Item -ItemType Directory -Path $STATE_DIR -Force }
+$SCRIPT_DIR = Split-Path $PSCommandPath -Parent
+# Optional allowlist: one "address:port" per line; when present, only these
+# nodes are eligible (throughput-tested pool, overrides ping-only scoring)
+$POOL_FILE = "$SCRIPT_DIR\node-pool.txt"
 
 # ============================================================
 # HELPERS
@@ -223,7 +227,7 @@ function Invoke-Enhance {
         try {
             $cur = Get-Content $configFile -Raw | ConvertFrom-Json
             $curPx = @($cur.outbounds | Where-Object { $_.protocol -ne "freedom" -and $_.protocol -ne "blackhole" })
-            if ($curPx.Count -ge 2) {
+            if ($curPx.Count -ge 3) {
                 Write-Host "Config already multi-server ($($curPx.Count) proxy outbounds) — nothing to do"
                 return $true
             }
@@ -233,6 +237,21 @@ function Invoke-Enhance {
     $nodes = Read-SubscriptionNodes $dir
     if (-not $nodes -or $nodes.Count -lt 2) {
         Write-Host "ERROR: need >=2 subscription nodes in guiNDB.db (found: $($nodes.Count))"
+        return $false
+    }
+
+    $poolApplied = $false
+    if (Test-Path $POOL_FILE) {
+        $pool = @(Get-Content $POOL_FILE | Where-Object { $_ -match "^\S+:\d+$" } | ForEach-Object { $_.Trim() })
+        if ($pool.Count -gt 0) {
+            $before = $nodes.Count
+            $nodes = @($nodes | Where-Object { "$($_.Address):$($_.Port)" -in $pool })
+            Write-Host "[Pool] node-pool.txt restricts candidates to $($pool.Count) entries — $($nodes.Count)/$before matched"
+            $poolApplied = $true
+        }
+    }
+    if ($nodes.Count -lt 2) {
+        Write-Host "ERROR: fewer than 2 pool nodes available (found: $($nodes.Count))"
         return $false
     }
     Write-Host "[1] Discovered $($nodes.Count) subscription nodes from guiNDB.db"
@@ -252,9 +271,11 @@ function Invoke-Enhance {
     $alive = $nodes | Where-Object { $_.Latency -lt 500 }
     foreach ($n in $alive) { $n.Score = [Math]::Round([Math]::Max(0.0, 1.0 - ($n.Latency / 500.0)), 3) }
     $diverse = $alive | Sort-Object -Property Score -Descending
+    $bestLimit = if ($poolApplied) { $nodes.Count } else { 3 }
     $seen = @{}; $best = @()
     foreach ($n in $diverse) {
-        if (-not $seen[$n.Address] -and $best.Count -lt 3) { $seen[$n.Address] = $true; $best += $n }
+        # dedup by address:port — multiple ports on one relay domain are distinct backends
+        if (-not $seen["$($n.Address):$($n.Port)"] -and $best.Count -lt $bestLimit) { $seen["$($n.Address):$($n.Port)"] = $true; $best += $n }
     }
     if ($best.Count -lt 2) {
         Write-Host "  Too few reachable nodes — no optimization possible"
@@ -280,11 +301,11 @@ function Invoke-Enhance {
 
         $primaryProxy = $config.outbounds | Where-Object { $_.protocol -ne "freedom" -and $_.protocol -ne "blackhole" } | Select-Object -First 1
         if (-not $primaryProxy) { Write-Host "ERROR: No proxy outbound in native config"; return $false }
-        $origAddr = $primaryProxy.settings.vnext[0].address
+        $origAddr = "$($primaryProxy.settings.vnext[0].address):$($primaryProxy.settings.vnext[0].port)"
 
-        # Exclude the current primary and any address already in the config
-        $existingAddrs = @($config.outbounds | ForEach-Object { $_.settings.vnext[0].address })
-        $cands = $best | Where-Object { $_.Address -ne $origAddr -and $_.Address -notin $existingAddrs }
+        # Exclude the current primary and any endpoint already in the config
+        $existingAddrs = @($config.outbounds | ForEach-Object { if ($_.settings.vnext) { "$($_.settings.vnext[0].address):$($_.settings.vnext[0].port)" } })
+        $cands = $best | Where-Object { "$($_.Address):$($_.Port)" -ne $origAddr -and "$($_.Address):$($_.Port)" -notin $existingAddrs }
         if ($cands.Count -eq 0) {
             Write-Host "  All candidates equal current primary — no change needed"
             return $true

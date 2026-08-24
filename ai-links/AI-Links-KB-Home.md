@@ -27,7 +27,9 @@ See also: [[AGENTS]] | [[AI大模型开发]] | [[TYPORA-KB-Home]] | [[2026-08-16
 | [[DSH-TUI插件使用手册]] | 本机 @dsh-tui/dsh-tui 终端界面：安装、运行、快捷键、端点配置 |
 | [[DSH插件与Hook开发最佳实践]] | Cordis 插件体系、工具/hooks 开发、发布与最佳实践清单 |
 | [[DSH提效与Token插件调研]] | 官方 token-meter + 社区 Token/提效插件清单与推荐组合（2026-08-18） |
-| [[Articles-Index]] | 远程文章库索引（可解释性/上下文工程/Skill/机制拆解 14 篇） |
+| [[Articles-Index]] | 远程文章库索引（可解释性/上下文工程/Skill/机制拆解/训练实录 14 篇） |
+| [[Open-Magiviz-AI视频创作平台]] | 开源 AI 视频创作 SaaS 参考（追加 2026-08-18） |
+| [[Vercel-AI编码Agent-Harness课程]] | Vercel 手写 Agent Harness 课程（11 模块 + Capstone，追加 2026-08-18） |
 
 ## 文档关系图
 
@@ -39,6 +41,8 @@ graph LR
   HOME --> DEVBEST[DSH插件与Hook开发最佳实践]
   HOME --> PLUGINS[DSH提效与Token插件调研]
   HOME --> ARTICLES[Articles-Index]
+  HOME --> MAGIVIZ[Open-Magiviz-AI视频创作平台]
+  HOME --> VERCEL[Vercel-AI编码Agent-Harness课程]
   MAIN --> SKILLS[Agent Skills: 4 链接]
   MAIN --> ANATOMY[编码 Agent 解剖: 3 链接]
   MAIN --> TUTOR[入门教程: 2 链接]
@@ -66,8 +70,8 @@ graph LR
 
 | 项 | 值 |
 |---|---|
-| 链接总数 | 16（2026/05/05 × 3，2026/08/16 × 13） |
-| 平均评级 | ★★★★（5★×4，4★×9，3★×3） |
+| 链接总数 | 18（2026/05/05 × 3，2026/08/16 × 13，2026/08/18 追加 Open-Magiviz、Vercel 课程 × 2） |
+| 平均评级 | ★★★★（5★×5，4★×10，3★×3） |
 | 调研方式 | flash 式 4 代理并行 web 检索 |
 | 归档状态 | `review`（快照数据待作者复核） |
 
