@@ -3,7 +3,7 @@ title: Claude-Ops-KB-Home
 aliases: [Claude Code 运维知识库, claude-ops, ClaudeOps]
 tags: [moc, ai/ops]
 created: 2026-08-17
-updated: 2026-08-25
+updated: 2026-08-26
 status: stable
 ---
 
@@ -11,7 +11,7 @@ status: stable
 
 > [!abstract] 概述
 > 本子库承载远程仓库 `akb-remote`（Claude Code 无人值守知识库，commit `f493130`）的运维知识体系：从现象→根因→方案→部署的完整推导与产出。所有文档均可独立阅读，彼此正交但交叉引用。
-> 迁移日期：2026-08-17 · 文档总数：56（54 篇迁移 + 本 MOC + [[MEMORY-INDEX]]）
+> 迁移日期：2026-08-17 · 文档总数：60（54 篇迁移 + 本 MOC + [[MEMORY-INDEX]] + 2026-08-25 新增 4 篇）
 
 See also: [[AGENTS]] · [[AI-Links-KB-Home]] · [[Network-KB-Home]]
 
@@ -107,6 +107,10 @@ See also: [[AGENTS]] · [[AI-Links-KB-Home]] · [[Network-KB-Home]]
 | [[production-diagnosis-2026-07-06]] | 生产运行诊断与修复 |
 | [[subagent-lessons-learned-2026-07-03]] | Subagent 资源管理实施经验 |
 | [[subagent-resource-architecture-2026-07-03]] | Subagent 资源管理体系架构 |
+| [[main-subagent-realtime-interaction]] | 主Agent与Subagent实时交互方案（心跳/邮箱/打断/恢复，新增 2026-08-25） |
+| [[opencode-pi-base-development-analysis]] | 基座开发七维度选型与服务化并发路线图（新增 2026-08-25） |
+| [[lognet-rootcause-multiagent-architecture]] | 日志网络根因分析多Agent架构：LogNet/渐进展开/符号化(artget)/可行性（新增 2026-08-25） |
+| [[agent-memory-context-knowledge-design]] | 记忆三级模型/上下文五源装配/外部知识库化策略（新增 2026-08-25） |
 | [[MEMORY-INDEX]] | memory 索引（含悬空条目说明） |
 
 ### 4. Plans（status: deprecated，全部归档）
@@ -128,7 +132,7 @@ See also: [[AGENTS]] · [[AI-Links-KB-Home]] · [[Network-KB-Home]]
 Claude-Ops-KB-Home (HOME)
 ├─ 运维方案与设计 (OPS) — review × 23 · deprecated × 2
 ├─ 事故复盘 (INC) — stable × 8
-├─ Agent-架构模式 (ARCH) — stable × 14（含 MEMORY-INDEX）
+├─ Agent-架构模式 (ARCH) — stable × 14 · review × 4（2026-08-25 新增实时交互、基座选型、日志网络根因、记忆与知识库化）
 ├─ Plans (PLAN) — deprecated × 8
 ├─ AGENTS (AG)
 └─ AI-Links-KB-Home (AI)
@@ -145,8 +149,8 @@ Claude-Ops-KB-Home (HOME)
 
 | 标签 | 用途 | 文档数 |
 |------|------|--------|
-| `#ai/ops` | Agent 无人值守运维（本子库全局） | 56 |
-| `#ai/agent` | 方案/设计/架构模式类 | 39 |
+| `#ai/ops` | Agent 无人值守运维（本子库全局） | 60 |
+| `#ai/agent` | 方案/设计/架构模式类 | 43 |
 | `#incident` | 事故复盘 | 8 |
 | `#moc` | MOC 首页 | 1 |
 
@@ -154,11 +158,11 @@ Claude-Ops-KB-Home (HOME)
 
 | 指标 | 值 |
 |------|-----|
-| 迁移文档总数 | 56（54 篇迁移 + MOC + [[MEMORY-INDEX]]） |
+| 迁移文档总数 | 56（54 篇迁移 + MOC + [[MEMORY-INDEX]]）；2026-08-25 起 Agent-架构模式 新增 4 篇（[[main-subagent-realtime-interaction]]、[[opencode-pi-base-development-analysis]]、[[lognet-rootcause-multiagent-architecture]]、[[agent-memory-context-knowledge-design]]），全库总数 60 |
 | 迁移日期 | 2026-08-17 |
 | 来源仓库 | `akb-remote` @ commit `f493130` |
-| status 分布 | review 23 · stable 21 · deprecated 10（不含 MOC/索引 2 篇 stable） |
-| 目录分布 | 运维方案与设计 25 · 事故复盘 8 · Agent-架构模式 14（含 MEMORY-INDEX）· Plans 8（合计 55 + 本 MOC = 56） |
+| status 分布 | review 27 · stable 21 · deprecated 10（不含 MOC/索引 2 篇 stable） |
+| 目录分布 | 运维方案与设计 25 · 事故复盘 8 · Agent-架构模式 18（含 MEMORY-INDEX；+4 为 2026-08-25 新增）· Plans 8（合计 59 + 本 MOC = 60） |
 
 ## 脚本清单
 
@@ -171,6 +175,7 @@ Claude-Ops-KB-Home (HOME)
 | `proxy-gate/` · `proxy-timeout-fix/` | 代理网关与超时修复部署 + rollback + backups |
 | `cc-version-switch/` · `agent-gate/` · `diagnostic-relay/` | 版本切换、gate hooks、诊断中继 |
 | `log-analysis-agent/` · `log-analysis-agent-pi/` | 日志分析 Agent 服务（Windows/Pi 版） |
+| `lognet-poc/`（vault 根 scripts/） | [[lognet-rootcause-multiagent-architecture]] M0 数据层 PoC：hilog/kmsg→LogNet(SQLite+FTS5)+query_logs/get_subgraph，27 测试全绿（2026-08-26） |
 | `patches/` | permafrost_align / model_router 补丁 |
 | `demos/` · `tests/` · `components/` | Demo 脚本、测试与可复用组件 |
 

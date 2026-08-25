@@ -3,7 +3,7 @@ title: Fan-Out 子智能体分发模式
 aliases: []
 tags: [ai/ops, ai/agent]
 created: 2026-07-01
-updated: 2026-08-17
+updated: 2026-08-26
 status: stable
 ---
 
@@ -11,7 +11,7 @@ status: stable
 
 > [!abstract] Fan-Out 扇出模式 — 主智能体并行分发任务到多个子智能体的设计模式与实现方案
 
-See also: [[Claude-Ops-KB-Home]] · [[state-machine-quality-gate-loop]] · [[opencode-multi-agent-architecture]]
+See also: [[Claude-Ops-KB-Home]] · [[state-machine-quality-gate-loop]] · [[opencode-multi-agent-architecture]] · [[main-subagent-realtime-interaction]]
 
 ## 定义
 主智能体将复杂任务分解为 N 个子任务，一次性并行分发给多个子智能体，汇总结果。

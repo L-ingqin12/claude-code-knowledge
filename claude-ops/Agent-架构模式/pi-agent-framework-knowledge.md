@@ -3,15 +3,15 @@ title: Pi Agent 框架知识
 aliases: []
 tags: [ai/ops, ai/agent]
 created: 2026-08-10
-updated: 2026-08-25
+updated: 2026-08-26
 status: stable
 ---
 
 # Pi Agent 框架知识
 
-> [!abstract] Pi Agent 框架完整知识 — TypeScript monorepo、4原子工具、800token预算、parallel tool execution、programmatic SDK
+> [!abstract] Pi Agent 框架完整知识 — TypeScript monorepo、内置工具集（0.84.3 源码核验共 9 工具）、800token预算、parallel tool execution、programmatic SDK
 
-See also: [[Claude-Ops-KB-Home]] · [[pi-agent-constraints-reference]] · [[pi-agent-log-analysis-plan]]
+See also: [[Claude-Ops-KB-Home]] · [[pi-agent-constraints-reference]] · [[pi-agent-log-analysis-plan]] · [[opencode-pi-base-development-analysis]] · [[参考-Pi-Agent-技术调研报告]]
 
 ## 定义
 
@@ -19,7 +19,9 @@ Pi Agent (Mario Zechner/badlogic) 是 TypeScript 编写的 AI Agent 工具包，
 
 ## 核心约束
 
-- **4 原子工具**: read, write, edit, bash (Unix 哲学 — 组合而非新增)
+- **内置工具（0.84.3 源码核验）**: bash / read / write / edit / edit-diff / grep / find / ls / powershell（Windows 一等支持的直接证据）
+
+> [!note] 勘误 (2026-08-26): 本文早期沿用宣传口径「read/write/edit/bash 四原子工具」；经 @earendil-works/pi-coding-agent@0.84.3 npm 包源码逐文件核验，面向模型的内置工具实为上列 9 种（见 [[参考-Pi-Agent-技术调研报告]] §11.3）。「组合而非新增」的极简哲学不变。
 - **~800 token 系统提示词预算** (刻意保持低开销)
 - **无 Agent spawn** — 无子 Agent 概念，用 parallel tools 或 多 AgentSession 模拟
 - **无内置权限系统** — 依赖 Docker/Gondolin/OpenShell 容器化
@@ -39,7 +41,7 @@ Pi Agent (Mario Zechner/badlogic) 是 TypeScript 编写的 AI Agent 工具包，
 | 维度 | Pi Agent | opencode |
 |------|----------|----------|
 | 语言 | TypeScript (Node.js) | TypeScript（TUI 部分为 Go） |
-| 工具模型 | 4 原子工具 | 丰富工具集 |
+| 工具模型 | 内置 9 工具（bash/read/write/edit/edit-diff/grep/find/ls/powershell） | 丰富工具集 |
 | 并行 | toolExecution: "parallel" (LLM 自主) | 依赖插件 (agent-intercom) |
 | 嵌入 | SDK in-process | subprocess / HTTP |
 | 系统提示词 | ~800 tokens (强制精简) | 无硬限制 |
@@ -52,7 +54,7 @@ Pi Agent (Mario Zechner/badlogic) 是 TypeScript 编写的 AI Agent 工具包，
 - LLM 自主决定并行维度 → 更灵活但可控性低于代码固定的 ThreadPoolExecutor
 
 **Why:** Pi Agent 和 opencode 是两种完全不同的 Agent 框架范式 — TypeScript SDK 嵌入 vs TypeScript CLI subprocess 调用（TUI 为 Go）。选择哪个决定了整个 HTTP 服务的技术栈。
-**How to apply:** 设计基于 Pi Agent 的服务时，始终从 "4 工具 + 800 token + SDK in-process" 的约束出发，不要照搬 opencode 的方案。
+**How to apply:** 设计基于 Pi Agent 的服务时，始终从 "内置工具集 + 800 token + SDK in-process" 的约束出发，不要照搬 opencode 的方案。
 
 ## 关联
 

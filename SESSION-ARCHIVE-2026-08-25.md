@@ -3,7 +3,7 @@ title: SESSION-ARCHIVE-2026-08-25
 aliases: [2026-08-25 会话归档]
 tags: [meta]
 created: 2026-08-25
-updated: 2026-08-25
+updated: 2026-08-26
 status: review
 ---
 
@@ -58,7 +58,7 @@ status: review
 | claude-ops/事故复盘+Agent-架构模式 | hermes 80min→~110min 时间线、ping 口径澄清、opencode Python→TypeScript(+Go TUI)、nginx select 1024/单 worker、逃生通道级别统一、状态机补 ESCALATE 终态（附待确认 callout）、cron hosts 追加缺陷修正、HTTP/2 根因叙述纠正、死链按 MEMORY-INDEX 重定向修复 | 11 文件 / 28 处 |
 | claude-ops/运维方案与设计 | 锚点工具 9/10 统一、sysctl PRoot 不可用 warning、fail-open 超时语义、claude-haiku-4-5→deepseek-chat 映射注、reusePort 正确实现、cache-proxy-evaluation 转 deprecated | 19 文件 / 76 处 |
 
-死链专项：Plans 内 [[hermes-parallel-task-communication]] 等历史死链全部改为真实文件名或加失效注记。
+死链专项：Plans 内 `hermes-parallel-task-communication` 等历史死链全部改为真实文件名或加失效注记。
 
 ## 五、规范演进（AGENTS.md）
 
@@ -91,5 +91,32 @@ status: review
    git -c http.proxy=http://[IP已脱敏]:10808 push origin main
    ```
    （直连可达时可省 proxy 参数）
+
+## 十、同日追加会话：OpenCode/Pi 基座研究与日志分析多Agent架构设计
+
+> 第二会话（同日晚）。主题：OpenCode 扩展机制知识补全、主↔子 agent 实时交互方案、基座开发七维度选型、日志网络根因分析多Agent架构。
+
+### 产出（6 新文档）
+
+| 文档 | 要点 |
+|---|---|
+| [[参考-OpenCode-技术调研报告]] | Agent双mode/task委派与四大缺口(异步#5887/嵌套#9280/并行#29638/resume#6584)、plugin五hook+event Bus、自定义tool(zod)、SKILL渐进披露、MCP local/remote、opencode.json permission last-match、**serve REST+/event SSE+abort**（GitLab orbit/Onyx 生产佐证）、v1.18.23/MIT |
+| [[参考-Pi-Agent-技术调研报告]] | badlogic→Earendil 迁移史、库优先 createAgentSession 三层API、**steer()/followUp() 双队列**、AbortSignal/interrupt、树状JSONL、无内核MCP、默认无权限、Windows坑、0.x破坏性变更+npm作用域迁移风险 |
+| [[main-subagent-realtime-interaction]] | 实时交互四原语（感知/邮箱/打断/恢复）、四层活性金字塔与判定矩阵、T0..T3升级阶梯（Pi steer=T1.5当轮注入）、mailbox协议、checkpoint模板 |
+| [[opencode-pi-base-development-analysis]] | 双层基座推荐（OpenCode交互基座+Sidecar外挂，Pi嵌入备选）；manifest入上下文+secure_read明文治理；关键字短路两级；会话池/cache亲和/背压；跨平台矩阵；Phase 0-4路线图；ADR D1-D6 |
+| [[lognet-rootcause-multiagent-architecture]] | LogNet图模型(SQLite+FTS5)+时钟域对齐；从问题节点frontier评分渐进展开；符号化工具链(addr2line/llvm-symbolizer批处理+build-id匹配+**artget适配器**)；多包并发流水线；容量估算与PoC假设清单；M0-M4路线 |
+| [[agent-memory-context-knowledge-design]] | 记忆三级模型(L1窗口/L2checkpoint/L3知识库)；上下文五源装配+前缀稳定排序(缓存亲和)；外部知识库化四形态(规则/事实/方法论/案例)+写入三闸门与混合检索；直接复用本库 AGENTS 协议为产品内知识库规范 |
+
+### 关联修改
+
+- MOC 挂载：[[AI-Links-KB-Home]] 文档地图 +2 调研报告行；[[Claude-Ops-KB-Home]] ARCH 表 +4 行（review ×4）；[[MEMORY-INDEX]] 新增节 4 条
+- 反向链接补齐：opencode-multi-agent-architecture / fan-out-subagent-pattern / state-machine-quality-gate-loop / pi-agent-framework-knowledge / log-analysis-agent-windows-architecture 的 See also
+- 调研方式：两路后台子代理多轮 web_search 交叉验证（ox-alpha 继承，未传 model 覆盖）
+
+### 本会话遗留
+
+1. 两份调研报告各含 6-8 处「待确认」（org 归属、explore agent、MCP 分隔符、allowed-tools 执行、zod 细节等），后续可实机核验
+2. artget 为内部工具，接入设计按"制品拉取"口径完成（用户确认），实际 CLI 参数待对齐
+3. Doc C/D 的 Phase/M 路线图为设计稿，未启动实施
 
 > 相关：[[Network-KB-Home]] · [[Claude-Ops-KB-Home]] · [[AI-Links-KB-Home]] · [[TYPORA-KB-Home]]

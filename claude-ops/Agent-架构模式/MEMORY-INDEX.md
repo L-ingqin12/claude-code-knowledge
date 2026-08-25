@@ -3,7 +3,7 @@ title: MEMORY-INDEX
 aliases: [Memory 索引, memory 知识索引, MEMORY 记忆索引]
 tags: [ai/ops, ai/agent]
 created: 2026-08-17
-updated: 2026-08-25
+updated: 2026-08-26
 status: stable
 ---
 
@@ -23,8 +23,17 @@ See also: [[Claude-Ops-KB-Home]] · [[AGENTS]] · [[AI-Links-KB-Home]]
 | [[fan-out-subagent-pattern]] | 并行分发 N 个子任务、防冲突机制、OpenCode vs Claude Code 对比 |
 | [[log-analysis-agent-windows-architecture]] | Nginx+Tornado 多进程+ThreadPoolExecutor 异步隔离+Windows TCP 调优 |
 | [[opencode-multi-agent-architecture]] | Primary/Subagent 两层模型、自规划调度、Fan-Out、权限隔离 |
-| [[pi-agent-framework-knowledge]] | TypeScript monorepo、4 原子工具、800token 预算、programmatic SDK |
+| [[pi-agent-framework-knowledge]] | TypeScript monorepo、内置工具 9 种（0.84.3 源码核验，含 powershell/edit-diff）、800token 预算、programmatic SDK |
 | [[state-machine-quality-gate-loop]] | 7 状态控制流、VERIFY 门/RETRY 回环/ESCALATE、死循环保护 |
+
+## 2026-08-25 新增架构文档（4 篇）
+
+| 新文档 | 摘要 |
+|--------|------|
+| [[main-subagent-realtime-interaction]] | 主↔子 agent 实时交互四原语：活性感知(4层金字塔)/邮箱通知/打断抢占/checkpoint 恢复 + T0..T3 升级阶梯 |
+| [[opencode-pi-base-development-analysis]] | 基座开发七维度选型：OpenCode 交互基座+Sidecar 外挂 vs Pi 嵌入；明文治理 manifest+secure_read；会话池流水排布；跨平台矩阵与 Phase 0-4 路线图 |
+| [[lognet-rootcause-multiagent-architecture]] | 日志网络根因分析多Agent架构：LogNet 图+时间线、从问题节点渐进展开、符号化工具链(addr2line/artget)、多包并发与可行性路线 |
+| [[agent-memory-context-knowledge-design]] | 记忆三级模型(L1窗口/L2状态/L3知识库)、上下文五源装配与前缀稳定排序、外部知识库化四形态与写入检索治理（复用本库 AGENTS 协议） |
 
 ## 悬空条目已重定向（6 条）
 
@@ -59,5 +68,6 @@ See also: [[Claude-Ops-KB-Home]] · [[AGENTS]] · [[AI-Links-KB-Home]]
 - 部署工作流 → 部署记录：[[claude-deployment-record]]
 - 异步隔离/日志分析：[[log-analysis-agent-architecture]] · [[agent-async-isolation-pattern]]
 - Fan-Out/质量门控/OpenCode：[[fan-out-subagent-pattern]] · [[state-machine-quality-gate-loop]] · [[opencode-multi-agent-architecture]]
+- 实时交互/基座选型：[[main-subagent-realtime-interaction]] · [[opencode-pi-base-development-analysis]] · [[lognet-rootcause-multiagent-architecture]] · [[agent-memory-context-knowledge-design]]
 - Pi Agent 体系：[[pi-agent-framework-knowledge]] · [[pi-agent-constraints-reference]]
 - Hermes 并行机制：[[hermes-parallel-task-report]]

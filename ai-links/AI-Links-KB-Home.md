@@ -3,7 +3,7 @@ title: AI 链接收藏库 MOC
 aliases: [AI Links KB, AI链接收藏库, AI-Links MOC]
 tags: [moc, ai/links]
 created: 2026-08-16
-updated: 2026-08-25
+updated: 2026-08-26
 status: review
 ---
 
@@ -30,6 +30,8 @@ See also: [[AGENTS]] | [[AI大模型开发]] | [[TYPORA-KB-Home]] | [[2026-08-16
 | [[Articles-Index]] | 远程文章库索引（可解释性/上下文工程/Skill/机制拆解/训练实录 14 篇） |
 | [[Open-Magiviz-AI视频创作平台]] | 开源 AI 视频创作 SaaS 参考（追加 2026-08-18） |
 | [[Vercel-AI编码Agent-Harness课程]] | Vercel 手写 Agent Harness 课程（11 模块 + Capstone，追加 2026-08-18） |
+| [[参考-OpenCode-技术调研报告]] | OpenCode 全机制调研：Agent/Plugin-Hook/自定义工具/Skills/MCP/Server-SDK/社区生态（2026-08-25） |
+| [[参考-Pi-Agent-技术调研报告]] | Pi (badlogic→Earendil) 调研：SDK 嵌入/steer-followUp 队列/扩展系统/权限与风险（2026-08-25） |
 
 ## 文档关系图
 

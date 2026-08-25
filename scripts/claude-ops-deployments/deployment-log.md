@@ -156,3 +156,15 @@
 - **排查文档**: docs/production-diagnosis-2026-07-06.md
 - **优化计划**: plans/agent-gate-optimization-plan-2026-07-06.md
 - **commit**: 44130d4
+
+## 2026-08-26
+
+### lognet-poc M0 数据层原型 (入库)
+- **时间**: 2026-08-26 ~01:30
+- **操作**: 新增 scripts/lognet-poc/（非运行时部署，代码资产入库）
+- **变更**: hilog/kmsg 解析注册表、连续重复折叠、SQLite+FTS5 LogNet 建库（WAL/synchronous=NORMAL/keyset 分页）、query_logs/get_subgraph 工具、合成故障链生成器、27 项 unittest
+- **预检**: ✅ miniconda Python 3.13 + sqlite3 FTS5 可用性验证内建
+- **E2E**: ✅ run_tests.ps1 全绿（unittest 27/27 + CLI build/query/subgraph 冒烟 + FTS 基准 P50=12.7ms/P95=348ms@291k 折叠行，500ms CI 闸通过）
+- **逃生**: `git revert 7a7ba14` 或直接删除 scripts/lognet-poc/（无外部副作用；派生 db 可随时重建）
+- **日志可审计**: builder.stats 结构化输出（每文件 events/folded_rows/skipped_lines/unknown_files）
+- **commit**: 7a7ba14

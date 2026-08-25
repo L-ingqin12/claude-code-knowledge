@@ -3,7 +3,7 @@ title: 日志分析 Agent — Windows 高并发部署架构
 aliases: []
 tags: [ai/ops, ai/agent]
 created: 2026-08-10
-updated: 2026-08-25
+updated: 2026-08-26
 status: stable
 ---
 
@@ -11,7 +11,7 @@ status: stable
 
 > [!abstract] 日志分析 Agent 服务在 Windows 上的高并发架构设计 — Nginx+Tornado 多进程+ThreadPoolExecutor 异步隔离+Windows TCP 调优
 
-See also: [[Claude-Ops-KB-Home]] · [[agent-async-isolation-pattern]] · [[log-analysis-agent-architecture]]
+See also: [[Claude-Ops-KB-Home]] · [[agent-async-isolation-pattern]] · [[log-analysis-agent-architecture]] · [[lognet-rootcause-multiagent-architecture]]
 
 ## 核心决策
 

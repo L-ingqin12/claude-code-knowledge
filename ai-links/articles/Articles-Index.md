@@ -3,7 +3,7 @@ title: AI 文章库索引（子 MOC）
 aliases: [Articles Index, 文章索引, AI文章库, Articles-MOC]
 tags: [moc, ai/learning]
 created: 2026-08-17
-updated: 2026-08-25
+updated: 2026-08-26
 status: review
 ---
 
@@ -60,6 +60,14 @@ Agent 产品内部是怎么实现的。
 | [[Loop-Engineering-深度拆解-从产品功能集到方法论包装]] | Loop 从产品功能集是怎么被包装成方法论的？ | 2026-06-25 |
 | [[Agent韧性架构分析-微信转载]] | Claude Code 的容错/成本/认证/观测四支柱怎么设计？ | 2026-06-13 |
 
+### 🤝 多智能体编排（1 篇）
+
+生产级 Orchestrator-Worker 模式的一手复盘，本库多代理协议的外部锚点。
+
+| 文档 | 回答的问题 | 日期 |
+|------|-----------|------|
+| [[Anthropic多智能体研究系统拆解]] | 编排者-工作者模式为什么有效？委派工程/上下文经济学(15×)/评测三件套怎么做？ | 2026-08-26 |
+
 ### 🏋️ 训练/复刻实录（1 篇）
 
 真正跑一次训练会踩什么坑。
@@ -101,6 +109,10 @@ Agent 产品内部是怎么实现的。
         │   ├─ Claude-Code记忆机制源码拆解
         │   ├─ Loop-Engineering-深度拆解-从产品功能集到方法论包装
         │   └─ Agent韧性架构分析-微信转载
+        ├─ 多智能体编排: 1 篇
+        │   └─ Anthropic多智能体研究系统拆解
+        │       ├─ → main-subagent-realtime-interaction
+        │       └─ → fan-out-subagent-pattern
         ├─ 训练实录: 1 篇
         │   └─ 预训练迷你Kimi-K3实录-章节总结
         │       └─ → AI大模型开发
@@ -113,7 +125,7 @@ Agent 产品内部是怎么实现的。
 
 - `#ai/learning` — 学习与精读：可解释性 3 篇、上下文工程落地实践、Skill 系统 5 篇、机制拆解 3 篇
 - `#ai/skills` — Skill 系统相关：实用 Skills 参考、规模化管理、迁移设计、日志 Demo、Anthropic 深度分析（5 篇）
-- `#ai/agent` — Agent 机制：记忆机制源码拆解、Loop-Engineering、Agent 韧性架构（3 篇）
+- `#ai/agent` — Agent 机制：记忆机制源码拆解、Loop-Engineering、Agent 韧性架构、多智能体研究系统拆解（4 篇）
 - `#ai/links` — 微信转载：上下文工程理论、Agent 韧性架构分析（2 篇）
 - `#reference` — 引用型文档：论文精读/转载原文出处（8 篇）
 - `#moc` — 本页
@@ -124,8 +136,8 @@ Agent 产品内部是怎么实现的。
 
 | 项 | 值 |
 |---|---|
-| 文章总数 | 14（articles/ 11 篇 + 仓库根目录 2 篇 + 2026-08-18 新增 K3 章节总结 1 篇） |
-| 分组 | 5 组：可解释性 3 / 上下文工程 2 / Skill 5 / 机制拆解 3 / 训练实录 1 |
+| 文章总数 | 15（articles/ 12 篇 + 仓库根目录 2 篇 + 2026-08-18 新增 K3 章节总结 1 篇） |
+| 分组 | 6 组：可解释性 3 / 上下文工程 2 / Skill 5 / 机制拆解 3 / **多智能体编排 1（2026-08-26 新增）** / 训练实录 1 |
 | 迁移日期 | 2026-08-17（源：`_install-tmp/akb-remote`，只读源未改动） |
 | status 分布 | stable 11 篇 / review 3 篇（设计/Demo 类） |
 | 命名调整 | 2 篇改为主语义中文命名：`Agent韧性架构分析-微信转载.md`、`Anthropic-Skill系统深度分析.md` |
@@ -138,6 +150,7 @@ Agent 产品内部是怎么实现的。
 - **想把 Agent 做稳/做省** → 上下文工程两篇（理论 → 落地），辅以 [[Agent韧性架构分析-微信转载]]（容错/成本四支柱）。
 - **想管理规模化 Skill** → [[Claude-Code实用Skills参考]]（有什么可用）→ [[Anthropic-Skill系统深度分析]]（设计原理）→ [[Skill规模化管理-从渐进式披露到检索式发现]]（规模化方案）→ [[Agent驱动Skill迁移设计]] + [[日志检索分析系统-Skill管理Demo设计]]（落地）。
 - **想懂 Claude Code 内部** → [[Claude-Code记忆机制源码拆解]] → [[Loop-Engineering-深度拆解-从产品功能集到方法论包装]]。
+- **想搭多代理系统** → [[Anthropic多智能体研究系统拆解]]（生产级编排者-工作者：委派工程/15× token 经济学/评测三件套），对照本库 [[main-subagent-realtime-interaction]] 协议与 [[fan-out-subagent-pattern]]。
 - **想搞一次真实的预训练** → [[预训练迷你Kimi-K3实录-章节总结]]（先测量再优化：MFU 只有 2.5% 时钱花在哪）。
 
 ## 另见

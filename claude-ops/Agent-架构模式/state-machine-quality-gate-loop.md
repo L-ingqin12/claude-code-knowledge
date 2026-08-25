@@ -3,7 +3,7 @@ title: 状态机式质量门控回环
 aliases: []
 tags: [ai/ops, ai/agent]
 created: 2026-07-01
-updated: 2026-08-25
+updated: 2026-08-26
 status: stable
 ---
 
@@ -11,7 +11,7 @@ status: stable
 
 > [!abstract] 状态机式质量门控反馈回环 — 多智能体系统可靠性控制的核心模式
 
-See also: [[Claude-Ops-KB-Home]] · [[fan-out-subagent-pattern]] · [[opencode-multi-agent-architecture]]
+See also: [[Claude-Ops-KB-Home]] · [[fan-out-subagent-pattern]] · [[opencode-multi-agent-architecture]] · [[main-subagent-realtime-interaction]]
 
 ## 仓库
 https://github.com/L-ingqin12/opencode-multi-agent-system

@@ -3,7 +3,7 @@ title: OpenCode 多智能体协作架构
 aliases: []
 tags: [ai/ops, ai/agent]
 created: 2026-07-01
-updated: 2026-08-17
+updated: 2026-08-26
 status: stable
 ---
 
@@ -11,7 +11,7 @@ status: stable
 
 > [!abstract] OpenCode 两层智能体架构的设计原理与自规划调度机制
 
-See also: [[Claude-Ops-KB-Home]] · [[fan-out-subagent-pattern]] · [[state-machine-quality-gate-loop]]
+See also: [[Claude-Ops-KB-Home]] · [[fan-out-subagent-pattern]] · [[state-machine-quality-gate-loop]] · [[main-subagent-realtime-interaction]] · [[opencode-pi-base-development-analysis]]
 
 ## 仓库
 https://github.com/L-ingqin12/opencode-multi-agent-system
