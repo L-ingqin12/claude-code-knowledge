@@ -35,6 +35,14 @@ See also: [[Claude-Ops-KB-Home]] · [[AGENTS]] · [[AI-Links-KB-Home]]
 | [[lognet-rootcause-multiagent-architecture]] | 日志网络根因分析多Agent架构：LogNet 图+时间线、从问题节点渐进展开、符号化工具链(addr2line/artget)、多包并发与可行性路线 |
 | [[agent-memory-context-knowledge-design]] | 记忆三级模型(L1窗口/L2状态/L3知识库)、上下文五源装配与前缀稳定排序、外部知识库化四形态与写入检索治理（复用本库 AGENTS 协议） |
 
+## 2026-08-26 新增（3 篇）
+
+| 新文档 | 摘要 |
+|--------|------|
+| [[agent-harness-anatomy]] | Agent Harness 七件套解剖(提示词脚手架/工具循环/上下文记忆/权限沙箱/子代理编排/Hook扩展/观测评测)、Claude Code/OpenCode/Pi/DSH 四家实现对照、从零构建决策树(Anthropic 五模式)与反模式清单 |
+| [[agent-evals-observability]] | Agent 评测三层次(单步/轨迹/端到端)、四层方法栈(确定性断言→LLM-as-Judge 校准→人工盲测→在线评估)、trace 结构化采集、质量门控 RETRY/ESCALATE 阈值定标与成本计量 |
+| [[Anthropic多智能体研究系统拆解]]（articles/） | 编排者-工作者生产复盘：委派工程三要素/努力分级/15× token 经济学/评测三件套，映射本库协议 |
+
 ## 悬空条目已重定向（6 条）
 
 | 原索引条目（文件不存在） | 重定向至本库等价文档 |
@@ -69,5 +77,6 @@ See also: [[Claude-Ops-KB-Home]] · [[AGENTS]] · [[AI-Links-KB-Home]]
 - 异步隔离/日志分析：[[log-analysis-agent-architecture]] · [[agent-async-isolation-pattern]]
 - Fan-Out/质量门控/OpenCode：[[fan-out-subagent-pattern]] · [[state-machine-quality-gate-loop]] · [[opencode-multi-agent-architecture]]
 - 实时交互/基座选型：[[main-subagent-realtime-interaction]] · [[opencode-pi-base-development-analysis]] · [[lognet-rootcause-multiagent-architecture]] · [[agent-memory-context-knowledge-design]]
+- Harness 解剖/评测观测：[[agent-harness-anatomy]] · [[agent-evals-observability]]
 - Pi Agent 体系：[[pi-agent-framework-knowledge]] · [[pi-agent-constraints-reference]]
 - Hermes 并行机制：[[hermes-parallel-task-report]]

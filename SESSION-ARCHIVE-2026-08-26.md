@@ -59,7 +59,34 @@ status: stable
 | `1e83c71` | docs(audit): 全库一致性审计 13 文件 |
 | `7a7ba14` | feat(lognet-poc): M0 数据层原型 |
 | `677d57b` | docs: 归档本篇 + DocD M0 回标 + KB-Home 挂载 + deployment-log |
-| （本条） | docs: COM/CPO 两份学习文档入库 |
+| `f6f70fe` | docs: COM/CPO 两份学习文档 |
+| `51309e8` | docs(ai-links): 文章库补缺 — 多智能体编排组（Anthropic 多智能体系统拆解）|
+| （v5） | docs: Harness 解剖学 + 评测观测两篇 + MOC 挂载；脱敏推送 public→main |
+
+## 五·五、AI 知识缺口审视与补充（用户追加指令）
+
+**审视范围**：harness/Context/AI 框架/Agent 构建/文章分析。
+**方法**：结构扫描（38 篇 AI 文档 frontmatter/wikilinks/Mermaid/gap 标记全过）+ 索引覆盖核查（Articles-Index/AI-Links-Home/AI-Dev-Home 三级 MOC 零遗漏）+ 主题组盘点。
+
+**结论与处置**：
+
+| 检查项 | 结果 | 处置 |
+|--------|------|------|
+| frontmatter/链接/禁则 | 全部合规；唯一"悬空链"系反引号内规范示例假阳性 | 无需修 |
+| 三级索引覆盖 | Articles-Index 14/15、两级 Home 零漏挂（补录前口径） | 已随新篇同步 |
+| 文章主题组 | 缺**多智能体编排**整组 | ✅ 新增 [[Anthropic多智能体研究系统拆解]]（委派工程/15×经济学/评测三件套+本库映射，`51309e8`）|
+| Harness 知识 | 散落七处无综合视图 | ✅ 新增 [[agent-harness-anatomy]]（七件套解剖+四家对照+构建决策树）|
+| 评测可观测 | 质量门控有协议、评测方法论缺失 | ✅ 新增 [[agent-evals-observability]]（三层次/四层栈/校准/门控集成）|
+| Agent 安全治理 | 分散于 4+ 文档（权限引擎/容器化/WMI 边界），暂不新建合成篇 | 登记为后续候选 |
+
+外部依据：Anthropic Building Effective Agents / Multi-Agent Research System / when-not-to-multi-agent、Simon Willison 编码代理原理综述、LangSmith trajectory evals 与 online evaluators、LLM-as-Judge 校准实践——正文逐条挂来源。
+
+## 六、脱敏推送记录
+
+- **v4**：`a518edf..fadb1f4` public→main（141+ 文件，含 PoC/调研五件套/审计修复/COM/CPO）
+- **v5**：追加多智能体拆解 + Harness/评测两篇后重镜像脱敏（103 文件改写/残留 IP 0/禁入路径 0），public→main 推送完成（哈希见 git log）
+
+
 
 ## 五、未解决问题与风险登记
 
@@ -71,4 +98,4 @@ status: stable
 
 ## Related
 
-[[SESSION-ARCHIVE-2026-08-25]] · [[参考-OpenCode-技术调研报告]] · [[参考-Pi-Agent-技术调研报告]] · [[lognet-rootcause-multiagent-architecture]] · [[opencode-pi-base-development-analysis]] · [[main-subagent-realtime-interaction]] · [[agent-memory-context-knowledge-design]] · [[参考-COM组件框架-Windows集成]] · [[参考-CPP-CPO定制点与std-execution]] · [[Claude-Ops-KB-Home]]
+[[SESSION-ARCHIVE-2026-08-25]] · [[参考-OpenCode-技术调研报告]] · [[参考-Pi-Agent-技术调研报告]] · [[lognet-rootcause-multiagent-architecture]] · [[opencode-pi-base-development-analysis]] · [[main-subagent-realtime-interaction]] · [[agent-memory-context-knowledge-design]] · [[agent-harness-anatomy]] · [[agent-evals-observability]] · [[Anthropic多智能体研究系统拆解]] · [[参考-COM组件框架-Windows集成]] · [[参考-CPP-CPO定制点与std-execution]] · [[Claude-Ops-KB-Home]]

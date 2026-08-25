@@ -111,6 +111,8 @@ See also: [[AGENTS]] · [[AI-Links-KB-Home]] · [[Network-KB-Home]]
 | [[opencode-pi-base-development-analysis]] | 基座开发七维度选型与服务化并发路线图（新增 2026-08-25） |
 | [[lognet-rootcause-multiagent-architecture]] | 日志网络根因分析多Agent架构：LogNet/渐进展开/符号化(artget)/可行性（新增 2026-08-25） |
 | [[agent-memory-context-knowledge-design]] | 记忆三级模型/上下文五源装配/外部知识库化策略（新增 2026-08-25） |
+| [[agent-harness-anatomy]] | Agent Harness 七件套解剖 + Claude Code/OpenCode/Pi/DSH 四家对照 + 构建决策树（新增 2026-08-26） |
+| [[agent-evals-observability]] | Agent 评测三层次/四层方法栈(LLM-as-Judge 校准)/trace 采集与门控集成（新增 2026-08-26） |
 | [[MEMORY-INDEX]] | memory 索引（含悬空条目说明） |
 
 ### 4. Plans（status: deprecated，全部归档）
