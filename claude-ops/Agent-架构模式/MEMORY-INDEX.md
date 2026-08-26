@@ -42,6 +42,8 @@ See also: [[Claude-Ops-KB-Home]] · [[AGENTS]] · [[AI-Links-KB-Home]]
 | [[agent-harness-anatomy]] | Agent Harness 七件套解剖(提示词脚手架/工具循环/上下文记忆/权限沙箱/子代理编排/Hook扩展/观测评测)、Claude Code/OpenCode/Pi/DSH 四家实现对照、从零构建决策树(Anthropic 五模式)与反模式清单 |
 | [[agent-evals-observability]] | Agent 评测三层次(单步/轨迹/端到端)、四层方法栈(确定性断言→LLM-as-Judge 校准→人工盲测→在线评估)、trace 结构化采集、质量门控 RETRY/ESCALATE 阈值定标与成本计量 |
 | [[Anthropic多智能体研究系统拆解]]（articles/） | 编排者-工作者生产复盘：委派工程三要素/努力分级/15× token 经济学/评测三件套，映射本库协议 |
+| [[opencode-深入使用与扩展实战]] | OpenCode 实操手册：permission last-match 规则、agent frontmatter 路由、TypeScript 自定义 tool、hook 五件套审计落盘、serve+SSE 服务化与排障 |
+| [[pi-agent深入使用与扩展实战]] | Pi 实操手册：L2 AgentSession 二开层、TypeBox defineTool 全码、steer/followUp/abort 三原语对应交互阶梯、RPC stdio 嵌入、JSONL 会话树→LogNet 数据通道 |
 
 ## 悬空条目已重定向（6 条）
 

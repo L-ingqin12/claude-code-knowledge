@@ -12,14 +12,16 @@ status: review
 > [!abstract] 定位
 > 语言、算法、系统、数据、工具链五大主干的知识底座，面向**面试八股 + 工程选型 + 机制级深潜**三用途。AI 应用层实战在 [[AI-Dev-KB-Home]]，网络运维实操在 [[Network-KB-Home]]；项目实证锚点（LogNet PoC）织入各篇。
 
-## 文档地图（12 篇）
+## 文档地图（16 篇）
 
 ### 语言与工具链
 | 文档 | 一句话 |
 |------|--------|
-| [[CPP-核心知识]] | RAII/移动语义/模板→concepts/内存序 |
+| [[CPP-核心知识]] | RAII/移动语义/模板→concepts/内存序 + **C++11→26 新特性纵深** |
 | [[LibC与动态链接]] | glibc vs musl、ELF 加载旅程、GOT/PLT、静态容器化账单 |
+| [[LibC运行时排查-TLS与锁]] | dlclose 陷阱/pthread_key 析构/TLS 四模型/futex 锁族/**排障手册** |
 | [[LLVM编译器基础设施]] | 三段式架构/优化 pass/Sanitizer/LTO-PGO/DWARF 符号化(→LogNet M1) |
+| [[LLVM使用调优与SO优化]] | flag 分层决策/SO 符号面-体积-启动-ABI 四维优化/PGO-LTO-BOLT/回归工作流 |
 
 ### 算法
 | 文档 | 一句话 |

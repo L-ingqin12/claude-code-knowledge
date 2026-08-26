@@ -65,7 +65,36 @@ See also: [[CS-KB-Home]] · [[参考-CPP-CPO定制点与std-execution]] · [[数
 | ABI/编译 | `-O2` 起步；sanitizers：ASan(内存)/TSan(数据竞争)/UBSan 全套进 CI |
 | 标准 | 项目锁定单一标准版本；C++23 主要件：`expected/print/mdspan` |
 
-## 六、待确认项
+## 六、新特性纵深（C++11 → 26：每代解决什么，怎么用对）
+
+### 演进主线一句话
+11 立语言现代化（移动/lambda/智能指针）→ 14 补漏 → 17 工程化（结构化绑定/optional）→ 20 范式跃迁（concepts/ranges/coroutines/modules）→ 23 易用性收官（expected/print/deducing this）→ 26 反射在路上。
+
+### 必须用对的十件事（附反例）
+| 特性 | 正确用法 | 反面案例 |
+|------|---------|---------|
+| 移动语义 | 移后即弃源对象；容器扩容自动受益 | 对 const 对象 std::move（退化成拷贝） |
+| lambda | 默认按值捕获+mutable；异步场景**显式捕获 shared_from_this** | `[&]` 引用逃逸出作用域→悬垂 |
+| constexpr | 编译期查表/静态配置 | 把 IO 塞进 constexpr 函数幻想优化 |
+| structured bindings | `auto [k,v] : map` | 绑定到临时对象再长期持有 |
+| optional/variant | 替换哨兵值与 union 手艺 | .value() 不检查直接炸（应 value_or） |
+| string_view | 免拷贝入参 | **存下 view 指向临时 string**（悬垂重灾区） |
+| span | 数组段抽象替代 ptr+len 双参 | 同上，不拥有内存 |
+| concepts | `template<CComparable T>` 报错可读 | 概念里塞运行期才可知的约束 |
+| coroutines(20) | co_await 封装 IO；框架层(asio)消费 | 裸写 promise_type（极易错，用库） |
+| modules(20/23) | 隔离宏泄漏、加速构建 | 与 unity build/ccache 生态混用踩坑 |
+
+### C++23 落地清单（项目可直接吃）
+- `std::expected<T,E>`：错误通道标准化——替换自研 result 类型（错误码+值双轨终结）
+- `std::print/println`：格式化输出统一 i18n 安全
+- `deducing this`：显式对象形参，CRGB 类模板递归简化、ref-qualified 去重载
+- `std::mdspan`：多维视图（数值/图像路径）
+- stacktrace：异常带栈（配合 [[LLVM编译器基础设施]] 符号化）
+
+### C++26 展望（跟踪不押注）
+反射(P2996 进展中)/契约(contracts)/std::execution 入 IS——生产采用等编译器落地矩阵（**待确认**），新代码按 [[参考-CPP-CPO定制点与std-execution]] 的迁移建议留薄壳。
+
+## 七、待确认项
 
 > ① 各编译器对 C++20 modules 的生产可用度差异；② coroutine TS→C++20 无栈协程在主流库（asio/cppcoro）的封装成熟度；③ 硬件内存模型（TSO/ARM 弱序）与 C++ 序映射的逐平台对照表。
 

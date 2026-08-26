@@ -31,6 +31,7 @@ status: review
 | 12 | [[微调数据工程与模型蒸馏]] | SFT/COT/偏好数据集构建 + R1 式黑箱蒸馏 | ![[Training-vs-Inference.excalidraw]]（复用） |
 | 13 | [[Agent-Skills技能开发实战]] | SKILL.md 规范与渐进式披露：给 Agent 写"说明书"（课程第13章补齐） | — |
 | 14 | [[多模态Agent平台实战]] | 语音/视觉管线四层架构与延迟预算（课程第21章补齐） | — |
+| 15 | [[LLM架构进阶-从注意力变体到推理引擎]] | MHA/GQA/MLA 演化账本、RoPE 外推、MoE 工程真相、连续批处理/PagedAttention/投机解码机制级（2026-08-26 新增） | — |
 
 ## 课程外增补雷达（2026 时效性缺口）
 

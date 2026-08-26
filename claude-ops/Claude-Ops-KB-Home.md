@@ -113,6 +113,8 @@ See also: [[AGENTS]] · [[AI-Links-KB-Home]] · [[Network-KB-Home]]
 | [[agent-memory-context-knowledge-design]] | 记忆三级模型/上下文五源装配/外部知识库化策略（新增 2026-08-25） |
 | [[agent-harness-anatomy]] | Agent Harness 七件套解剖 + Claude Code/OpenCode/Pi/DSH 四家对照 + 构建决策树（新增 2026-08-26） |
 | [[agent-evals-observability]] | Agent 评测三层次/四层方法栈(LLM-as-Judge 校准)/trace 采集与门控集成（新增 2026-08-26） |
+| [[opencode-深入使用与扩展实战]] | OpenCode 配置体系/自定义 tool 落码/hook 实战/serve-SSE 集成/排障（新增 2026-08-26） |
+| [[pi-agent深入使用与扩展实战]] | Pi 三层 API/TypeBox 工具全码/steer-followUp 双队列/RPC 嵌入/JSONL→LogNet 数据源（新增 2026-08-26） |
 | [[MEMORY-INDEX]] | memory 索引（含悬空条目说明） |
 
 ### 4. Plans（status: deprecated，全部归档）

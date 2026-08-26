@@ -52,7 +52,8 @@ knowledge/
 │   └── Plans/                         ← 归档计划 (deprecated)
 ├── typora/                            ← Typora 激活复盘子 Vault (MOC: TYPORA-KB-Home)
 ├── cs-base/                           ← 计算机基础子 Vault (MOC: CS-KB-Home)
-│   ├── CPP-核心知识 / LibC与动态链接 / LLVM编译器基础设施
+│   ├── CPP-核心知识 / LibC与动态链接 / LibC运行时排查-TLS与锁
+│   ├── LLVM编译器基础设施 / LLVM使用调优与SO优化
 │   ├── 数据结构与算法 / 深度学习算法基础
 │   ├── 数据库原理与调优 / MySQL-InnoDB精要 / Redis原理与实践
 │   ├── MongoDB原理与实践 / 向量数据库与检索

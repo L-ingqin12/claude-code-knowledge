@@ -64,6 +64,7 @@ status: stable
 | （v5） | docs: Harness 解剖学 + 评测观测两篇 + MOC 挂载；脱敏推送 public→main |
 | （v6） | docs(cs-base): 计算机基础子库 7 文件 + AGENTS 注册；脱敏推送 public→main |
 | （v7） | docs(cs-base): 数据库五分册+计组+LibC链接+LLVM 共 7 文件(MOC 重构)；全库审视后脱敏推送 public→main |
+| （v8） | docs: LibC运行时排查(dlclose/TLS/锁)+LLVM使用调优与SO优化 + LLM架构进阶 + OpenCode/Pi 实战手册 ×2 + 四篇讲透增补(C++新特性纵深等)；MOC×4 挂载；脱敏推送 |
 
 ## 五·五、AI 知识缺口审视与补充（用户追加指令）
 
@@ -82,6 +83,7 @@ status: stable
 | Agent 安全治理 | 分散于 4+ 文档（权限引擎/容器化/WMI 边界），暂不新建合成篇 | 登记为后续候选 |
 | C++/算法/系统八股（用户追加）| 全库无计算机基础主干，且无承载子库 | ✅ 新建 `cs-base/` 子库：[[CS-KB-Home]] MOC + 6 篇（C++核心/数据结构算法/DL算法基础/OS/网络/高并发），AGENTS 树+MOC 表+标签体系同步注册 |
 | 数据库分册+组原+工具链（用户追加）| 通用篇缺 MySQL/MongoDB/Redis/向量库分册与 musl/LLVM 底座 | ✅ 再增 6 篇：数据库原理与调优(含 SQLite 实测)/MySQL精要/Redis/MongoDB/向量检索/计组原理/LibC动态链接/LLVM(DWARF→LogNet M1 锚点)，cs-base 达 13 篇内容+MOC；全库审视(221 md)：frontmatter 缺失仅 scripts/ 运维件、Mermaid 零违例、悬空链接均为代码示例/坐标噪声，AGENTS.md 补 status 字段 |
+| 实战纵深+AI基座深入学习（用户追加）| 排障向 libc 知识缺位；LLVM 停留在架构层；LLM/OpenCode/Pi 无实操手册；四篇基础文档偏罗列 | ✅ 新增 LibC运行时排查-TLS与锁(dlclose/pthread_key/futex/排障手册)、LLVM使用调优与SO优化(符号面/体积/启动/ABI 四维)、LLM架构进阶(KV账本/GQA-MLA/PagedAttention/投机解码)、OpenCode 与 Pi 实战手册各一篇；CPP 新特性 C++11→26 纵深、网络/OS/组原机制推演增补；全部挂载 MOC |
 
 外部依据：Anthropic Building Effective Agents / Multi-Agent Research System / when-not-to-multi-agent、Simon Willison 编码代理原理综述、LangSmith trajectory evals 与 online evaluators、LLM-as-Judge 校准实践——正文逐条挂来源。
 
