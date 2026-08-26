@@ -50,6 +50,9 @@ knowledge/
 │   ├── Agent-架构模式/                 ← 架构模式与记忆 (含 MEMORY-INDEX)
 │   └── Plans/                         ← 归档计划 (deprecated)
 ├── typora/                            ← Typora 激活复盘子 Vault (MOC: TYPORA-KB-Home)
+├── cs-base/                           ← 计算机基础子 Vault (MOC: CS-KB-Home)
+│   ├── CPP-核心知识.md / 数据结构与算法.md / 深度学习算法基础.md
+│   └── 操作系统八股.md / 计算机网络八股.md / 高并发系统设计.md
 ├── diagrams/                          ← Excalidraw 图表库 + ARROW-CHECKLIST
 ├── scripts/                           ← 跨库脚本 (claude-ops-deployments/dumps)
 └── SESSION-ARCHIVE-*.md               ← 会话归档
@@ -110,6 +113,10 @@ status: draft | review | stable | deprecated
 #ai/links             AI 链接收藏与综述
 #ai/tools             AI 工具收藏 (DSH 插件、终端工具等)
 #ai/ops               Agent 无人值守运维 (claude-ops 子库)
+#cs/cpp               C++ 语言与专题
+#cs/algo              数据结构与算法
+#cs/dl                深度学习算法基础
+#cs/os / #cs/net / #cs/system   操作系统/计算机网络/高并发
 #meta                  元文档 (AGENTS, MOC, 会话归档)
 ```
 
@@ -172,6 +179,7 @@ status: draft | review | stable | deprecated
 | Claude Code 运维 | [[Claude-Ops-KB-Home]] |
 | LLM 应用开发实战 | [[AI-Dev-KB-Home]] |
 | Typora 激活复盘 | [[TYPORA-KB-Home]] |
+| 计算机基础 | [[CS-KB-Home]] |
 
 MOC 应包含：概述、文档地图、关系图（**Excalidraw 嵌入或缩进文字树**——Markdown 中禁止 Mermaid，见第十一节）、标签索引、关键数据、脚本清单。
 

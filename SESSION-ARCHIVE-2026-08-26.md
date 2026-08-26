@@ -62,6 +62,7 @@ status: stable
 | `f6f70fe` | docs: COM/CPO 两份学习文档 |
 | `51309e8` | docs(ai-links): 文章库补缺 — 多智能体编排组（Anthropic 多智能体系统拆解）|
 | （v5） | docs: Harness 解剖学 + 评测观测两篇 + MOC 挂载；脱敏推送 public→main |
+| （v6） | docs(cs-base): 计算机基础子库 7 文件 + AGENTS 注册；脱敏推送 public→main |
 
 ## 五·五、AI 知识缺口审视与补充（用户追加指令）
 
@@ -78,6 +79,7 @@ status: stable
 | Harness 知识 | 散落七处无综合视图 | ✅ 新增 [[agent-harness-anatomy]]（七件套解剖+四家对照+构建决策树）|
 | 评测可观测 | 质量门控有协议、评测方法论缺失 | ✅ 新增 [[agent-evals-observability]]（三层次/四层栈/校准/门控集成）|
 | Agent 安全治理 | 分散于 4+ 文档（权限引擎/容器化/WMI 边界），暂不新建合成篇 | 登记为后续候选 |
+| C++/算法/系统八股（用户追加）| 全库无计算机基础主干，且无承载子库 | ✅ 新建 `cs-base/` 子库：[[CS-KB-Home]] MOC + 6 篇（C++核心/数据结构算法/DL算法基础/OS/网络/高并发），AGENTS 树+MOC 表+标签体系同步注册 |
 
 外部依据：Anthropic Building Effective Agents / Multi-Agent Research System / when-not-to-multi-agent、Simon Willison 编码代理原理综述、LangSmith trajectory evals 与 online evaluators、LLM-as-Judge 校准实践——正文逐条挂来源。
 
@@ -85,6 +87,7 @@ status: stable
 
 - **v4**：`a518edf..fadb1f4` public→main（141+ 文件，含 PoC/调研五件套/审计修复/COM/CPO）
 - **v5**：追加多智能体拆解 + Harness/评测两篇后重镜像脱敏（103 文件改写/残留 IP 0/禁入路径 0），public→main 推送完成（哈希见 git log）
+- **v6**：cs-base 子库入库后重镜像脱敏，public→main 快进推送（流程同 v5；期间修复一次 amend 改写已推历史导致的非快进拒绝——改用 fetch+soft reset 重放增量）
 
 
 
