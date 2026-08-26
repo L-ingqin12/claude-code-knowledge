@@ -45,6 +45,32 @@ See also: [[CS-KB-Home]] · [[MySQL-InnoDB精要]] · [[Redis原理与实践]] �
 - `$lookup` 即左外连接——大集合互 join 性能差，属建模失败信号而非调优对象
 - `$facet` 单次多分支输出仪表盘场景利器
 
+## 四·补、ESR 与 explain 走读（代码级）
+
+### ESR 组装实例
+查询：`db.orders.find({user_id: u, status: "paid"}).sort({created_at: -1})`
+
+```
+E(quality) → S(sort) → R(range) 的顺序推演:
+  user_id 等值 → 放最前(E)
+  created_at 排序 → 第二(S): 等值字段之后紧跟排序字段,
+                    索引天然按 user_id 内的 created_at 有序 → 免内存排序
+  status 过滤 → 最后(R): 若放第二, 则 created_at 在索引里不再连续, sort 需内存 TOP-K
+最终: { user_id: 1, created_at: -1, status: 1 }
+     (status 挪到末尾仍可被 ISCAN 过滤; 若 status 基数极低可考虑部分索引 partialFilter)
+```
+
+**反面教材**：`{status:1, user_id:1, created_at:-1}`——status 只有 3 个取值，索引前缀区分度≈无，等于全索引扫。
+
+### explain("executionStats") 判读模板
+```
+winningPlan: FETCH←IXSCAN{user_id,created_at}   ✓ 走了目标索引
+totalKeysExamined: 42   totalDocsExamined: 42   nReturned: 42
+                       ↑ 三数相等=完美比率; keys/docs 远大于 returned = 扫描浪费
+executionTimeMillis + stage 里出现 SORT(内存排序) / COLLSCAN = 立刻加索引或改查询
+```
+健康线：`keysExamined ≈ docsExamined ≈ nReturned`（1:1:1）；分页场景配合范围查询避免 skip 深翻页（与 [[数据库原理与调优]] §七 keyset 思想同源）。
+
 ## 五、副本集与分片
 
 - oplog(capped) 增量同步；选举协议 Raft 衍生(v1)：多数派 term+priority；**write concern=majority + read concern majority** 才有跨故障切换的读己之写承诺；retryable writes 幂等重试

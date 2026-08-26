@@ -66,6 +66,7 @@ status: stable
 | （v7） | docs(cs-base): 数据库五分册+计组+LibC链接+LLVM 共 7 文件(MOC 重构)；全库审视后脱敏推送 public→main |
 | （v8） | docs: LibC运行时排查(dlclose/TLS/锁)+LLVM使用调优与SO优化 + LLM架构进阶 + OpenCode/Pi 实战手册 ×2 + 四篇讲透增补(C++新特性纵深等)；MOC×4 挂载；脱敏推送 |
 | （v9） | docs(cs-base): 设计模式实战(代码级重写)+架构设计与方案选型(ADR 全文/选型推导) + 数据结构/高并发 走读级加深；脱敏推送 |
+| （v10）| docs(cs-base): 深度学习算法基础反向传播手推(标量全流程/CE梯度推导/消失算术本质) + Redis 渐进rehash trace与Lua锁竞态 + MySQL 锁矩阵SQL复现双会话表 + MongoDB ESR组装与explain判读；脱敏推送 |
 
 ## 五·五、AI 知识缺口审视与补充（用户追加指令）
 

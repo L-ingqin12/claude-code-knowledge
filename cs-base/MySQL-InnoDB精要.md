@@ -70,6 +70,33 @@ See also: [[CS-KB-Home]] · [[数据库原理与调优]] · [[Redis原理与实�
 
 优化器干预：`ANALYZE TABLE` 刷统计；hint(USE/FORCE INDEX) 最后手段并注释原因。
 
+## 五·补、锁矩阵 SQL 复现脚本（RR 隔离级，双会话对照）
+
+准备：`CREATE TABLE t(id INT PRIMARY KEY, k INT, KEY idx_k(k)); INSERT INTO t VALUES (1,3),(5,7),(10,10);`
+
+### 实验 1：无命中行的等值查询 → 间隙锁
+| 步 | 会话 A | 会话 B | 现象 |
+|----|--------|--------|------|
+| 1 | `BEGIN;` | `BEGIN;` | — |
+| 2 | `SELECT * FROM t WHERE k=5 FOR UPDATE;` | | 无匹配行 → **只加间隙锁 (3,7)**，不锁任何行 |
+| 3 | | `INSERT INTO t VALUES (2,4);` | **阻塞**！k=4 落在间隙内 |
+| 4 | | `INSERT INTO t VALUES (9,9);` | 成功——(7,10) 间隙未锁 |
+| 5 | A `COMMIT;` 后 B 的步骤3立即完成 | | 锁随事务释放 |
+
+**推理链**：RR 需要"可重复读"且防幻影。k=5 不存在，行锁无处安放；InnoDB 用锁住"空隙"的方式保证 A 再查时结果不变（B 插不进 4）。副作用即生产事故源：**无命中行的 FOR UPDATE 是把隐形刀**——并发插入整段卡死。
+
+### 实验 2：唯一索引 vs 普通索引的加锁差异
+- `WHERE id=5 FOR UPDATE`（PK 等值、存在）：仅记录锁该行（唯一性保证无需间隙）
+- `WHERE id=7 FOR UPDATE`（不存在）：间隙锁 (5,10)
+- `WHERE k BETWEEN 4 AND 8 FOR UPDATE`（普通索引范围）：next-key (3,7] + (7,10) + 可能补到上界——**范围越大锁越多**
+
+### 实验 3：EXPLAIN 输出走读（对应 §五）
+```
+EXPLAIN SELECT * FROM t WHERE k>4 AND k<9;
+type=range | key=idx_k | rows=2 | Extra=Using index condition
+```
+判读顺序：type(range≥ref≥index≥ALL) → key 是否真用上 → rows 估算与实际行数比(差一个量级=统计过期跑 ANALYZE) → Extra 里 ICP 表示 k 条件下推到引擎层过滤（回表前裁剪）。
+
 ## 六、参数基线（起步模板，非万能值）
 
 ```
