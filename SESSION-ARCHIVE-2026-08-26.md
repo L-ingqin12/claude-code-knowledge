@@ -68,6 +68,7 @@ status: stable
 | （v9） | docs(cs-base): 设计模式实战(代码级重写)+架构设计与方案选型(ADR 全文/选型推导) + 数据结构/高并发 走读级加深；脱敏推送 |
 | （v10）| docs(cs-base): 深度学习算法基础反向传播手推(标量全流程/CE梯度推导/消失算术本质) + Redis 渐进rehash trace与Lua锁竞态 + MySQL 锁矩阵SQL复现双会话表 + MongoDB ESR组装与explain判读；脱敏推送 |
 | （v11）| docs(cs-base): 向量数据库 HNSW 插入/搜索伪码走读(层数抽样几何分布/SELECT-NEIGHBORS多样性/微例trace/ef召回数学) + LibC动态链接 GOT/PLT 反汇编对照(懒绑定三段式生命周期/-z now 差异)；深度标准队列清空；脱敏推送 |
+| （v12）| docs(cs-base): 网盘课程资料缺口分析 → 新增 4 篇(Python高级核心/Linux高性能网络编程实战/音视频流媒体开发基础/操作系统实现视角-从引导到内核) + 数据结构手写实现坑位清单；MOC 18→22；脱敏推送 |
 
 ## 五·五、AI 知识缺口审视与补充（用户追加指令）
 
@@ -87,6 +88,7 @@ status: stable
 | C++/算法/系统八股（用户追加）| 全库无计算机基础主干，且无承载子库 | ✅ 新建 `cs-base/` 子库：[[CS-KB-Home]] MOC + 6 篇（C++核心/数据结构算法/DL算法基础/OS/网络/高并发），AGENTS 树+MOC 表+标签体系同步注册 |
 | 数据库分册+组原+工具链（用户追加）| 通用篇缺 MySQL/MongoDB/Redis/向量库分册与 musl/LLVM 底座 | ✅ 再增 6 篇：数据库原理与调优(含 SQLite 实测)/MySQL精要/Redis/MongoDB/向量检索/计组原理/LibC动态链接/LLVM(DWARF→LogNet M1 锚点)，cs-base 达 13 篇内容+MOC；全库审视(221 md)：frontmatter 缺失仅 scripts/ 运维件、Mermaid 零违例、悬空链接均为代码示例/坐标噪声，AGENTS.md 补 status 字段 |
 | 实战纵深+AI基座深入学习（用户追加）| 排障向 libc 知识缺位；LLVM 停留在架构层；LLM/OpenCode/Pi 无实操手册；四篇基础文档偏罗列 | ✅ 新增 LibC运行时排查-TLS与锁(dlclose/pthread_key/futex/排障手册)、LLVM使用调优与SO优化(符号面/体积/启动/ABI 四维)、LLM架构进阶(KV账本/GQA-MLA/PagedAttention/投机解码)、OpenCode 与 Pi 实战手册各一篇；CPP 新特性 C++11→26 纵深、网络/OS/组原机制推演增补；全部挂载 MOC |
+| 网盘课程资料缺口分析（用户追加 v12）| 五个采集方向对照库内容：Python 运行时全缺；高性能网络编程实战(epoll反应堆/io_uring/DPDK/协程)缺；音视频流媒体全域缺；OS 实现视角(引导/保护模式/特权级)缺；数据结构手写实现坑位未沉淀 | ✅ 新增 4 篇：Python高级核心 / Linux高性能网络编程实战 / 音视频流媒体开发基础 / 操作系统实现视角-从引导到内核 + 数据结构走读4手写坑位清单；cs-base 达 21 篇内容+MOC=22 文件；正文不含课程推广名，仅知识采集来源 |
 
 外部依据：Anthropic Building Effective Agents / Multi-Agent Research System / when-not-to-multi-agent、Simon Willison 编码代理原理综述、LangSmith trajectory evals 与 online evaluators、LLM-as-Judge 校准实践——正文逐条挂来源。
 

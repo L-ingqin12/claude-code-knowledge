@@ -12,12 +12,13 @@ status: review
 > [!abstract] 定位
 > 语言、算法、系统、数据、工具链五大主干的知识底座，面向**面试八股 + 工程选型 + 机制级深潜**三用途。AI 应用层实战在 [[AI-Dev-KB-Home]]，网络运维实操在 [[Network-KB-Home]]；项目实证锚点（LogNet PoC）织入各篇。
 
-## 文档地图（18 篇）
+## 文档地图（22 篇）
 
 ### 语言与工具链
 | 文档 | 一句话 |
 |------|--------|
 | [[CPP-核心知识]] | RAII/移动语义/模板→concepts/内存序 + **C++11→26 新特性纵深** |
+| [[Python高级核心]] | 对象模型/协议魔法函数/GC 双引擎/描述符元类 ORM 原理/生成器帧/GIL 并发选型矩阵 |
 | [[LibC与动态链接]] | glibc vs musl、ELF 加载旅程、GOT/PLT、静态容器化账单 |
 | [[LibC运行时排查-TLS与锁]] | dlclose 陷阱/pthread_key 析构/TLS 四模型/futex 锁族/**排障手册** |
 | [[LLVM编译器基础设施]] | 三段式架构/优化 pass/Sanitizer/LTO-PGO/DWARF 符号化(→LogNet M1) |
@@ -43,6 +44,9 @@ status: review
 |------|--------|
 | [[计算机组成原理]] | 流水线乱序/存储层次/MESI/SIMD/TMA 性能方法论 |
 | [[操作系统八股]] | 调度/虚拟内存/锁层级/epoll→io_uring 双轨 |
+| [[操作系统实现视角-从引导到内核]] | 加电→MBR(0x7C00)→保护模式三步仪式/GDT 特权级与门/时钟中断物理真相/ELF 内核加载/Tiny shell 闭环 |
+| [[Linux高性能网络编程实战]] | Reactor 代码骨架/io_uring 双环/DPDK 绕内核判据/有栈无栈协程切换账本/池式组件设计点 |
+| [[音视频流媒体开发基础]] | codec-封装-传输三层正名/协议选型表(RTMP-HLS-RTSP)/FFmpeg 管线/ffplay 式四线程播放器与音视频同步/WebRTC 五件套 |
 | [[计算机网络八股]] | TCP 可靠性/TLS1.3/HTTP1.1→3/DNS(RFC 挂链) |
 | [[高并发系统设计]] | C10K→C10M/缓存三级/限流熔断/分片 |
 
