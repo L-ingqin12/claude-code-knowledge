@@ -5,35 +5,93 @@ tags: [excalidraw]
 # Excalidraw Data
 
 ## Text Elements
-用户任务 Thought思考·下一步该做什么 Action行动·选择工具 tool[args] Observation观察·工具执行结果 Final Answer 最终回答 执行工具 循环直至信息充分 信息充分时输出 保护：max_iterations 上限防死循环
+用户任务 ^t1
 
+Thought 思考
+下一步该做什么 ^t2
+
+Action 行动
+选择工具 tool[args] ^t3
+
+Observation 观察
+工具执行结果 ^t4
+
+Final Answer
+最终回答 ^t5
+
+循环直至信息充分 ^f1
+
+信息充分时输出 ^f2
+
+保护：max_iterations 上限防死循环 ^f3
+
+%%
 ## Drawing
-```json
-{
-  "type": "excalidraw",
-  "version": 2,
-  "source": "https://github.com/zsviczian/obsidian-excalidraw-plugin",
-  "elements": [
-    {"id":"b1","type":"rectangle","x":70,"y":300,"width":150,"height":60,"angle":0,"strokeColor":"#1e1e1e","backgroundColor":"#e3f2fd","fillStyle":"solid","strokeWidth":2,"strokeStyle":"solid","roughness":1,"opacity":100,"groupIds":[],"roundness":{"type":3},"seed":41,"version":1,"isDeleted":false,"boundElements":[{"id":"t1","type":"text"},{"id":"a1","type":"arrow"}],"updated":1,"link":null,"locked":false},
-    {"id":"t1","type":"text","x":78,"y":318,"width":134,"height":25,"angle":0,"strokeColor":"#1e1e1e","backgroundColor":"transparent","fillStyle":"solid","strokeWidth":1,"strokeStyle":"solid","roughness":1,"opacity":100,"groupIds":[],"roundness":null,"seed":42,"version":1,"isDeleted":false,"boundElements":null,"updated":1,"link":null,"locked":false,"text":"用户任务","fontSize":16,"fontFamily":1,"textAlign":"center","verticalAlign":"middle","containerId":"b1","originalText":"用户任务","lineHeight":1.25},
-    {"id":"b2","type":"rectangle","x":320,"y":290,"width":190,"height":70,"angle":0,"strokeColor":"#1e1e1e","backgroundColor":"#fff9c4","fillStyle":"solid","strokeWidth":2,"strokeStyle":"solid","roughness":1,"opacity":100,"groupIds":[],"roundness":{"type":3},"seed":43,"version":1,"isDeleted":false,"boundElements":[{"id":"t2","type":"text"},{"id":"a1","type":"arrow"},{"id":"a2","type":"arrow"},{"id":"a4","type":"arrow"},{"id":"a5","type":"arrow"}],"updated":1,"link":null,"locked":false},
-    {"id":"t2","type":"text","x":328,"y":301,"width":174,"height":48,"angle":0,"strokeColor":"#1e1e1e","backgroundColor":"transparent","fillStyle":"solid","strokeWidth":1,"strokeStyle":"solid","roughness":1,"opacity":100,"groupIds":[],"roundness":null,"seed":44,"version":1,"isDeleted":false,"boundElements":null,"updated":1,"link":null,"locked":false,"text":"Thought 思考\n下一步该做什么","fontSize":16,"fontFamily":1,"textAlign":"center","verticalAlign":"middle","containerId":"b2","originalText":"Thought 思考\n下一步该做什么","lineHeight":1.25},
-    {"id":"b3","type":"rectangle","x":600,"y":290,"width":190,"height":70,"angle":0,"strokeColor":"#1e1e1e","backgroundColor":"#ffccbc","fillStyle":"solid","strokeWidth":2,"strokeStyle":"solid","roughness":1,"opacity":100,"groupIds":[],"roundness":{"type":3},"seed":45,"version":1,"isDeleted":false,"boundElements":[{"id":"t3","type":"text"},{"id":"a2","type":"arrow"},{"id":"a3","type":"arrow"}],"updated":1,"link":null,"locked":false},
-    {"id":"t3","type":"text","x":608,"y":301,"width":174,"height":48,"angle":0,"strokeColor":"#1e1e1e","backgroundColor":"transparent","fillStyle":"solid","strokeWidth":1,"strokeStyle":"solid","roughness":1,"opacity":100,"groupIds":[],"roundness":null,"seed":46,"version":1,"isDeleted":false,"boundElements":null,"updated":1,"link":null,"locked":false,"text":"Action 行动\n选择工具 tool[args]","fontSize":16,"fontFamily":1,"textAlign":"center","verticalAlign":"middle","containerId":"b3","originalText":"Action 行动\n选择工具 tool[args]","lineHeight":1.25},
-    {"id":"b4","type":"rectangle","x":880,"y":290,"width":190,"height":70,"angle":0,"strokeColor":"#1e1e1e","backgroundColor":"#fff9c4","fillStyle":"solid","strokeWidth":2,"strokeStyle":"solid","roughness":1,"opacity":100,"groupIds":[],"roundness":{"type":3},"seed":47,"version":1,"isDeleted":false,"boundElements":[{"id":"t4","type":"text"},{"id":"a3","type":"arrow"},{"id":"a4","type":"arrow"}],"updated":1,"link":null,"locked":false},
-    {"id":"t4","type":"text","x":888,"y":301,"width":174,"height":48,"angle":0,"strokeColor":"#1e1e1e","backgroundColor":"transparent","fillStyle":"solid","strokeWidth":1,"strokeStyle":"solid","roughness":1,"opacity":100,"groupIds":[],"roundness":null,"seed":48,"version":1,"isDeleted":false,"boundElements":null,"updated":1,"link":null,"locked":false,"text":"Observation 观察\n工具执行结果","fontSize":16,"fontFamily":1,"textAlign":"center","verticalAlign":"middle","containerId":"b4","originalText":"Observation 观察\n工具执行结果","lineHeight":1.25},
-    {"id":"b5","type":"rectangle","x":520,"y":480,"width":180,"height":60,"angle":0,"strokeColor":"#1e1e1e","backgroundColor":"#c8e6c9","fillStyle":"solid","strokeWidth":2,"strokeStyle":"solid","roughness":1,"opacity":100,"groupIds":[],"roundness":{"type":3},"seed":49,"version":1,"isDeleted":false,"boundElements":[{"id":"t5","type":"text"},{"id":"a5","type":"arrow"}],"updated":1,"link":null,"locked":false},
-    {"id":"t5","type":"text","x":528,"y":486,"width":164,"height":48,"angle":0,"strokeColor":"#1e1e1e","backgroundColor":"transparent","fillStyle":"solid","strokeWidth":1,"strokeStyle":"solid","roughness":1,"opacity":100,"groupIds":[],"roundness":null,"seed":50,"version":1,"isDeleted":false,"boundElements":null,"updated":1,"link":null,"locked":false,"text":"Final Answer\n最终回答","fontSize":16,"fontFamily":1,"textAlign":"center","verticalAlign":"middle","containerId":"b5","originalText":"Final Answer\n最终回答","lineHeight":1.25},
-    {"id":"a1","type":"arrow","x":224,"y":325,"points":[[0,0],[92,0]],"lastCommittedPoint":null,"angle":0,"strokeColor":"#1e1e1e","backgroundColor":"transparent","fillStyle":"solid","strokeWidth":2,"strokeStyle":"solid","roughness":1,"opacity":100,"groupIds":[],"roundness":null,"seed":51,"version":1,"isDeleted":false,"boundElements":null,"updated":1,"link":null,"locked":false,"startArrowhead":null,"endArrowhead":"arrow","startBinding":{"elementId":"b1","focus":0,"gap":4},"endBinding":{"elementId":"b2","focus":0,"gap":4}},
-    {"id":"a2","type":"arrow","x":514,"y":325,"points":[[0,0],[82,0]],"lastCommittedPoint":null,"angle":0,"strokeColor":"#1e1e1e","backgroundColor":"transparent","fillStyle":"solid","strokeWidth":2,"strokeStyle":"solid","roughness":1,"opacity":100,"groupIds":[],"roundness":null,"seed":52,"version":1,"isDeleted":false,"boundElements":null,"updated":1,"link":null,"locked":false,"startArrowhead":null,"endArrowhead":"arrow","startBinding":{"elementId":"b2","focus":0,"gap":4},"endBinding":{"elementId":"b3","focus":0,"gap":4}},
-    {"id":"a3","type":"arrow","x":794,"y":325,"points":[[0,0],[82,0]],"lastCommittedPoint":null,"angle":0,"strokeColor":"#1e1e1e","backgroundColor":"transparent","fillStyle":"solid","strokeWidth":2,"strokeStyle":"solid","roughness":1,"opacity":100,"groupIds":[],"roundness":null,"seed":53,"version":1,"isDeleted":false,"boundElements":null,"updated":1,"link":null,"locked":false,"startArrowhead":null,"endArrowhead":"arrow","startBinding":{"elementId":"b3","focus":0,"gap":4},"endBinding":{"elementId":"b4","focus":0,"gap":4}},
-    {"id":"a4","type":"arrow","x":975,"y":286,"points":[[0,-70],[-560,-70],[-560,0]],"lastCommittedPoint":null,"angle":0,"strokeColor":"#388e3c","backgroundColor":"transparent","fillStyle":"solid","strokeWidth":2,"strokeStyle":"solid","roughness":1,"opacity":100,"groupIds":[],"roundness":null,"seed":54,"version":1,"isDeleted":false,"boundElements":null,"updated":1,"link":null,"locked":false,"startArrowhead":null,"endArrowhead":"arrow","startBinding":{"elementId":"b4","focus":0,"gap":4},"endBinding":{"elementId":"b2","focus":0,"gap":4}},
-    {"id":"a5","type":"arrow","x":415,"y":364,"points":[[0,56],[195,116]],"lastCommittedPoint":null,"angle":0,"strokeColor":"#1e1e1e","backgroundColor":"transparent","fillStyle":"solid","strokeWidth":2,"strokeStyle":"solid","roughness":1,"opacity":100,"groupIds":[],"roundness":null,"seed":55,"version":1,"isDeleted":false,"boundElements":null,"updated":1,"link":null,"locked":false,"startArrowhead":null,"endArrowhead":"arrow","startBinding":{"elementId":"b2","focus":0,"gap":4},"endBinding":{"elementId":"b5","focus":0,"gap":4}},
-    {"id":"f1","type":"text","x":700,"y":196,"width":200,"height":22,"angle":0,"strokeColor":"#388e3c","backgroundColor":"transparent","fillStyle":"solid","strokeWidth":1,"strokeStyle":"solid","roughness":1,"opacity":100,"groupIds":[],"roundness":null,"seed":56,"version":1,"isDeleted":false,"boundElements":null,"updated":1,"link":null,"locked":false,"containerId":null,"originalText":"循环直至信息充分","text":"循环直至信息充分","fontSize":14,"fontFamily":1,"textAlign":"left","verticalAlign":"top","lineHeight":1.25},
-    {"id":"f2","type":"text","x":430,"y":420,"width":140,"height":22,"angle":0,"strokeColor":"#1e1e1e","backgroundColor":"transparent","fillStyle":"solid","strokeWidth":1,"strokeStyle":"solid","roughness":1,"opacity":100,"groupIds":[],"roundness":null,"seed":57,"version":1,"isDeleted":false,"boundElements":null,"updated":1,"link":null,"locked":false,"containerId":null,"originalText":"信息充分时输出","text":"信息充分时输出","fontSize":14,"fontFamily":1,"textAlign":"left","verticalAlign":"top","lineHeight":1.25},
-    {"id":"f3","type":"text","x":880,"y":420,"width":260,"height":22,"angle":0,"strokeColor":"#d84315","backgroundColor":"transparent","fillStyle":"solid","strokeWidth":1,"strokeStyle":"solid","roughness":1,"opacity":100,"groupIds":[],"roundness":null,"seed":58,"version":1,"isDeleted":false,"boundElements":null,"updated":1,"link":null,"locked":false,"containerId":null,"originalText":"保护：max_iterations 上限防死循环","text":"保护：max_iterations 上限防死循环","fontSize":14,"fontFamily":1,"textAlign":"left","verticalAlign":"top","lineHeight":1.25}
-  ],
-  "appState": {"gridSize": 20, "viewBackgroundColor": "#ffffff", "theme": "dark"},
-  "files": {}
-}
+```compressed-json
+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
+
+2AtsLzBgcuA4AJCJu3CArhNQIATUEAA=
 ```
+%%

@@ -56,10 +56,10 @@ knowledge/
 │   ├── LLVM编译器基础设施 / LLVM使用调优与SO优化
 │   ├── 数据结构与算法 / 深度学习算法基础
 │   ├── 数据库原理与调优 / MySQL-InnoDB精要 / Redis原理与实践
-│   ├── MongoDB原理与实践 / 向量数据库与检索
+│   ├── MongoDB原理与实践 / 向量数据库与检索 / Kafka原理与实践 / Raft与分布式协同
 │   ├── 计算机组成原理 / 操作系统八股 / 操作系统实现视角-从引导到内核
 │   ├── 计算机网络八股 / 高并发系统设计 / Linux高性能网络编程实战
-│   ├── 音视频流媒体开发基础 / Python高级核心
+│   ├── 音视频流媒体开发基础 / Python高级核心 / 容器与云原生基础
 │   └── 设计模式实战 / 架构设计与方案选型
 ├── diagrams/                          ← Excalidraw 图表库 + ARROW-CHECKLIST
 ├── scripts/                           ← 跨库脚本 (claude-ops-deployments/dumps)
