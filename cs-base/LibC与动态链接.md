@@ -46,6 +46,29 @@ See also: [[CS-KB-Home]] · [[计算机组成原理]] · [[操作系统八股]] 
 - **PLT**：函数跳板。懒绑定流程：首次调用 PLT[n] → 压符号索引跳回 ld.so 解析器 → 真地址写 GOT[n] → 后续直达
 - `-z now`(BIND_NOW)+RELRO：启动即全量解析并把 GOT 变只读——关懒绑定换安全
 
+### 2A. 反汇编对照：一次懒绑定的完整生命周期
+
+源码 `libdemo.so`：`int util(int){ return strlen(s); }` 编译为动态库后：
+
+```
+$ objdump -d libdemo.so
+<util>:
+  call   <strlen@plt>
+        ↓ PLT 条目(三段式):
+<strlen@plt>:
+  jmp    *0x3f2a(%rip)        # ① 间接跳转: 读 GOT[n] 槽位跳过去
+  push   $0x1                 # ② 仅首次到达: 压"重定位项序号"
+  jmp    <PLT0>               # ③ 跳 PLT[0] → 进 ld.so 的 _dl_runtime_resolve
+
+# 初始状态 GOT[n] 内容 = ②的地址 (链接期填好的"回环")
+# 首调路径: call plt → jmp *GOT → 落在② → resolve("strlen") → 真地址写入 GOT[n] → 进入 strlen
+# 二调路径: call plt → jmp *GOT → 直接落在 strlen 本体 (①一条指令完事)
+```
+
+**推理链**：为什么首调要绕两跳？——链接器生成 so 时**不知道** strlen 最终地址（进程里可能被 LD_PRELOAD 劫持、libc 版本未定），只能留一个可回填的槽位；"压序号+跳解析器"就是把符号名查找延迟到第一次真正使用。`_dl_runtime_resolve` 还要保存/恢复 SSE 寄存器状态，所以**热循环里首调毛刺**是机制内生的。
+
+`-z now` 后的反汇编差异：加载期 ld.so 把 GOT[n] 直接填真地址，PLT 条目只剩 `jmp *GOT` 一行（②③成死代码），配合 RELRO 把 `.got.plt` 页改只读——攻击者无法改 GOT 槽位劫持调用流。验证手段：`LD_BIND_NOW=1` 环境变量等效强制；`readelf -d app | grep BIND_NOW`。
+
 ## 三、符号解析规则与坑
 
 - 解析顺序=全局符号表 BFS：**主程序优先于依赖库**——主程序同名符号可"插桩"覆盖库内引用(interposition)，也是事故源
