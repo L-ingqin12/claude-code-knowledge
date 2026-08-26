@@ -63,6 +63,7 @@ status: stable
 | `51309e8` | docs(ai-links): 文章库补缺 — 多智能体编排组（Anthropic 多智能体系统拆解）|
 | （v5） | docs: Harness 解剖学 + 评测观测两篇 + MOC 挂载；脱敏推送 public→main |
 | （v6） | docs(cs-base): 计算机基础子库 7 文件 + AGENTS 注册；脱敏推送 public→main |
+| （v7） | docs(cs-base): 数据库五分册+计组+LibC链接+LLVM 共 7 文件(MOC 重构)；全库审视后脱敏推送 public→main |
 
 ## 五·五、AI 知识缺口审视与补充（用户追加指令）
 
@@ -80,6 +81,7 @@ status: stable
 | 评测可观测 | 质量门控有协议、评测方法论缺失 | ✅ 新增 [[agent-evals-observability]]（三层次/四层栈/校准/门控集成）|
 | Agent 安全治理 | 分散于 4+ 文档（权限引擎/容器化/WMI 边界），暂不新建合成篇 | 登记为后续候选 |
 | C++/算法/系统八股（用户追加）| 全库无计算机基础主干，且无承载子库 | ✅ 新建 `cs-base/` 子库：[[CS-KB-Home]] MOC + 6 篇（C++核心/数据结构算法/DL算法基础/OS/网络/高并发），AGENTS 树+MOC 表+标签体系同步注册 |
+| 数据库分册+组原+工具链（用户追加）| 通用篇缺 MySQL/MongoDB/Redis/向量库分册与 musl/LLVM 底座 | ✅ 再增 6 篇：数据库原理与调优(含 SQLite 实测)/MySQL精要/Redis/MongoDB/向量检索/计组原理/LibC动态链接/LLVM(DWARF→LogNet M1 锚点)，cs-base 达 13 篇内容+MOC；全库审视(221 md)：frontmatter 缺失仅 scripts/ 运维件、Mermaid 零违例、悬空链接均为代码示例/坐标噪声，AGENTS.md 补 status 字段 |
 
 外部依据：Anthropic Building Effective Agents / Multi-Agent Research System / when-not-to-multi-agent、Simon Willison 编码代理原理综述、LangSmith trajectory evals 与 online evaluators、LLM-as-Judge 校准实践——正文逐条挂来源。
 

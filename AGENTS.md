@@ -3,7 +3,8 @@ title: AGENTS
 aliases: [AI指令, Agent配置, 智能体规则]
 tags: [meta, agents, system]
 created: 2026-07-28
-updated: 2026-08-25
+updated: 2026-08-26
+status: stable
 cssclass: agents-manifest
 ---
 
@@ -51,8 +52,11 @@ knowledge/
 │   └── Plans/                         ← 归档计划 (deprecated)
 ├── typora/                            ← Typora 激活复盘子 Vault (MOC: TYPORA-KB-Home)
 ├── cs-base/                           ← 计算机基础子 Vault (MOC: CS-KB-Home)
-│   ├── CPP-核心知识.md / 数据结构与算法.md / 深度学习算法基础.md
-│   └── 操作系统八股.md / 计算机网络八股.md / 高并发系统设计.md
+│   ├── CPP-核心知识 / LibC与动态链接 / LLVM编译器基础设施
+│   ├── 数据结构与算法 / 深度学习算法基础
+│   ├── 数据库原理与调优 / MySQL-InnoDB精要 / Redis原理与实践
+│   ├── MongoDB原理与实践 / 向量数据库与检索
+│   └── 计算机组成原理 / 操作系统八股 / 计算机网络八股 / 高并发系统设计
 ├── diagrams/                          ← Excalidraw 图表库 + ARROW-CHECKLIST
 ├── scripts/                           ← 跨库脚本 (claude-ops-deployments/dumps)
 └── SESSION-ARCHIVE-*.md               ← 会话归档
@@ -117,6 +121,9 @@ status: draft | review | stable | deprecated
 #cs/algo              数据结构与算法
 #cs/dl                深度学习算法基础
 #cs/os / #cs/net / #cs/system   操作系统/计算机网络/高并发
+#cs/db               数据库(MySQL/SQLite/MongoDB/Redis/向量库)
+#cs/arch             计算机组成原理
+#cs/toolchain        libc/链接加载/LLVM 工具链
 #meta                  元文档 (AGENTS, MOC, 会话归档)
 ```
 
