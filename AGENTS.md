@@ -57,7 +57,8 @@ knowledge/
 │   ├── 数据结构与算法 / 深度学习算法基础
 │   ├── 数据库原理与调优 / MySQL-InnoDB精要 / Redis原理与实践
 │   ├── MongoDB原理与实践 / 向量数据库与检索
-│   └── 计算机组成原理 / 操作系统八股 / 计算机网络八股 / 高并发系统设计
+│   ├── 计算机组成原理 / 操作系统八股 / 计算机网络八股 / 高并发系统设计
+│   └── 设计模式实战 / 架构设计与方案选型
 ├── diagrams/                          ← Excalidraw 图表库 + ARROW-CHECKLIST
 ├── scripts/                           ← 跨库脚本 (claude-ops-deployments/dumps)
 └── SESSION-ARCHIVE-*.md               ← 会话归档
