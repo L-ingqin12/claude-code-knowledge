@@ -3,7 +3,7 @@ title: DSH TUI 插件使用手册
 aliases: [dsh-tui, DSH终端UI, TUI手册]
 tags: [ai/agent, ai/tools, ai/links]
 created: 2026-08-17
-updated: 2026-08-25
+updated: 2026-08-30
 status: review
 source: "官方手册 README.zh.md（MIT 许可）"
 source_urls:
@@ -100,6 +100,32 @@ dsh --profile tui --resume <session-id>  # 恢复历史会话
 llm-deepseek:
   baseURL: http://localhost:8000/v1
 ```
+
+## 独立客户端路线（2026-08-30 实测，当前推荐）
+
+> [!success] 另一条安装路线：`npm i -g dsh-tui`（npm 包 **`dsh-tui` v0.2.19**，GitHub MashedPotato817/dsh-tui）
+> 与本文档主体（插件包 `@dsh-tui/dsh-tui`，profile 集成）**不是同一个包**。独立包是薄客户端：**后端跑 `dsh web`（host，默认 http://127.0.0.1:3080）+ 前端 `dsh-tui` 直连**，直接 `dsh-tui` 命令启动，`DSH_URL` 环境变量可改 host 地址。
+
+| 项 | 插件版 `@dsh-tui/dsh-tui` (profile) | 独立包 `dsh-tui` (host+client) |
+|---|---|---|
+| 安装 | `dsh plugin --profile tui add @dsh-tui/dsh-tui` | `npm i -g dsh-tui` |
+| 启动 | `dsh --profile tui` | `dsh web`(后台) + `dsh-tui` |
+| 架构 | cordis 插件 bundle（与 host 同进程） | 独立 Ink TUI，经 HTTP 连 host |
+| 思考强度控制 | 自带 `/model`（含推理力度选择） | **无**（源码核查，见下） |
+| 适用 | 单进程一体化 | host 独立运行，客户端可随时重连 |
+
+> [!warning] 独立版思考强度控制：TUI 内**无**内置开关
+> 2026-08-30 源码级核查（feat/dsh-tui 分支 lib/commands.js）：本地斜杠命令仅 `new/resume/exit/quit/list/status/clear/help`；`:w/:cancel/:q`；CLI 参数无 model/effort；`session.create/prompt` 载荷**不传递** model/reasoningEffort。思考强度只能由 **host 端**决定：
+> - settings.yaml `agent-default-model.reasoningEffort`（**热加载**，新会话生效）
+> - 模型条目 `reasoningEfforts` 声明可选档位（官方 7 档 off/minimal/low/medium/high/xhigh/max）
+> - Web 客户端模型选择器 + `/model` 斜杠命令（官方 UI 槽位 `conversation.input.model`）
+
+### 独立路线本机实测（2026-08-30）
+
+- `dsh` 0.1.0-rc.6 → **0.1.1-rc.2**；`dsh-tui` 全局安装 v0.2.19
+- `dsh-tui run "..."` 一次调用验证：host + 客户端链路通，请求直达上游模型
+- 会话请求头实测：`model: z-ai/glm-5.3-flash` + `reasoningEffort: "low"`（见 [[DSH提效与Token插件调研#思考强度控制实证]]）
+- ⚠️ 工作区建议：在**项目子目录**启动（用户根目录会使临时目录落在工作区内被沙箱拒绝）
 
 ## 状态与已知限制
 

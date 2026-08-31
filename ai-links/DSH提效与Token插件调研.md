@@ -3,7 +3,7 @@ title: DSH 提效与 Token 用量插件调研
 aliases: [DSH插件调研, Token插件, DSH提效插件]
 tags: [ai/agent, ai/tools, ai/links]
 created: 2026-08-18
-updated: 2026-08-18
+updated: 2026-08-30
 status: review
 ---
 
@@ -117,6 +117,76 @@ See also: [[AI-Links-KB-Home]] | [[DSH-TUI插件使用手册]] | [[DSH插件与H
 > 3. **提效三件套**（Web 面）：DSH-better-sidebar（2155★）+ dsh-web-ui（4532★）+ dsh-context（313★）；会话提效用 dsh-sidechain + dsh-session-manager。
 > 4. **费用治理**：[dsh-cost-meter](https://github.com/Han-1413141/dsh-cost-meter)（功能最全）或 [dsh-budget](https://github.com/PerryLink/dsh-budget)（预算告警）。
 > 5. **压缩节流**：官方 compaction-basic（自带）+ 可选 billion-context-dsh 或 context-pruner。
+
+## 四·五、思考强度控制与 token 优化实证（2026-08-30）
+
+> [!success] 结论先行
+> **GLM-5.3-flash 思考永远开启、默认 `max`（最费 token）；降档到 `low` 是唯一有效省钱手段**（实测 reasoning tokens 大幅下降）。GLM 5.2 在 OpenRouter 最低只能 `high`；MiniMax M3 可 `none` 关闭但本机该模型已失效。免费模型 `:free` 上游共享池频繁 429 限流，不可作主力。
+
+### 实证数据（OpenRouter 直测 z-ai/glm-5.3-flash，2026-08-30）
+
+| 请求参数 | 结果 |
+|---|---|
+| 无 thinking 参数（默认） | 思考占满 max_tokens（finish=length），reasoning tokens 大量 |
+| `thinking:{type:"enabled", effort:"low"}` | **有效**，26 reasoning tokens 即完成 `say ok` |
+| `thinking:{type:"disabled"}` | **无效**，照常思考（GLM-5.3 起移除 disabled） |
+| `thinking:{type:"enabled", effort:"none"}` | **无效**，照常思考 |
+| `effort:"high"/"max"` | 有效档位（OR 仅接受 low/high/max，medium 勿用） |
+
+> [!tip] OpenRouter 思考档位（官方文档 + llm-rosetta 实测交叉）
+> 请求字段 `reasoning:{effort:"..."}`（chat 扩展）或 `thinking:{type:"enabled",effort:"..."}`；OR 统一档位 none/minimal/low/medium/high/xhigh，`max` 会 400（但 GLM-5.3-flash 模型页特例支持 max）。推理 token 计入输出计费。
+
+### DSH 配置位（官方三层概念，勿混淆）
+
+| 层 | 位置 | 作用 |
+|---|---|---|
+| `reasoningEfforts` | llm-pi-ai 模型条目 | **声明**模型支持的档位 + wire 拼写；选未声明档位报 `UNSUPPORTED_REASONING_EFFORT` |
+| `reasoning` | provider profile | 部署默认档位 |
+| `reasoningEffort` | settings.yaml `agent-default-model` 分节 | 选中档位，**热加载**，新会话生效；TUI/headless 均可 |
+
+本机配置（2026-08-30 生效，端到端已验证请求头 `reasoningEffort:"low"`）：
+
+```yaml
+agent-default-model:
+  provider: ox-openrouter
+  model: z-ai/glm-5.3-flash
+  reasoningEffort: low        # GLM 最低档；按需改 medium/high 热加载即生效
+
+llm-pi-ai:
+  providers:
+    ox-openrouter:
+      models:
+        - id: z-ai/glm-5.3-flash
+          reasoningEfforts:   # 声明 = /model 选择器可见档位
+            low: "low"
+            high: "high"
+            max: "max"
+```
+
+### 自动 compact 配置（官方 compaction-basic，profile patch）
+
+`compaction-basic` 不从 settings.yaml 读配置，改 **profile 的 cordis.patch.yml**（id 定位行，**需重启 host**）：
+
+```yaml
+- id: compaction-basic
+  config:
+    auto: true                # 自动压缩开关
+    thresholdRatio: 0.75      # 默认 0.8 → 提前压缩防爆窗
+    retainRatio: 0.16         # 保留尾部 16% 原文
+    modelPolicies:
+      - provider: ox-openrouter
+        model: z-ai/glm-5.3-flash
+        thresholdRatio: 0.7   # 主力模型再提前
+```
+
+其他配置项：`summarizationProvider/Model`（摘要模型，缺省用会话路由模型）、`maxTokens`（摘要上限，默认 8192）、`compactionRetries`。工具结果压缩另有 `tool-result-pruner`（thresholdChars 8192 / head 4096 / tail 1024，dsh-base 内建）。
+
+> [!warning] 三模型思考控制对照（公开资料 + 本机实测）
+> | 模型 | OR 档位 | 关闭思考 | 省 token 建议 |
+> |---|---|---|---|
+> | GLM-5.3-flash | low/high/max（默认 max） | **不可** | `low` |
+> | GLM-5.2(:free) | high/xhigh | OR 层不可 | 换 5.3-flash；:free 还常 429 |
+> | MiniMax-M3 | none~xhigh（原生不认 effort） | `effort:none` 可 | M3:free 已失效（2026-08-30 实测无响应） |
 
 ## 五、注意事项
 

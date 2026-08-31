@@ -82,4 +82,5 @@ See also: [[AGENTS]] | [[AI大模型开发]] | [[TYPORA-KB-Home]] | [[2026-08-16
 - [[2026-08-16-AI链接综述与归档]] — 主文档（本页入口）
 - [[Articles-Index]] — 文章库子 MOC：可解释性/上下文工程/Skill/机制拆解 14 篇文章（2026-08-17 迁移）
 - [[SESSION-ARCHIVE-2026-08-18]] — 本子库创建会话归档（16 链接调研 + DSH 4 篇落盘 + 远程合并推送）
+- [[SESSION-ARCHIVE-2026-08-30]] — dsh/dsh-tui 升级 + 思考强度控制 + Token 优化归档（DSH-TUI 手册与 Token 调研同步更新）
 - 本 vault 其他复盘：[[v2rayn-balancer-复盘-2026-08-09]]、[[2026-07-21-树莓派网络故障与路由器破解完整复盘]]
