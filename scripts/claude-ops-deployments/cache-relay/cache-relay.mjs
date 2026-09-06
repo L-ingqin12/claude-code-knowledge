@@ -283,6 +283,12 @@ function forward(req, body, upstream, path, overrideHeaders = {}) {
       resolve({ status: upRes.statusCode, headers: upRes.headers, stream: upRes })
     })
     out.on('error', () => resolve({ status: 502, headers: {}, stream: null }))
+    // 超时保护：上游慢/挂起时 504，避免请求挂死（客户端拿到响应会自行重试）
+    const timeoutMs = Number(process.env.RELAY_TIMEOUT_MS ?? 30000)
+    out.setTimeout(timeoutMs, () => {
+      out.destroy()
+      resolve({ status: 504, headers: {}, stream: null })
+    })
     out.end(body)
   })
 }
@@ -322,11 +328,105 @@ function isRisk400(errBody, keywords) {
   return keys.some((k) => b.includes(String(k).toLowerCase()))
 }
 
+/** 判定是否 auto-mode 权限分类器请求：0 tools + system 含 "security monitor" + "autonomous"。 */
+function isClassifierRequest(parsed) {
+  if (!parsed) return false
+  if (Array.isArray(parsed.tools) && parsed.tools.length > 0) return false
+  const systemText = Array.isArray(parsed.system)
+    ? parsed.system.map((b) => (typeof b === 'string' ? b : (b?.text || ''))).join('\n')
+    : (typeof parsed.system === 'string' ? parsed.system : '')
+  return /security monitor/i.test(systemText) && /autonomous/i.test(systemText)
+}
+
+// ---------------------------------------------------------------------------
+// P5 keepalive 保温器（claude-thermos 思路）：主会话空闲时向同一上游重放最后一次
+// 真实请求（max_tokens=1），保持 DeepSeek/GLM 隐式前缀 warm，下次请求免全量重写。
+// config.keepalive = { enabled:false, idleMs:300000 } —— 默认关：无定时器、无逐请求记录，
+// 零额外状态。记录仅进程内存（不落盘）；重放走异步路径不阻塞主流程；重放自身不经过 serve，
+// 不会被记录（只重放真实请求）。
+// ---------------------------------------------------------------------------
+
+const KEEPALIVE_DEFAULT_IDLE_MS = 300000
+const lastMainRequest = { body: null, upstream: '', path: '', headers: null, method: 'POST', t: 0 }
+let lastKeepaliveT = 0
+let keepaliveTimer = null
+let keepaliveBusy = false
+
+/** 记录主会话（非分类器）最后一次真实请求。body 为对齐后实际发往上游的 JSON 串。 */
+function recordMainRequest(body, upstream, path, reqHeaders, method) {
+  lastMainRequest.body = body
+  lastMainRequest.upstream = upstream
+  lastMainRequest.path = path
+  // 头仅存进程内存、用于重放同鉴权；forward 会再滤 DROP_HEADERS 并重设 host/content-length
+  lastMainRequest.headers = reqHeaders ? { ...reqHeaders } : {}
+  lastMainRequest.method = method || 'POST'
+  lastMainRequest.t = Date.now()
+}
+
+/** keepalive 是否开启。启动时读一次决定 interval；之后改 config 需重启生效。 */
+function keepaliveEnabled(cfg) {
+  return cfg?.keepalive?.enabled === true
+}
+
+/** interval 周期：idleMs 小则紧密轮询（≤60s），idleMs 大则拉长，避免空转读盘。 */
+function keepalivePeriodMs(idleMs) {
+  return Math.max(200, Math.min(Math.floor(idleMs / 2), 60000))
+}
+
+/** 空闲重放一次：仅把 max_tokens 改 1，其余（对齐后 body/upstream/path/鉴权头）原样；
+ *  响应丢弃（排空+释放连接），只 warm 前缀。异步、不阻塞主流程。 */
+async function keepaliveReplayOnce() {
+  const { body, upstream, path, headers, method } = lastMainRequest
+  if (!body || !upstream) return
+  let replayBody = body
+  try {
+    const p = JSON.parse(body)
+    if (p && typeof p === 'object') { p.max_tokens = 1; replayBody = JSON.stringify(p) }
+  } catch { /* 非 JSON 原样重放（理论不达：记录时已 JSON.stringify） */ }
+  const mockReq = { method, headers: { ...headers } }
+  const r = await forward(mockReq, replayBody, upstream, path)
+  if (r.stream) { r.stream.on('error', () => {}); r.stream.resume() } // 丢弃，避免 unhandled error
+  console.log(`[cache-relay] keepalive ${r.status >= 200 && r.status < 400 ? 'replay' : 'replay-ignore'} ${safeHost(upstream)}${path} status=${r.status}`)
+}
+
+/** interval tick：距上次真实请求 ≥ idleMs 且距上次保温 ≥ idleMs 才触发，避免连发/自重放。 */
+async function keepaliveTick() {
+  const cfg = readConfig()
+  if (!keepaliveEnabled(cfg)) return
+  const idleMs = Number(cfg.keepalive?.idleMs ?? KEEPALIVE_DEFAULT_IDLE_MS)
+  if (!Number.isFinite(idleMs) || idleMs <= 0) return
+  const now = Date.now()
+  if (!lastMainRequest.body || now - lastMainRequest.t < idleMs) return
+  if (lastKeepaliveT > 0 && now - lastKeepaliveT < idleMs) return
+  if (keepaliveBusy) return
+  keepaliveBusy = true
+  try {
+    await keepaliveReplayOnce()
+    lastKeepaliveT = Date.now()
+  } catch (e) {
+    console.log(`[cache-relay] keepalive error: ${e?.message ?? e}`)
+  } finally {
+    keepaliveBusy = false
+  }
+}
+
+/** 启动时 config.keepalive.enabled=true 才起 interval（false/缺省 → 无定时器、零开销）。 */
+function startKeepaliveIfEnabled() {
+  if (keepaliveTimer) return
+  const cfg = readConfig()
+  if (!keepaliveEnabled(cfg)) return
+  const idleMs = Number(cfg.keepalive?.idleMs ?? KEEPALIVE_DEFAULT_IDLE_MS) || KEEPALIVE_DEFAULT_IDLE_MS
+  keepaliveTimer = setInterval(() => { keepaliveTick().catch(() => {}) }, keepalivePeriodMs(idleMs))
+  keepaliveTimer.unref?.()
+  console.log(`[cache-relay] keepalive enabled idleMs=${idleMs}ms period=${keepalivePeriodMs(idleMs)}ms`)
+}
+
 // ---------------------------------------------------------------------------
 // 中继服务器
 // ---------------------------------------------------------------------------
 
 function serve() {
+  startKeepaliveIfEnabled() // P5 keepalive：启动时 enabled 才起保温 interval（默认关→无）
   const server = http.createServer(async (req, res) => {
     // 热软回滚：每请求检查 .disabled/RELAY_DISABLED，undeploy 后立即生效（无需重启）
     if (process.env.RELAY_DISABLED === '1' || existsSync(DISABLED_FILE)) {
@@ -353,6 +453,58 @@ function serve() {
     } catch { /* 非 JSON 透传 */ }
 
     const fallback = fallbackConfig()
+    // config.dump=true → 记录对齐后的锚点指纹 + tools + system 摘要（命中率根因分析用）
+    if (cfg.dump === true && parsed) {
+      try {
+        const dumpLine = JSON.stringify({
+          t: Date.now(),
+          fp: anchorFingerprint(parsed),
+          model: parsed.model,
+          tools: (parsed.tools || []).map((t) => t?.name),
+          system: (parsed.system || []).map((b) => (typeof b === 'string' ? b : (b?.text || '')).slice(0, 100)),
+        })
+        writeFileSync(join(STATE_DIR, 'dump.jsonl'), dumpLine + '\n', { flag: 'a' })
+      } catch { /* dump 尽力而为 */ }
+    }
+    // 分类器模型档位重映射（阶段感知）：仅 Stage 1 快速判断（max_tokens≤64）投 flash，
+    // Stage 2 严肃思考留 pro。只做具体映射（无 * 通配），避免一刀切。
+    if (parsed && cfg.classifier?.modelMap && isClassifierRequest(parsed)) {
+      const m = cfg.classifier.modelMap
+      const mt = Number(parsed.max_tokens ?? 0)
+      const mapped = mt > 0 && mt <= 64 ? m[parsed.model] : undefined
+      if (mapped) {
+        parsed.model = mapped
+        body = JSON.stringify(parsed)
+      }
+    }
+    // 分类器分流（config.classifier.enabled=true 才开，默认关）：0 tools + security monitor 请求
+    // 改投独立上游（缺省继承 fallback=OpenRouter GLM），恢复原生「分类器独立缓存」隔离；
+    // 上游失败则软降级回原 DeepSeek 主上游（单请求，不 502）。
+    if (cfg.classifier?.enabled === true && parsed && isClassifierRequest(parsed)) {
+      const clsUp = cfg.classifier.upstream || fallback?.upstream
+      const clsTok = cfg.classifier.authToken || fallback?.authToken
+      if (clsUp && clsTok) {
+        try {
+          const q = JSON.parse(body)
+          const m = cfg.classifier.modelMap || fallback?.modelMap || {}
+          q.model = m[q.model] || m['*'] || q.model
+          const cls = await forward(req, JSON.stringify(q), clsUp, path, { authorization: 'Bearer ' + clsTok })
+          console.log(`[cache-relay] classifier → ${clsUp} status=${cls.status}`)
+          if (cls.stream && cls.status >= 200 && cls.status < 400) {
+            res.writeHead(cls.status, cls.headers)
+            cls.stream.pipe(res)
+            return
+          }
+          if (cls.stream) cls.stream.resume()
+          // 分流失败 → 落到原 DeepSeek 主上游（软降级）
+        } catch { /* 分流失败 → 软降级回主上游 */ }
+      }
+    }
+    // P5 keepalive：记录主会话（非分类器）最后一次真实请求 → 空闲重放保温用。
+    // 只重放真实请求：仅 serve 入口的记录会更新 lastMainRequest，重放不经 serve。
+    if (cfg.keepalive?.enabled === true && parsed && !isClassifierRequest(parsed)) {
+      recordMainRequest(body, upstream, path, req.headers, req.method)
+    }
     // P5 coalescer：同锚点并发合并（config.coalesce=true 开启，默认关）
     const fp = cfg.coalesce === true && parsed ? anchorFingerprint(parsed) : null
     const fwd = fp
