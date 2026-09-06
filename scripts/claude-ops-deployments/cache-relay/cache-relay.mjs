@@ -28,7 +28,7 @@ import { join } from 'node:path'
 const RELAY_PORT = Number(process.env.RELAY_PORT ?? 8790)
 const DEFAULT_UPSTREAM = process.env.RELAY_DEFAULT_UPSTREAM ?? ''
 const FORCE = process.env.RELAY_FORCE_PROVIDER ?? ''
-const STATE_DIR = join(homedir(), '.cache-relay')
+const STATE_DIR = process.env.RELAY_STATE_DIR || join(homedir(), '.cache-relay')
 const PID_FILE = join(STATE_DIR, 'relay.pid')
 const DISABLED_FILE = join(STATE_DIR, '.disabled')
 const CONFIG_FILE = join(STATE_DIR, 'config.json')
@@ -108,14 +108,96 @@ function stripCacheControl(node) {
   return node
 }
 
+// ---------------------------------------------------------------------------
+// permafrost aggressive 移植：billing nonce 钉桩 / 工具集归一 / env 块搬迁
+// ---------------------------------------------------------------------------
+
+const ANCHOR_TOOLS = new Set(['Agent', 'AskUserQuestion', 'Bash', 'Edit', 'Read', 'Skill', 'ToolSearch', 'Workflow', 'Write', 'WebSearch', 'WebFetch'])
+const ENV_MARKERS = ['<env>', 'Working directory', 'Is directory a git repo', "Today's date", 'Current branch', 'Recent commits', 'gitStatus', 'Platform:', 'OS Version']
+const VOLATILE_RES = [
+  /\b\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}(?::\d{2})?/,
+  /\b[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\b/,
+  /\b[0-9a-fA-F]{32,64}\b/,
+  /\b[0-9a-f]{7,40}\b/,
+]
+const looksLikeEnv = (text) => ENV_MARKERS.some((m) => text.includes(m))
+const countVolatile = (text) => VOLATILE_RES.reduce((n, re) => n + (re.test(text) ? 1 : 0), 0)
+
+/** 钉桩每请求 billing nonce（cch=xxx → cch=permafrost），防止前缀头部逐请求漂移。 */
+function stabilizeMetadata(body) {
+  const system = body?.system
+  if (!Array.isArray(system)) return
+  for (const b of system) {
+    if (b && typeof b.text === 'string' && b.text.includes('x-anthropic-billing-header')) {
+      b.text = b.text.replace(/(cch=)[^;\s]*/g, '$1permafrost')
+    }
+  }
+}
+
+/** 归一工具集：锚点工具保留 + 描述钉桩 + 按需保留非锚点（子代理无锚点则整体不动）。
+ *  可配置：config.anchorTools 全量覆盖锚点集；config.keepToolPrefixes 前缀命中的工具一律保留（如 "mcp__"）。 */
+function normalizeTools(body) {
+  const tools = body?.tools
+  if (!Array.isArray(tools) || tools.length < 2) return
+  const cfg = readConfig()
+  const anchorSet = Array.isArray(cfg.anchorTools) ? new Set(cfg.anchorTools) : ANCHOR_TOOLS
+  const prefixes = Array.isArray(cfg.keepToolPrefixes) ? cfg.keepToolPrefixes : []
+  for (const t of tools) {
+    if (t && typeof t.description === 'string' && t.description.length > 10) t.description = 'See tool schema.'
+  }
+  if (!tools.some((t) => t && anchorSet.has(t.name))) return // 子代理（缩减工具集）不动
+  const last = body?.messages?.[body.messages.length - 1]
+  const text = (typeof last?.content === 'string' ? last.content
+    : Array.isArray(last?.content) ? last.content.map((c) => c?.text ?? '').join(' ') : '').toLowerCase()
+  const wanted = new Set()
+  const KW = { search: 'WebSearch', 搜索: 'WebSearch', fetch: 'WebFetch', 抓取: 'WebFetch', grep: 'Grep', monitor: 'Monitor', 监控: 'Monitor' }
+  for (const [kw, tool] of Object.entries(KW)) if (text.includes(kw)) wanted.add(tool)
+  const kept = tools.filter((t) => {
+    const name = t?.name ?? ''
+    if (anchorSet.has(name)) return true
+    if (prefixes.some((p) => name.startsWith(p))) return true
+    return wanted.has(name)
+  })
+  body.tools = kept.sort((a, b) => (a.name ?? '').localeCompare(b.name ?? ''))
+}
+
+/** 把 system 里含易变内容（日期/uuid/hash/SHA）的 env 块搬迁到末尾消息（内容保留，只移出前缀）。 */
+function relocateVolatile(body) {
+  const system = body?.system
+  if (!Array.isArray(system)) return
+  const keep = []
+  const moved = []
+  for (const b of system) {
+    const text = b && typeof b.text === 'string' ? b.text : ''
+    if (countVolatile(text) > 0 && looksLikeEnv(text)) moved.push(b)
+    else keep.push(b)
+  }
+  if (moved.length === 0) return
+  body.system = keep
+  const msgs = body?.messages
+  if (!Array.isArray(msgs) || msgs.length === 0) { body.system = [...keep, ...moved]; return }
+  const last = msgs[msgs.length - 1]
+  const blocks = typeof last.content === 'string' ? [{ type: 'text', text: last.content }]
+    : Array.isArray(last.content) ? last.content : []
+  last.content = [...blocks,
+    { type: 'text', text: '<relay:relocated-context>\nMoved out of the cache prefix so it can change without resetting the cache.\n</relay:relocated-context>' },
+    ...moved,
+  ]
+  msgs[msgs.length - 1] = last
+}
+
 /** 按 provider 分派对齐。passthrough = 零改动透传（逃生）。 */
 function alignRequest(body, provider) {
   switch (provider) {
     case 'deepseek':
     case 'glm':
       stripCacheControl(body)
-      sortTools(body)
+      stabilizeMetadata(body)
       stabilizeDates(body)
+      sortTools(body)
+      // normalizeTools 默认关：会剥掉 MCP 等非锚点工具（行为级变化），需 config.json 显式 normalizeTools=true 开启
+      if (readConfig().normalizeTools === true) normalizeTools(body)
+      relocateVolatile(body)
       break
     case 'anthropic':
       sortTools(body)          // 保留 cache_control 断点，只排序 + 稳定
@@ -135,7 +217,7 @@ function alignRequest(body, provider) {
 
 const DROP_HEADERS = new Set(['host', 'content-length', 'connection', 'transfer-encoding'])
 
-function forward(req, body, upstream, path) {
+function forward(req, body, upstream, path, overrideHeaders = {}) {
   return new Promise((resolve) => {
     const target = new URL(upstream + path)
     const lib = target.protocol === 'https:' ? https : http
@@ -143,6 +225,7 @@ function forward(req, body, upstream, path) {
     for (const [k, v] of Object.entries(req.headers)) {
       if (!DROP_HEADERS.has(k.toLowerCase())) headers[k] = v
     }
+    for (const [k, v] of Object.entries(overrideHeaders)) headers[k.toLowerCase()] = v
     headers['host'] = target.host
     headers['content-length'] = Buffer.byteLength(body)
     const out = lib.request({
@@ -154,6 +237,41 @@ function forward(req, body, upstream, path) {
     out.on('error', () => resolve({ status: 502, headers: {}, stream: null }))
     out.end(body)
   })
+}
+
+/** 收集小体积错误响应体（仅 400 类 JSON 错误，避免打断正常 SSE 流）。 */
+function readBody(stream) {
+  return new Promise((resolve) => {
+    const chunks = []
+    stream.on('data', (c) => chunks.push(c))
+    stream.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')))
+    stream.on('error', () => resolve(''))
+  })
+}
+
+/** 内容审核 400 兜底配置（本地 ~/.cache-relay/config.json，不落地到仓库）。
+ *  authToken 优先取 config；否则按 authTokenSource 指向的文件读 env.ANTHROPIC_AUTH_TOKEN。 */
+function fallbackConfig() {
+  const f = readConfig().fallback
+  if (!f || !f.upstream) return null
+  if (f.authToken) return f
+  const src = f.authTokenSource
+  if (src) {
+    try {
+      const p = src.replace(/^~/, homedir())
+      const d = JSON.parse(readFileSync(p, 'utf8'))
+      const tok = d?.env?.ANTHROPIC_AUTH_TOKEN
+      if (tok) return { ...f, authToken: tok }
+    } catch { /* 读取失败则禁用兜底 */ }
+  }
+  return null
+}
+
+/** 判定错误体是否为内容审核 400（Content Exists Risk）。 */
+function isRisk400(errBody, keywords) {
+  const keys = keywords && keywords.length ? keywords : ['content exists risk', '内容存在风险']
+  const b = String(errBody).toLowerCase()
+  return keys.some((k) => b.includes(String(k).toLowerCase()))
 }
 
 // ---------------------------------------------------------------------------
@@ -185,7 +303,32 @@ function serve() {
       body = JSON.stringify(parsed)
     } catch { /* 非 JSON 透传 */ }
 
+    const fallback = fallbackConfig()
     const fwd = await forward(req, body, upstream, path)
+    // 内容审核 400 → 改投备用上游（OpenRouter GLM），不阻断会话
+    if (fwd.status === 400 && fallback && fwd.stream) {
+      const errBody = await readBody(fwd.stream)
+      if (isRisk400(errBody, fallback.riskKeywords)) {
+        let fbBody = body
+        try {
+          const p = JSON.parse(body)
+          const map = fallback.modelMap || {}
+          p.model = map[p.model] || map['*'] || p.model
+          fbBody = JSON.stringify(p)
+        } catch { /* 非 JSON 原样转发 */ }
+        const fb = await forward(req, fbBody, fallback.upstream, path, { authorization: 'Bearer ' + fallback.authToken })
+        console.log(`[cache-relay] 400 risk → fallback ${fallback.upstream} status=${fb.status}`)
+        if (fb.stream) { res.writeHead(fb.status, fb.headers); fb.stream.pipe(res); return }
+        // 兜底也失败：回传原始 400（信息最准）
+        res.writeHead(fwd.status, fwd.headers)
+        res.end(errBody)
+        return
+      }
+      // 非内容审核 400：原样回传
+      res.writeHead(fwd.status, fwd.headers)
+      res.end(errBody)
+      return
+    }
     if (!fwd.stream) { res.writeHead(fwd.status); res.end(); return }
     res.writeHead(fwd.status, fwd.headers)
     fwd.stream.pipe(res)
