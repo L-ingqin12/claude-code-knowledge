@@ -21,7 +21,7 @@
  */
 import http from 'node:http'
 import https from 'node:https'
-import { readFileSync, existsSync, writeFileSync, mkdirSync } from 'node:fs'
+import { readFileSync, existsSync, writeFileSync, mkdirSync, unlinkSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
 
@@ -152,6 +152,12 @@ function forward(req, body, upstream, path) {
 
 function serve() {
   const server = http.createServer(async (req, res) => {
+    // 热软回滚：每请求检查 .disabled/RELAY_DISABLED，undeploy 后立即生效（无需重启）
+    if (process.env.RELAY_DISABLED === '1' || existsSync(DISABLED_FILE)) {
+      res.writeHead(503, { 'content-type': 'application/json' })
+      res.end(JSON.stringify({ error: 'relay disabled (soft rollback)' }))
+      return
+    }
     let chunks = []
     for await (const c of req) chunks.push(c)
     let body = Buffer.concat(chunks).toString('utf8')
@@ -205,8 +211,28 @@ switch (cmd) {
     if (existsSync(PID_FILE)) {
       const pid = readFileSync(PID_FILE, 'utf8').trim()
       try { process.kill(Number(pid)); console.log(`已停止 cache-relay (PID ${pid})`) } catch { console.log('cache-relay 未运行（pid 过期）') }
-      try { require('node:fs').unlinkSync(PID_FILE) } catch {}
+      try { unlinkSync(PID_FILE) } catch {}
     } else console.log('无 pid 文件（未启动）')
+    break
+  }
+  case 'deploy': {
+    // 热部署：清 .disabled 标记 + 启动守护（不重启 Claude Code）
+    mkdirSync(STATE_DIR, { recursive: true })
+    try { unlinkSync(DISABLED_FILE) } catch {}
+    const { spawn } = await import('node:child_process')
+    const child = spawn(process.execPath, [process.argv[1], 'daemon'], { detached: true, stdio: 'ignore' })
+    child.unref()
+    console.log(`cache-relay 已热部署（监听 :${RELAY_PORT}）· 停止 node cache-relay.mjs stop`)
+    break
+  }
+  case 'undeploy': {
+    // 软回滚：写 .disabled 标记 + 停守护（不删文件，随时 re-deploy）
+    mkdirSync(STATE_DIR, { recursive: true })
+    writeFileSync(DISABLED_FILE, '')
+    if (existsSync(PID_FILE)) {
+      try { process.kill(Number(readFileSync(PID_FILE, 'utf8').trim())) } catch {}
+    }
+    console.log('cache-relay 已软回滚（.disabled 已写，守护已停）· 恢复 node cache-relay.mjs deploy')
     break
   }
   case 'daemon': {
