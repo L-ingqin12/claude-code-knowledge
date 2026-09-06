@@ -3,15 +3,15 @@ title: Claude-Ops-KB-Home
 aliases: [Claude Code 运维知识库, claude-ops, ClaudeOps]
 tags: [moc, ai/ops]
 created: 2026-08-17
-updated: 2026-08-26
+updated: 2026-09-06
 status: stable
 ---
 
 # Claude-Ops-KB-Home — Claude Code 无人值守运维知识库
 
 > [!abstract] 概述
-> 本子库承载远程仓库 `akb-remote`（Claude Code 无人值守知识库，commit `f493130`）的运维知识体系：从现象→根因→方案→部署的完整推导与产出。所有文档均可独立阅读，彼此正交但交叉引用。
-> 迁移日期：2026-08-17 · 文档总数：60（54 篇迁移 + 本 MOC + [[MEMORY-INDEX]] + 2026-08-25 新增 4 篇）
+> 本子库承载远程仓库 `akb-remote`（Claude Code 无人值守运维知识库，commit `f493130`）的运维知识体系：从现象→根因→方案→部署的完整推导与产出。所有文档均可独立阅读，彼此正交但交叉引用。
+> 迁移日期：2026-08-17 · 文档总数：61（54 篇迁移 + 本 MOC + [[MEMORY-INDEX]] + 2026-08-25 新增 4 篇 + 2026-08-28 事故复盘 1 篇）
 
 See also: [[AGENTS]] · [[AI-Links-KB-Home]] · [[Network-KB-Home]]
 
@@ -47,6 +47,8 @@ See also: [[AGENTS]] · [[AI-Links-KB-Home]] · [[Network-KB-Home]]
 
 ## 文档地图
 
+- **专题导航**：[[逃生回滚导航]] — 逃生 vs 回滚 · 按场景导航（permafrost 七级通道 / cache-relay 软回滚 / 版本切换回退 / 事故经验）
+
 ### 1. 运维方案与设计（status: review）
 
 | 文档 | 主题 |
@@ -74,6 +76,10 @@ See also: [[AGENTS]] · [[AI-Links-KB-Home]] · [[Network-KB-Home]]
 | [[hermes-cache-analysis]] | Hermes 缓存现状与优化 |
 | [[hermes-parallel-task-report]] | Hermes 并行任务调度与通信 |
 | [[hermes-session-optimization-report]] | Hermes 会话优化与模型调度 |
+| [[claude-cache-relay-design]] | 通用多源缓存对齐中继设计（cache-relay，新增 2026-09-06） |
+| [[tianshu-cache-aim-plan]] | tianshu-tui 缓存命中率目标方案（新增 2026-09-06） |
+| [[deepseek-400-mitigation-design]] | DeepSeek 400 双类报错规避与恢复：预防/恢复/兜底三层（新增 2026-09-06） |
+| [[deepseek-400-mitigation-usage]] | DeepSeek 400 规避与恢复使用说明（架构 + 命令速查 + 消毒脚本）（新增 2026-09-06） |
 | ~~[[claude-network-resilience-design]]~~ | ⚠️ 已废弃 → [[claude-network-resilience-v2]] |
 | ~~[[claude-optimal-resilience-design]]~~ | ⚠️ 已废弃 → [[claude-network-resilience-v2]] |
 
@@ -89,6 +95,7 @@ See also: [[AGENTS]] · [[AI-Links-KB-Home]] · [[Network-KB-Home]]
 | [[claude-proxy-restart-incident]] | Proxy 重启事故 |
 | [[proxy-cancelretry-hook-incident]] | cancelRetry Hook 卡死事故 |
 | [[2026-06-24-hermes-feishu-outage-postmortem]] | Hermes 飞书助手全面瘫痪（P0） |
+| [[explorer-cpu-spin-postmortem-2026-08-28]] | Explorer 100% CPU 空转排查修复（Windows 壳扩展，新增 2026-08-28） |
 
 ### 3. Agent-架构模式（status: stable）
 
@@ -135,7 +142,7 @@ See also: [[AGENTS]] · [[AI-Links-KB-Home]] · [[Network-KB-Home]]
 ```
 Claude-Ops-KB-Home (HOME)
 ├─ 运维方案与设计 (OPS) — review × 23 · deprecated × 2
-├─ 事故复盘 (INC) — stable × 8
+├─ 事故复盘 (INC) — stable × 9
 ├─ Agent-架构模式 (ARCH) — stable × 14 · review × 4（2026-08-25 新增实时交互、基座选型、日志网络根因、记忆与知识库化）
 ├─ Plans (PLAN) — deprecated × 8
 ├─ AGENTS (AG)
@@ -155,18 +162,18 @@ Claude-Ops-KB-Home (HOME)
 |------|------|--------|
 | `#ai/ops` | Agent 无人值守运维（本子库全局） | 60 |
 | `#ai/agent` | 方案/设计/架构模式类 | 43 |
-| `#incident` | 事故复盘 | 8 |
+| `#incident` | 事故复盘 | 9 |
 | `#moc` | MOC 首页 | 1 |
 
 ## 关键数据
 
 | 指标 | 值 |
 |------|-----|
-| 迁移文档总数 | 56（54 篇迁移 + MOC + [[MEMORY-INDEX]]）；2026-08-25 起 Agent-架构模式 新增 4 篇（[[main-subagent-realtime-interaction]]、[[opencode-pi-base-development-analysis]]、[[lognet-rootcause-multiagent-architecture]]、[[agent-memory-context-knowledge-design]]），全库总数 60 |
+| 迁移文档总数 | 56（54 篇迁移 + MOC + [[MEMORY-INDEX]]）；2026-08-25 起 Agent-架构模式 新增 4 篇（[[main-subagent-realtime-interaction]]、[[opencode-pi-base-development-analysis]]、[[lognet-rootcause-multiagent-architecture]]、[[agent-memory-context-knowledge-design]]），2026-08-28 事故复盘 +1（[[explorer-cpu-spin-postmortem-2026-08-28]]），全库总数 61 |
 | 迁移日期 | 2026-08-17 |
 | 来源仓库 | `akb-remote` @ commit `f493130` |
-| status 分布 | review 27 · stable 21 · deprecated 10（不含 MOC/索引 2 篇 stable） |
-| 目录分布 | 运维方案与设计 25 · 事故复盘 8 · Agent-架构模式 18（含 MEMORY-INDEX；+4 为 2026-08-25 新增）· Plans 8（合计 59 + 本 MOC = 60） |
+| status 分布 | review 27 · stable 22 · deprecated 10（不含 MOC/索引 2 篇 stable） |
+| 目录分布 | 运维方案与设计 25 · 事故复盘 9 · Agent-架构模式 18（含 MEMORY-INDEX；+4 为 2026-08-25 新增）· Plans 8（合计 60 + 本 MOC = 61） |
 
 ## 脚本清单
 

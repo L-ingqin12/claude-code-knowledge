@@ -284,7 +284,7 @@ function forward(req, body, upstream, path, overrideHeaders = {}) {
     })
     out.on('error', () => resolve({ status: 502, headers: {}, stream: null }))
     // 超时保护：上游慢/挂起时 504，避免请求挂死（客户端拿到响应会自行重试）
-    const timeoutMs = Number(process.env.RELAY_TIMEOUT_MS ?? 30000)
+    const timeoutMs = Number(process.env.RELAY_TIMEOUT_MS ?? 180000)
     out.setTimeout(timeoutMs, () => {
       out.destroy()
       resolve({ status: 504, headers: {}, stream: null })
