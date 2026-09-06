@@ -31,6 +31,12 @@ const FORCE = process.env.RELAY_FORCE_PROVIDER ?? ''
 const STATE_DIR = join(homedir(), '.cache-relay')
 const PID_FILE = join(STATE_DIR, 'relay.pid')
 const DISABLED_FILE = join(STATE_DIR, '.disabled')
+const CONFIG_FILE = join(STATE_DIR, 'config.json')
+
+/** 热配置：~/.cache-relay/config.json（可热改，重启中继生效；只存上游/策略，不落地密钥）。 */
+function readConfig() {
+  try { return JSON.parse(readFileSync(CONFIG_FILE, 'utf8')) } catch { return {} }
+}
 
 // ---------------------------------------------------------------------------
 // 判源（detectProvider）
@@ -38,15 +44,19 @@ const DISABLED_FILE = join(STATE_DIR, '.disabled')
 
 /** 依据 baseUrl host + model + 协议路径 判 provider。 */
 function detectProvider(baseUrl = '', model = '', path = '') {
-  if (FORCE) return FORCE // 逃生阀：强制策略优先
+  const force = readConfig().forceProvider ?? FORCE
+  if (force) return force // 逃生阀：强制策略优先
   const host = safeHost(baseUrl)
   const bm = (baseUrl + model).toLowerCase()
-  if (/anthropic\.com/.test(host) || /\/v1\/messages$/.test(path) || /claude/i.test(model)) return 'anthropic'
+  // host 优先：deepseek.com 即使走 Anthropic 协议(/v1/messages)也是隐式前缀，必须按 deepseek 处理
+  // （否则会把「剥离 cache_control」错判成「保留」——DeepSeek 不识别 cache_control，位置漂移打穿前缀）
   if (/deepseek\.com/.test(host)) return 'deepseek'
   if (/bigmodel\.cn|zhipu/.test(bm)) return 'glm'
-  if (/openrouter\.ai/.test(host)) return 'openrouter'
   if (/minimaxi\.com/.test(host)) return 'deepseek' // 隐式前缀，同 DeepSeek 策略
+  if (/openrouter\.ai/.test(host)) return 'openrouter'
   if (/moonshot\.cn|siliconflow/.test(host)) return 'generic'
+  // 协议/模型兜底（放最后）：显式 Anthropic 端点，或 /v1/messages 且无已知 host
+  if (/anthropic\.com/.test(host) || /\/v1\/messages$/.test(path) || /claude/i.test(model)) return 'anthropic'
   return 'generic'
 }
 
@@ -162,7 +172,9 @@ function serve() {
     for await (const c of req) chunks.push(c)
     let body = Buffer.concat(chunks).toString('utf8')
 
-    const upstream = String(req.headers['x-relay-upstream'] ?? DEFAULT_UPSTREAM ?? '')
+    const cfg = readConfig()
+    // 优先级：请求头 > env(RELAY_DEFAULT_UPSTREAM) > config.json(defaultUpstream)
+    const upstream = String(req.headers['x-relay-upstream'] || DEFAULT_UPSTREAM || cfg.defaultUpstream || '')
     const path = new URL(req.url, 'http://x').pathname + (new URL(req.url, 'http://x').search || '')
     if (!upstream) { res.writeHead(502, { 'content-type': 'application/json' }); res.end(JSON.stringify({ error: 'no upstream: set RELAY_DEFAULT_UPSTREAM or X-Relay-Upstream' })); return }
 
