@@ -24,6 +24,7 @@ import https from 'node:https'
 import { readFileSync, existsSync, writeFileSync, mkdirSync, unlinkSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
+import { createHash } from 'node:crypto'
 
 const RELAY_PORT = Number(process.env.RELAY_PORT ?? 8790)
 const DEFAULT_UPSTREAM = process.env.RELAY_DEFAULT_UPSTREAM ?? ''
@@ -212,6 +213,53 @@ function alignRequest(body, provider) {
 }
 
 // ---------------------------------------------------------------------------
+// P5 冷启动合并（coalescer）：并发同锚点请求，首请求领跑，跟随者等首字节+settle 后转发，
+// 读 DeepSeek 刚写入的热缓存（异步写 ~6-60s）。仅对同锚点并发有用；不同锚点互不影响。
+// config.coalesce=true 开启（默认关，零额外状态除非开启）。
+// ---------------------------------------------------------------------------
+
+const COALESCE_SETTLE_MS = Number(process.env.RELAY_COALESCE_SETTLE ?? 2500)
+const inFlight = new Map() // fingerprint -> { ready: Promise, resolve: () => void, count: number }
+
+/** 锚点指纹 = tools + system（对齐后）的 sha256，标识「同一可缓存前缀」。 */
+function anchorFingerprint(body) {
+  const anchor = JSON.stringify({ tools: body?.tools, system: body?.system })
+  return createHash('sha256').update(anchor).digest('hex')
+}
+
+/** 领跑/跟随：首请求直接转发，同锚点后续请求等首字节+settle 后转发（读热缓存）。 */
+function coalesceForward(fingerprint, forwardFn) {
+  const existing = inFlight.get(fingerprint)
+  if (existing) {
+    existing.count++
+    return existing.ready.then(() => forwardFn())
+  }
+  let resolve
+  const ready = new Promise((r) => { resolve = r })
+  const entry = { ready, resolve, count: 1 }
+  inFlight.set(fingerprint, entry)
+  return forwardFn().then((result) => {
+    let settled = false
+    const settle = () => {
+      if (settled) return
+      settled = true
+      if (inFlight.get(fingerprint) === entry) inFlight.delete(fingerprint)
+      resolve()
+    }
+    if (result.stream) {
+      // 首字节后等 settle（给 DeepSeek 异步写缓存留时间）；error 立即释放
+      result.stream.once('data', () => setTimeout(settle, COALESCE_SETTLE_MS))
+      result.stream.once('error', settle)
+      // 兜底：上游空响应/无 data 时强制释放，避免 follower 死等
+      setTimeout(settle, COALESCE_SETTLE_MS + 5000).unref?.()
+    } else {
+      settle()
+    }
+    return result
+  })
+}
+
+// ---------------------------------------------------------------------------
 // 转发（透传头，不落地密钥）
 // ---------------------------------------------------------------------------
 
@@ -297,14 +345,19 @@ function serve() {
     if (!upstream) { res.writeHead(502, { 'content-type': 'application/json' }); res.end(JSON.stringify({ error: 'no upstream: set RELAY_DEFAULT_UPSTREAM or X-Relay-Upstream' })); return }
 
     const provider = detectProvider(upstream, '', path)
+    let parsed = null
     try {
-      const parsed = JSON.parse(body)
+      parsed = JSON.parse(body)
       alignRequest(parsed, provider)
       body = JSON.stringify(parsed)
     } catch { /* 非 JSON 透传 */ }
 
     const fallback = fallbackConfig()
-    const fwd = await forward(req, body, upstream, path)
+    // P5 coalescer：同锚点并发合并（config.coalesce=true 开启，默认关）
+    const fp = cfg.coalesce === true && parsed ? anchorFingerprint(parsed) : null
+    const fwd = fp
+      ? await coalesceForward(fp, () => forward(req, body, upstream, path))
+      : await forward(req, body, upstream, path)
     // 内容审核 400 → 改投备用上游（OpenRouter GLM），不阻断会话
     if (fwd.status === 400 && fallback && fwd.stream) {
       const errBody = await readBody(fwd.stream)
