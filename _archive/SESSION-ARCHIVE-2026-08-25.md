@@ -88,7 +88,7 @@ status: review
 8. **推送待执行**：本地已领先 origin/main 三个提交（4edd7ef / ce7c593 / 本归档提交），沙箱内凭据管理器被拦无法认证。请在你的终端执行：
    ```powershell
    cd D:\Document\local\knowledge
-   git -c http.proxy=http://[IP已脱敏]:10808 push origin main
+   git -c http.proxy=http://127.0.0.1:10808 push origin main
    ```
    （直连可达时可省 proxy 参数）
 

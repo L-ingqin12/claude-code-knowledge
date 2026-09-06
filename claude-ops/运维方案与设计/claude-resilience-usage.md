@@ -21,7 +21,7 @@ See also: [[Claude-Ops-KB-Home]] · [[claude-resilience-architecture]] · [[clau
 一个运行在本地的轻量代理 (Node.js, ~120 行)，位于 Claude Code 和 DeepSeek API 之间。自动重试网络抖动、保持连接活跃。
 
 ```
-Claude Code → [IP已脱敏]:8787 → 代理 → api.deepseek.com
+Claude Code → 127.0.0.1:8787 → 代理 → api.deepseek.com
 ```
 
 ---
@@ -51,7 +51,7 @@ bash /root/claude-rollback.sh
 cat /root/.claude/proxy.log
 
 # 正常时应该看到类似:
-# [proxy] Listening [IP已脱敏]:8787 → https://api.deepseek.com/anthropic
+# [proxy] Listening 127.0.0.1:8787 → https://api.deepseek.com/anthropic
 # [proxy] POST /v1/messages → 200 (1234ms)
 
 # 网络抖动被重试时:
@@ -66,7 +66,7 @@ cat /root/.claude/proxy.log
 ```
 状态A: 正常运行
   代理进程: ✓ (PID 在 /root/.claude/proxy.pid)
-  shell配置: ANTHROPIC_BASE_URL=http://[IP已脱敏]:8787
+  shell配置: ANTHROPIC_BASE_URL=http://127.0.0.1:8787
   → 无需操作，Claude 新会话自动走代理
 
 状态B: 回滚后（直连 DeepSeek）

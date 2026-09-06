@@ -23,8 +23,8 @@ See also: [[Claude-Ops-KB-Home]] · [[claude-resilience-architecture]] · [[clau
 
 | 文件 | 行号 | 修改前 | 修改后 |
 |------|------|--------|--------|
-| `/root/.zshrc` | 107 | `export ANTHROPIC_BASE_URL="https://api.deepseek.com/anthropic"` | `export ANTHROPIC_BASE_URL="http://[IP已脱敏]:8787/anthropic"` |
-| `/root/.bashrc` | 150 | `export ANTHROPIC_BASE_URL="https://api.deepseek.com/anthropic"` | `export ANTHROPIC_BASE_URL="http://[IP已脱敏]:8787/anthropic"` |
+| `/root/.zshrc` | 107 | `export ANTHROPIC_BASE_URL="https://api.deepseek.com/anthropic"` | `export ANTHROPIC_BASE_URL="http://127.0.0.1:8787/anthropic"` |
+| `/root/.bashrc` | 150 | `export ANTHROPIC_BASE_URL="https://api.deepseek.com/anthropic"` | `export ANTHROPIC_BASE_URL="http://127.0.0.1:8787/anthropic"` |
 
 ### 新增文件（5 个）
 
@@ -93,7 +93,7 @@ bash /root/claude-resilience-deploy.sh status
 
 ```bash
 # 拼接恢复协议头 + 你的任务
-ANTHROPIC_BASE_URL=http://[IP已脱敏]:8787/anthropic \
+ANTHROPIC_BASE_URL=http://127.0.0.1:8787/anthropic \
   claude -p "$(cat /root/.claude/resume-prompt-header.txt)
 
 你的任务描述" --permission-mode accept-edits
@@ -121,10 +121,10 @@ bash /root/claude-rollback.sh
 kill $(cat /root/.claude/proxy.pid) 2>/dev/null
 
 # 2. 恢复 .zshrc
-sed -i 's|export ANTHROPIC_BASE_URL="http://[IP已脱敏]:8787/anthropic"|export ANTHROPIC_BASE_URL="https://api.deepseek.com/anthropic"|' /root/.zshrc
+sed -i 's|export ANTHROPIC_BASE_URL="http://127.0.0.1:8787/anthropic"|export ANTHROPIC_BASE_URL="https://api.deepseek.com/anthropic"|' /root/.zshrc
 
 # 3. 恢复 .bashrc
-sed -i 's|export ANTHROPIC_BASE_URL="http://[IP已脱敏]:8787/anthropic"|export ANTHROPIC_BASE_URL="https://api.deepseek.com/anthropic"|' /root/.bashrc
+sed -i 's|export ANTHROPIC_BASE_URL="http://127.0.0.1:8787/anthropic"|export ANTHROPIC_BASE_URL="https://api.deepseek.com/anthropic"|' /root/.bashrc
 
 # 4. 当前会话生效
 export ANTHROPIC_BASE_URL="https://api.deepseek.com/anthropic"

@@ -127,7 +127,7 @@ Write-Host "[健康检查]" -ForegroundColor Yellow
 for ($i = 0; $i -lt $WorkerCount; $i++) {
     $port = $PortStart + $i
     try {
-        $resp = Invoke-RestMethod -Uri "http://[IP已脱敏]:$port/api/health" -TimeoutSec 5 -ErrorAction Stop
+        $resp = Invoke-RestMethod -Uri "http://127.0.0.1:$port/api/health" -TimeoutSec 5 -ErrorAction Stop
         Write-Host "  端口 $port: $($resp.status) ✓ (worker $($resp.worker_id))" -ForegroundColor Green
     } catch {
         Write-Host "  端口 $port: 启动中... (稍后重试)" -ForegroundColor Yellow

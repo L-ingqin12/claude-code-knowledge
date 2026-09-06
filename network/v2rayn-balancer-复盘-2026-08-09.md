@@ -97,8 +97,8 @@ v2rayN 7.19.5 的 GUI 均衡组（多选服务器生成 balancer）产出的路�
 同节点、同 google SNI、同 DNS，仅改规则字段：
 
 ```
-variant C (balancerTag):  https://www.google.com/generate_204 → 204 ✅
-原配置 (outboundTag):     https://www.google.com/generate_204 → TLS 秒拒 ❌
+variant C (balancerTag):  https://[域名已脱敏]/generate_204 → 204 ✅
+原配置 (outboundTag):     https://[域名已脱敏]/generate_204 → TLS 秒拒 ❌
 ```
 
 > [!success] 证据链完整
@@ -158,7 +158,7 @@ live balancer 实测（2026-08-09），**运行池已换成 4 个稳定节点**�
 | px-jp1 | 日本-01 | ✅ 稳定（当前池） |
 | px-dtwo1-10000 | 韩国1 动态家宽 | ⚠️ 波动大（ipify 5 次挂 2 次），已移出池 |
 | px-221-10000 | 韩国2 | ⚠️ 波动，已移出池 |
-| fuck.p1d2.com:32769 | 新加坡2 | ⚠️ 不稳，已移出池 |
+| [域名已脱敏]:32769 | 新加坡2 | ⚠️ 不稳，已移出池 |
 | TW1 | 台湾直连 | ❌ 宕机 |
 | SG6 | 新加坡6 | ❌ google 失败 |
 

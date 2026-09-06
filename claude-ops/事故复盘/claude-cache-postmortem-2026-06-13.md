@@ -51,9 +51,9 @@ CC v2.1.174 → Permafrost :8788 (缓存对齐) → Proxy :8787 (韧性) → Dee
 关键发现：**shell rc 文件和 settings.local.json 指向不同端口**。
 
 ```
-settings.local.json → http://[IP已脱敏]:8788  (permafrost ✅)
-.zshrc              → http://[IP已脱敏]:8787  (proxy 直连 ❌)
-.bashrc             → http://[IP已脱敏]:8787  (proxy 直连 ❌)
+settings.local.json → http://127.0.0.1:8788  (permafrost ✅)
+.zshrc              → http://127.0.0.1:8787  (proxy 直连 ❌)
+.bashrc             → http://127.0.0.1:8787  (proxy 直连 ❌)
 ```
 
 两个旧 CC session 绕过了 permafrost，请求未经缓存优化直发 DeepSeek → 0% 命中率。

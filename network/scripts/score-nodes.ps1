@@ -22,7 +22,7 @@ $ErrorActionPreference = "SilentlyContinue"
 $STATE_DIR = "$env:LOCALAPPDATA\network-optimizer"
 if (-not (Test-Path $STATE_DIR)) { $null = New-Item -ItemType Directory -Path $STATE_DIR -Force }
 
-$SPEED_TEST_URL = "http://speedtest.tele2.net/1MB.zip"
+$SPEED_TEST_URL = "http://[域名已脱敏]/1MB.zip"
 $SPEED_TEST_TIMEOUT = 12
 $PING_TIMEOUT_MS = 2000
 $PING_THRESHOLD_MS = 500
@@ -77,7 +77,7 @@ function Discover-Nodes {
 function Test-PingLatency {
     param([string]$address)
     $sw = [Diagnostics.Stopwatch]::StartNew()
-    $ping = New-Object System.Net.NetworkInformation.Ping
+    $ping = New-Object [域名已脱敏].NetworkInformation.Ping
     try {
         $reply = $ping.Send($address, $PING_TIMEOUT_MS)
         if ($reply.Status -eq "Success") { return $reply.RoundtripTime }
@@ -95,7 +95,7 @@ function New-TempXrayConfig {
     return @{
         log = @{ loglevel = "none" }
         inbounds = @(@{
-            tag = "socks"; port = $port; listen = "[IP已脱敏]"; protocol = "mixed"
+            tag = "socks"; port = $port; listen = "127.0.0.1"; protocol = "mixed"
             settings = @{ auth = "noauth"; udp = $false; allowTransparent = $false }
         })
         outbounds = @(
@@ -103,7 +103,7 @@ function New-TempXrayConfig {
                 tag = "proxy"; protocol = "vless"
                 settings = @{ vnext = @(@{
                     address = $node.address; port = $node.port
-                    users = @(@{ id = $node.uuid; email = "t@t.tt"
+                    users = @(@{ id = $node.uuid; email = "t@[域名已脱敏]"
                         security = "auto"; encryption = "none"
                         flow = if ($node.flow) { $node.flow } else { "xtls-rprx-vision" }
                     })
@@ -111,7 +111,7 @@ function New-TempXrayConfig {
                 streamSettings = @{
                     network = "tcp"; security = "reality"
                     realitySettings = @{
-                        serverName = if ($node.sni) { $node.sni } else { "apple.com" }
+                        serverName = if ($node.sni) { $node.sni } else { "[域名已脱敏]" }
                         fingerprint = if ($node.fingerprint) { $node.fingerprint } else { "chrome" }
                         publicKey = if ($node.publicKey) { $node.publicKey } else { "" }
                         shortId = ""; spiderX = "/"; mldsa65Verify = ""
@@ -150,7 +150,7 @@ function Test-DownloadSpeed {
     $speed = 0
     try {
         $result = & curl -s -o "$STATE_DIR\speed_test.tmp" -w "%{speed_download}" `
-            --max-time $SPEED_TEST_TIMEOUT --socks5 "[IP已脱敏]:$port" `
+            --max-time $SPEED_TEST_TIMEOUT --socks5 "127.0.0.1:$port" `
             $SPEED_TEST_URL 2>$null
         if ($result -match '^\d+') { $speed = [double]$result }
         Remove-Item "$STATE_DIR\speed_test.tmp" -Force -EA 0
@@ -205,13 +205,13 @@ function New-OptimizedConfig {
             tag = $tag; protocol = "vless"
             settings = @{ vnext = @(@{
                 address = $n.Address; port = $n.Port
-                users = @(@{ id = $uuid; email = "t@t.tt"
+                users = @(@{ id = $uuid; email = "t@[域名已脱敏]"
                     security = "auto"; encryption = "none"; flow = $flow })
             })}
             streamSettings = @{
                 network = "tcp"; security = "reality"
                 realitySettings = @{
-                    serverName = if ($n.SNI) { $n.SNI } else { "apple.com" }
+                    serverName = if ($n.SNI) { $n.SNI } else { "[域名已脱敏]" }
                     fingerprint = "chrome"
                     publicKey = if ($n.PublicKey) { $n.PublicKey } else { "" }
                     shortId = ""; spiderX = "/"; mldsa65Verify = ""
@@ -233,22 +233,22 @@ function New-OptimizedConfig {
     $config = [ordered]@{
         log = @{ loglevel = "warning" }
         dns = @{
-            hosts = @{ "dns.google" = @("[IP已脱敏]", "[IP已脱敏]"); "dns.alidns.com" = @("[IP已脱敏]", "[IP已脱敏]") }
+            hosts = @{ "[域名已脱敏]" = @("[IP已脱敏]", "[IP已脱敏]"); "[域名已脱敏]" = @("[IP已脱敏]", "[IP已脱敏]") }
             servers = @(
-                @{ address = "https://dns.alidns.com/dns-query"; domains = @("geosite:private", "geosite:cn"); skipFallback = $true; tag = "direct-dns" }
-                @{ address = "https://cloudflare-dns.com/dns-query"; domains = @("geosite:google"); skipFallback = $true }
-                @{ address = "[IP已脱敏]"; domains = @("full:dns.alidns.com"); skipFallback = $true }
-                "https://cloudflare-dns.com/dns-query"
+                @{ address = "https://[域名已脱敏]/dns-query"; domains = @("geosite:private", "geosite:cn"); skipFallback = $true; tag = "direct-dns" }
+                @{ address = "https://[域名已脱敏]/dns-query"; domains = @("geosite:google"); skipFallback = $true }
+                @{ address = "[IP已脱敏]"; domains = @("full:[域名已脱敏]"); skipFallback = $true }
+                "https://[域名已脱敏]/dns-query"
             )
             tag = "dns-module"
         }
         inbounds = @(@{
-            tag = "socks"; port = $inboundPort; listen = "[IP已脱敏]"; protocol = "mixed"
+            tag = "socks"; port = $inboundPort; listen = "127.0.0.1"; protocol = "mixed"
             sniffing = @{ enabled = $true; destOverride = @("http", "tls"); routeOnly = $false }
             settings = @{ auth = "noauth"; udp = $true; allowTransparent = $false }
         })
         outbounds = $outbounds
-        observatory = @{ subjectSelector = $allTags; probeURL = "https://www.google.com/generate_204"; probeInterval = "2m" }
+        observatory = @{ subjectSelector = $allTags; probeURL = "https://[域名已脱敏]/generate_204"; probeInterval = "2m" }
         routing = @{
             domainStrategy = "AsIs"
             balancers = @(@{ tag = "balancer"; selector = $primaryTags; strategy = @{ type = "leastPing" } })

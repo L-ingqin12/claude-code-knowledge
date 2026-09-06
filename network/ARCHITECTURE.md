@@ -129,7 +129,7 @@ v2rayN 写入 config.json
 > | DNS 防泄露 | CN 域名 → Alibaba DNS（直连）；境外 → Cloudflare DNS（通过代理） |
 > | CN IP 直连 | 保留 `geoip:cn → direct` 和 `geosite:cn → direct` |
 > | UDP 443 阻断 | 保留 `port:443, network:udp → block` 防 QUIC 绕过代理 |
-> | 无开放端口 | 代理仅监听 [IP已脱敏]:10808，不对局域网开放 |
+> | 无开放端口 | 代理仅监听 127.0.0.1:10808，不对局域网开放 |
 
 ## 四、文件说明
 

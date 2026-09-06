@@ -105,14 +105,14 @@ C:\nginx\nginx
 
 ```powershell
 # Worker 健康检查
-curl http://[IP已脱敏]:8801/api/health
-curl http://[IP已脱敏]:8802/api/health
+curl http://127.0.0.1:8801/api/health
+curl http://127.0.0.1:8802/api/health
 
 # 通过 Nginx
-curl http://[IP已脱敏]/api/health
+curl http://127.0.0.1/api/health
 
 # 提交分析
-curl -X POST http://[IP已脱敏]/api/analyze `
+curl -X POST http://127.0.0.1/api/analyze `
   -H "Content-Type: application/json" `
   -d '{"log_content":"ERROR: connection timeout after 30s"}'
 ```

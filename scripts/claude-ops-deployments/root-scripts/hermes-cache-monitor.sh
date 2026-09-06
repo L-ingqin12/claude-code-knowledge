@@ -22,8 +22,8 @@
 # ============================================================================
 set -e
 
-PERMAFROST_URL="${PERMAFROST_URL:-http://[IP已脱敏]:8788}"
-ROUTER_URL="${ROUTER_URL:-http://[IP已脱敏]:18888}"
+PERMAFROST_URL="${PERMAFROST_URL:-http://127.0.0.1:8788}"
+ROUTER_URL="${ROUTER_URL:-http://127.0.0.1:18888}"
 MONITOR_DIR="${MONITOR_DIR:-$HOME/.hermes-cache/monitor}"
 STATE_FILE="$MONITOR_DIR/state.json"
 LOG_FILE="$MONITOR_DIR/monitor.log"

@@ -21,7 +21,7 @@ See also: [[Network-KB-Home]] | [[ROUTER-VIDEO-REMOTE-MONITOR]] | [[ARCHITECTURE
 
 ```
 应用 (git/curl/Claude Code)
-  ↓ socks5h://[IP已脱敏]:10808
+  ↓ socks5h://127.0.0.1:10808
 Xray SOCKS5 Inbound (port 10808)
   ↓ VLESS + REALITY 协议
 远程服务器 ([IP已脱敏]:10000)
@@ -33,17 +33,17 @@ Xray SOCKS5 Inbound (port 10808)
 
 | 组件 | 配置 |
 |------|------|
-| Inbound | SOCKS5, [IP已脱敏]:10808 |
+| Inbound | SOCKS5, 127.0.0.1:10808 |
 | Outbound | VLESS + REALITY → [IP已脱敏]:10000 |
-| 传输 | TCP, REALITY 指纹伪装 (apple.com, chrome) |
+| 传输 | TCP, REALITY 指纹伪装 ([域名已脱敏], chrome) |
 | 路由 | geosite:cn → direct, 其余 → proxy |
 | 健康检查 | burstObservatory, 5min 间隔, 3 次采样 |
 
 ### Git 代理配置
 
 ```bash
-git config --global http.proxy socks5h://[IP已脱敏]:10808
-git config --global https.proxy socks5h://[IP已脱敏]:10808
+git config --global http.proxy socks5h://127.0.0.1:10808
+git config --global https.proxy socks5h://127.0.0.1:10808
 ```
 
 注意：`socks5h`（h = hostname）让 DNS 也通过代理解析，避免 DNS 泄漏。
@@ -130,7 +130,7 @@ REALITY 协议的 TLS 隧道在某些网络条件下会丢包或 TLS 记录损�
 ### 当前代理评分
 
 ```
-primary (socks5h://[IP已脱敏]:10808)
+primary (socks5h://127.0.0.1:10808)
   综合分: 35/100
   延迟:   2.8s (44/100)   ← github.com 实测（google 1.0s、大文件 2.3s）
   吞吐:   0.03MB/s (1/100)  ← 主要瓶颈

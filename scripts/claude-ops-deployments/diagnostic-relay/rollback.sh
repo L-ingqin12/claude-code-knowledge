@@ -23,7 +23,7 @@ log "中继端口: ${RELAY_PORT}"
 
 log "切换 permafrost upstream → proxy (:8787) 直连..."
 source /root/claude-permafrost-deploy.sh
-start_permafrost "http://[IP已脱敏]:8787" "方案 C (逃生: 移除 relay)"
+start_permafrost "http://127.0.0.1:8787" "方案 C (逃生: 移除 relay)"
 
 sleep 2
 
@@ -49,7 +49,7 @@ pkill -f "relay.js" 2>/dev/null && warn "已清理残留 relay 进程" || true
 # ── 4. 验证恢复 ───────────────────────────────────────────────────
 
 sleep 1
-if curl -s --connect-timeout 3 "http://[IP已脱敏]:8788/permafrost/health" >/dev/null 2>&1; then
+if curl -s --connect-timeout 3 "http://127.0.0.1:8788/permafrost/health" >/dev/null 2>&1; then
     log "逃生成功: permafrost (:8788) → proxy (:8787) 直连"
 else
     err "逃生后 permafrost 无响应, 请手动检查"

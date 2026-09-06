@@ -17,7 +17,7 @@ try{
   __log("[hook] SLicense registry ensured "+__today);
 }catch(e){__log("[hook] registry set fail "+(e&&e.message||e))}
 // ---- inspector (wait=false, unchanged) ----
-try{require("inspector").open(9229,"[IP已脱敏]",false);__log("[hook] inspector open 9229")}catch(e){__log("[hook] inspector fail "+(e&&e.message))}
+try{require("inspector").open(9229,"127.0.0.1",false);__log("[hook] inspector open 9229")}catch(e){__log("[hook] inspector fail "+(e&&e.message))}
 // ---- fs redirect app.asar -> app.bak (unchanged) ----
 var __appDir=__dirname,__resDir=path.dirname(__appDir),__bakDir=path.join(__resDir,"app.bak"),__pageDir=path.join(__resDir,"page-dist")+path.sep;
 function __redir(p){if(typeof p!=="string")return p;try{var a=path.resolve(p),l=a.toLowerCase(),pk=path.join(__appDir,"package.json").toLowerCase(),ld=path.join(__appDir,"launch.dist.js").toLowerCase(),as=path.join(__resDir,"app.asar").toLowerCase();if(l===pk||l===ld||l===as+path.sep+"package.json"||l===as+path.sep+"launch.dist.js")return path.join(__bakDir,path.basename(a));if(l.indexOf(__pageDir.toLowerCase())===0)return path.join(__bakDir,"page-dist",a.slice(__pageDir.length));}catch(e){}return p;}

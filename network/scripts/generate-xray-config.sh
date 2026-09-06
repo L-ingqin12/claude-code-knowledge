@@ -121,7 +121,7 @@ while IFS=' ' read -r PING NODE_KEY; do
           "port": $PORT,
           "users": [{
             "id": "$UUID",
-            "email": "t@t.tt",
+            "email": "t@[域名已脱敏]",
             "security": "auto",
             "encryption": "none",
             "flow": "$FLOW"
@@ -132,7 +132,7 @@ while IFS=' ' read -r PING NODE_KEY; do
         "network": "tcp",
         "security": "reality",
         "realitySettings": {
-          "serverName": "${SNI:-apple.com}",
+          "serverName": "${SNI:-[域名已脱敏]}",
           "fingerprint": "chrome",
           "publicKey": "${PUBKEY:-}",
           "shortId": "",
@@ -170,30 +170,30 @@ cat > "$OUTPUT_CONFIG" <<XRAYCONFIG
   "log": { "loglevel": "warning" },
   "dns": {
     "hosts": {
-      "dns.google": ["[IP已脱敏]", "[IP已脱敏]"],
-      "dns.alidns.com": ["[IP已脱敏]", "[IP已脱敏]"]
+      "[域名已脱敏]": ["[IP已脱敏]", "[IP已脱敏]"],
+      "[域名已脱敏]": ["[IP已脱敏]", "[IP已脱敏]"]
     },
     "servers": [
       {
-        "address": "https://dns.alidns.com/dns-query",
+        "address": "https://[域名已脱敏]/dns-query",
         "domains": ["geosite:private", "geosite:cn"],
         "skipFallback": true,
         "tag": "direct-dns-1"
       },
       {
-        "address": "https://cloudflare-dns.com/dns-query",
+        "address": "https://[域名已脱敏]/dns-query",
         "domains": ["geosite:google"],
         "skipFallback": true
       },
-      { "address": "[IP已脱敏]", "domains": ["full:dns.alidns.com"], "skipFallback": true },
-      "https://cloudflare-dns.com/dns-query"
+      { "address": "[IP已脱敏]", "domains": ["full:[域名已脱敏]"], "skipFallback": true },
+      "https://[域名已脱敏]/dns-query"
     ],
     "tag": "dns-module"
   },
   "inbounds": [{
     "tag": "socks",
     "port": 10808,
-    "listen": "[IP已脱敏]",
+    "listen": "127.0.0.1",
     "protocol": "mixed",
     "sniffing": {
       "enabled": true,
@@ -209,7 +209,7 @@ cat > "$OUTPUT_CONFIG" <<XRAYCONFIG
   ],
   "observatory": {
     "subjectSelector": [$OBSERVATORY_SELECTOR],
-    "probeURL": "https://www.google.com/generate_204",
+    "probeURL": "https://[域名已脱敏]/generate_204",
     "probeInterval": "2m"
   },
   "routing": {

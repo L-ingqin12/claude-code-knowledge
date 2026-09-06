@@ -52,11 +52,11 @@ See also: [[AGENTS]] | [[Claude-Ops-KB-Home]] | [[AI-Links-KB-Home]] | [[Network
 1. 本地改文档 → `git commit`（main）
 2. 重建脱敏分支：worktree add public → robocopy 全库 → `_install-tmp\sanitize-push.ps1` → commit → push
 3. 推送命令（需代理 + gh 令牌）：`gh auth token` 取令牌后
-   `git -c http.proxy=http://[IP已脱敏]:10808 -c http.postBuffer=524288000 -c http.version=HTTP/1.1 push "https://L-ingqin12:<token>@github.com/L-ingqin12/agent-knowledge-base.git" public:main`
+   `git -c http.proxy=http://127.0.0.1:10808 -c http.postBuffer=524288000 -c http.version=HTTP/1.1 push "https://L-ingqin12:<token>@github.com/L-ingqin12/agent-knowledge-base.git" public:main`
 
 **脱敏规则**（`_install-tmp\sanitize-push.ps1` v2）：ark- 密钥 / UUID / 键值式密码令牌 / JSON id 字段 / sshpass / IPv4 → `[已脱敏]`；`network\scripts\*.json`（代理配置）直接移除；.obsidian/.claude/dll/pyc/dumps/backups 不入推送。
 
-**网络备忘**：直连 GitHub 被墙；git 走 `-c http.proxy=http://[IP已脱敏]:10808`（全局已设 sslverify=false）；SSH 22 不可用；curl/.NET TLS 被沙箱拦截；可用 Node+代理隧道（`_install-tmp\dl.js`）。
+**网络备忘**：直连 GitHub 被墙；git 走 `-c http.proxy=http://127.0.0.1:10808`（全局已设 sslverify=false）；SSH 22 不可用；curl/.NET TLS 被沙箱拦截；可用 Node+代理隧道（`_install-tmp\dl.js`）。
 
 ## Related
 

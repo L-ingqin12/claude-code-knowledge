@@ -4,7 +4,7 @@ aliases: [MOC, 网络知识库, Network KB, 000 Home]
 tags: [moc, network, network/moc]
 cssclass: dashboard
 created: 2026-07-27
-updated: 2026-08-25
+updated: 2026-09-06
 status: stable
 ---
 
@@ -42,7 +42,7 @@ status: stable
 | 标签 | 文档 |
 |------|------|
 | `#network/router` | [[ROUTER-FULL-CAPABILITY]], [[ROUTER-DEEP-EXPLORATION]], [[ROUTER-OPTIMIZATION]] |
-| `#network/proxy` | [[ARCHITECTURE]], [[OPTIMIZATION-AUDIT]], [[FINAL-SUMMARY]] |
+| `#network/proxy` | [[ARCHITECTURE]], [[OPTIMIZATION-AUDIT]], [[FINAL-SUMMARY]], [[参考-ClaudeCode网络韧性]] |
 | `#network/guide` | [[GUIDE]] |
 | `#network/analysis` | [[network-analysis-2026-07-28]], [[OPTIMIZATION-AUDIT]], [[v2rayn-balancer-复盘-2026-08-09]] |
 | `#network/moc` | 本页 |

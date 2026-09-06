@@ -47,7 +47,7 @@ See also: [[Network-KB-Home]] | [[GUIDE]] | [[ROUTER-FULL-CAPABILITY]] | [[ROUTE
 | sysapihttpd | Web API (nginx-based) | 80, 8899, 8999 + 15个后端端口 |
 | himan | 小米 IoT 管理器 | 8080 |
 | tbusd | 小米内部消息总线 | 784 |
-| fcgi-cgi | FastCGI 后端 | [IP已脱敏]:8920 |
+| fcgi-cgi | FastCGI 后端 | 127.0.0.1:8920 |
 | taskmonitor | 任务监控 | — |
 | trafficd | 流量统计 | — |
 | datacenter | 数据中心(遥测) | — |

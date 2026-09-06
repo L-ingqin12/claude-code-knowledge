@@ -66,10 +66,10 @@ See also: [[Network-KB-Home]] | [[GUIDE]] | [[ROUTER-DEEP-EXPLORATION]] | [[ROUT
 | 8899,8999 | [IP已脱敏] | sysapihttpd | 管理 API |
 | 8387 | [IP已脱敏] | hiapk2 | 应用分发 |
 | 8443 | [IP已脱敏] | sysapihttpd | HTTPS API |
-| 8920 | [IP已脱敏] | fcgi-cgi | FastCGI 后端 |
-| 9090 | [IP已脱敏] | datacenter | 遥测 |
-| 9091 | [IP已脱敏] | plugincenter | 插件中心 |
-| 6010 | [IP已脱敏] | dropbear | SSH (loopback) |
+| 8920 | 127.0.0.1 | fcgi-cgi | FastCGI 后端 |
+| 9090 | 127.0.0.1 | datacenter | 遥测 |
+| 9091 | 127.0.0.1 | plugincenter | 插件中心 |
+| 6010 | 127.0.0.1 | dropbear | SSH (loopback) |
 
 ## 五、Busybox 工具清单 (146 个 applet)
 

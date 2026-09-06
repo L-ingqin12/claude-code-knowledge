@@ -60,7 +60,7 @@ ssh -R 2222:[IP已脱敏]:22 -o ServerAliveInterval=60 user@your-vps
 
 # 方案 A2: SOCKS 动态转发 (路由器作为代理出口)
 ssh -D 2080 -N user@your-vps
-# 然后浏览器配置 SOCKS5: [IP已脱敏]:2080
+# 然后浏览器配置 SOCKS5: 127.0.0.1:2080
 
 # 方案 A3: 本地转发 (访问远程服务)
 ssh -L 8080:remote-service:80 user@your-vps

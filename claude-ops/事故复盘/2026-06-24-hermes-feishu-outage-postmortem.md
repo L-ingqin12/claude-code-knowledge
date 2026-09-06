@@ -43,7 +43,7 @@ See also: [[Claude-Ops-KB-Home]] · [[hermes-session-optimization-report]] · [[
 2026-06-24 20:06:08 urllib3.exceptions.SSLError: EOF occurred in violation of protocol
 ```
 
-xray 通过韩国 VLESS reality 节点 (`[IP已脱敏]:10000` 等) 转发流量。reality 协议通过伪造 TLS 握手 (SNI=apple.com) 规避 GFW 检测。但韩国节点的 TLS 层不稳定 — 对端会间歇性发送 TCP RST 或直接关闭连接, 导致 `SSLError: EOF`。
+xray 通过韩国 VLESS reality 节点 (`[IP已脱敏]:10000` 等) 转发流量。reality 协议通过伪造 TLS 握手 (SNI=[域名已脱敏]) 规避 GFW 检测。但韩国节点的 TLS 层不稳定 — 对端会间歇性发送 TCP RST 或直接关闭连接, 导致 `SSLError: EOF`。
 
 **命令复现**:
 ```bash
@@ -51,7 +51,7 @@ xray 通过韩国 VLESS reality 节点 (`[IP已脱敏]:10000` 等) 转发流量�
 grep '"address"' /usr/local/etc/xray/config.json
 # 测试代理连通性
 curl -s -o /dev/null -w "HTTP %{http_code}\n" --connect-timeout 10 \
-  --socks5-hostname [IP已脱敏]:10808 https://github.com
+  --socks5-hostname 127.0.0.1:10808 https://github.com
 ```
 
 ### 第 2 层: 重试放大 (放大器)
@@ -132,7 +132,7 @@ tail -50 /home/pi/.hermes/logs/errors.log
 # 发现: 大量 NameResolutionError (open.feishu.cn) + SSLError
 
 # 4. 检查代理
-curl --socks5-hostname [IP已脱敏]:10808 https://github.com
+curl --socks5-hostname 127.0.0.1:10808 https://github.com
 # HTTP 000 — 代理不通
 ```
 
@@ -288,8 +288,8 @@ sed -i 's/FEISHU_ALLOW_ALL_USERS=false/FEISHU_ALLOW_ALL_USERS=true/' \
 | 探针 | 检测 | 方法 |
 |------|------|------|
 | P1 网关进程 | systemd 单元状态 | `systemctl --user show -p ActiveState` |
-| P2 模型路由器 | :18888/health | `curl http://[IP已脱敏]:18888/health` |
-| P3 代理连通性 | GitHub 可达性 | socks5://[IP已脱敏]:10808 → GitHub |
+| P2 模型路由器 | :18888/health | `curl http://127.0.0.1:18888/health` |
+| P3 代理连通性 | GitHub 可达性 | socks5://127.0.0.1:10808 → GitHub |
 | P4 飞书响应 (复合) | WS + 日志 + API ping | grep Connected + inbound/outbound + API |
 | P5 工具循环 | tool_call 堆积 | agent.log 中 tool/response 比率 |
 | P6 会话数 | 会话泄漏 | `ls /home/pi/.hermes/sessions/*.json | wc -l` |
@@ -386,7 +386,7 @@ grep -c "Sending response.*Feishu" /home/pi/.hermes/logs/gateway.log
 
 ```bash
 curl -s -o /dev/null -w "HTTP %{http_code}\n" --connect-timeout 10 \
-  --socks5-hostname [IP已脱敏]:10808 https://github.com
+  --socks5-hostname 127.0.0.1:10808 https://github.com
 curl -s -o /dev/null -w "HTTP %{http_code}\n" --connect-timeout 10 \
   https://www.baidu.com
 host -t A open.feishu.cn

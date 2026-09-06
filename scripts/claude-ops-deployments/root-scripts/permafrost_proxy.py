@@ -14,10 +14,10 @@ forwarded verbatim.
                                               ├─ align_request() freezes the prefix
                                               └─ records real cache hit/miss tokens
 
-Run:  python3 permafrost_proxy.py            # [IP已脱敏]:8787 -> api.deepseek.com
+Run:  python3 permafrost_proxy.py            # 127.0.0.1:8787 -> api.deepseek.com
 Env:
   PERMAFROST_PORT       (default 8787)
-  PERMAFROST_HOST       (default [IP已脱敏])
+  PERMAFROST_HOST       (default 127.0.0.1)
   PERMAFROST_UPSTREAM   (default https://api.deepseek.com/anthropic)
   PERMAFROST_MODE       off | safe | aggressive   (default aggressive)
   PERMAFROST_FREEZE_ENV 1 to freeze the env block into the cached anchor and emit
@@ -57,7 +57,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import permafrost_align as pa  # noqa: E402
 
-HOST = os.environ.get("PERMAFROST_HOST", "[IP已脱敏]")
+HOST = os.environ.get("PERMAFROST_HOST", "127.0.0.1")
 PORT = int(os.environ.get("PERMAFROST_PORT", "8787"))
 UPSTREAM = os.environ.get("PERMAFROST_UPSTREAM", "https://api.deepseek.com/anthropic").rstrip("/")
 MODE = os.environ.get("PERMAFROST_MODE", "aggressive")
@@ -601,7 +601,7 @@ class Handler(BaseHTTPRequestHandler):
             super().log_message(*args)
 
     def _is_loopback_client(self) -> bool:
-        return self.client_address[0] in ("[IP已脱敏]", "::1", "::ffff:[IP已脱敏]")
+        return self.client_address[0] in ("127.0.0.1", "::1", "::ffff:127.0.0.1")
 
     # --- local introspection + GET passthrough ------------------------------
     def do_GET(self) -> None:

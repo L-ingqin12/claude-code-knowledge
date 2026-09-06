@@ -24,7 +24,7 @@ start_proxy() {
     sleep 2
     if kill -0 "$PID" 2>/dev/null; then
         log "Proxy started (PID $PID)"
-        curl -sI --connect-timeout 2 http://[IP已脱敏]:8787/ > /dev/null 2>&1 && log "Health check: OK" || warn "Health check failed"
+        curl -sI --connect-timeout 2 http://127.0.0.1:8787/ > /dev/null 2>&1 && log "Health check: OK" || warn "Health check failed"
     else
         warn "Proxy failed to start. Check $PROXY_LOG"
         return 1
@@ -66,7 +66,7 @@ case "${1:-start}" in
         log "=== Claude Resilience Stack ==="
         create_resume_header
         # 恢复 shell 配置 → 走代理
-        PROXY_URL="http://[IP已脱敏]:8788"
+        PROXY_URL="http://127.0.0.1:8788"
         for rc in /root/.zshrc /root/.bashrc; do
             if grep -q "ANTHROPIC_BASE_URL.*api.deepseek.com" "$rc" 2>/dev/null; then
                 sed -i "s|export ANTHROPIC_BASE_URL=\"https://api.deepseek.com/anthropic\"|export ANTHROPIC_BASE_URL=\"$PROXY_URL\"|" "$rc"

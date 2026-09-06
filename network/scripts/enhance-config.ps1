@@ -31,12 +31,16 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+# Decode native command (sqlite3/xray) stdout as UTF-8 so CJK node remarks survive
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $STATE_DIR = "$env:LOCALAPPDATA\network-optimizer"
 if (-not (Test-Path $STATE_DIR)) { $null = New-Item -ItemType Directory -Path $STATE_DIR -Force }
 $SCRIPT_DIR = Split-Path $PSCommandPath -Parent
 # Optional allowlist: one "address:port" per line; when present, only these
 # nodes are eligible (throughput-tested pool, overrides ping-only scoring)
 $POOL_FILE = "$SCRIPT_DIR\node-pool.txt"
+# Region routing rules: domain/geosite -> preferred exit region (editable JSON)
+$REGION_RULES_FILE = "$SCRIPT_DIR\region-routing.json"
 
 # ============================================================
 # HELPERS
@@ -97,6 +101,7 @@ function Read-SubscriptionNodes {
             SNI = $f[3]; Fingerprint = $f[4]; PublicKey = $f[5]
             Network = $f[6]; Security = $f[7]; ConfigType = [int]$f[8]
             Extra = $f[9]; Remarks = $f[10]
+            Region = (Get-NodeRegion $f[10])
             Protocol = ""; Flow = ""; Latency = 9999; Score = 0
         }
         if ($node.ConfigType -eq 5) { $node.Protocol = "vless" } else { continue }
@@ -115,7 +120,7 @@ function Read-SubscriptionNodes {
 
 function Test-Latency {
     param([string]$addr)
-    $ping = New-Object System.Net.NetworkInformation.Ping
+    $ping = New-Object [域名已脱敏].NetworkInformation.Ping
     try {
         $r = $ping.Send($addr, 2000)
         if ($r.Status -eq "Success") { return $r.RoundtripTime }
@@ -124,18 +129,108 @@ function Test-Latency {
 }
 
 # ============================================================
+# REGION ROUTING — route specific domains through a chosen region
+# ============================================================
+
+# Short stable hash of address:port — used for non-sensitive node tags
+function Get-NodeTagPrefix {
+    param([string]$address, [int]$port)
+    $sha = [Security.Cryptography.SHA256]::Create()
+    $b = [Text.Encoding]::UTF8.GetBytes("$address`:$port")
+    return ([BitConverter]::ToString($sha.ComputeHash($b)).Replace("-", "")).Substring(0, 6).ToLower()
+}
+
+# Extract the region name from a node's Remarks field (first CJK run after flag).
+# Remarks look like "<flag>+<region>+<index>" or "<flag>+<region>-<suffix>".
+function Get-NodeRegion {
+    param([string]$remarks)
+    if (-not $remarks) { return "" }
+    $s = $remarks -replace '^[^\p{IsCJKUnifiedIdeographs}]+', ''
+    $m = [regex]::Match($s, '\p{IsCJKUnifiedIdeographs}+')
+    if ($m.Success) { return $m.Value }
+    return $remarks.Trim()
+}
+
+function Get-RegionSlug {
+    param([string]$region, [string]$explicitSlug)
+    if ($explicitSlug -and $explicitSlug -match '^[a-z0-9][a-z0-9-]*$') { return $explicitSlug.ToLower() }
+    $sha = [Security.Cryptography.SHA256]::Create()
+    $b = [Text.Encoding]::UTF8.GetBytes([string]$region)
+    return ([BitConverter]::ToString($sha.ComputeHash($b)).Replace("-", "")).Substring(0, 4).ToLower()
+}
+
+# Read region-routing.json (editable). Empty array when absent/invalid.
+function Read-RegionRules {
+    if (-not (Test-Path $REGION_RULES_FILE)) { return @() }
+    try {
+        $j = Get-Content $REGION_RULES_FILE -Raw -Encoding UTF8 | ConvertFrom-Json
+        return @($j.rules)
+    } catch { return @() }
+}
+
+# Build region outbounds + balancers + routing rules for each rule.
+# $nodes: all alive nodes (with .Region set). Returns PSCustomObject.
+function Build-RegionRouting {
+    param($nodes, $rules)
+    $outbounds = @(); $balancers = @(); $routingRules = @(); $obsTags = @()
+    foreach ($rule in $rules) {
+        $region = $rule.region; $name = $rule.name; $domains = @($rule.domains)
+        if (-not $region -or -not $name -or $domains.Count -eq 0) { continue }
+        $regionNodes = @($nodes | Where-Object { $_.Region -eq $region -and $_.Latency -lt 500 })
+        if ($regionNodes.Count -eq 0) {
+            Write-Host "  [Region] $name -> $region : no reachable nodes, skipped"
+            continue
+        }
+        $slug = Get-RegionSlug $region $rule.slug
+        $bTag = "region-$slug-$name"
+        $selector = @()
+        foreach ($n in $regionNodes) {
+            $tag = "rg-$slug-$(Get-NodeTagPrefix $n.Address $n.Port)"
+            $selector += $tag
+            $obsTags += $tag
+            $outbounds += [PSCustomObject]@{
+                tag = $tag; protocol = $n.Protocol
+                settings = @{ vnext = @(@{ address = $n.Address; port = $n.Port; users = @(@{ id = $n.UUID; email = "t@[域名已脱敏]"; security = "auto"; encryption = "none"; flow = $n.Flow }) })}
+                streamSettings = @{ network = $n.Network; security = $n.Security; realitySettings = @{ serverName = $n.SNI; fingerprint = $n.Fingerprint; publicKey = $n.PublicKey; shortId = ""; spiderX = "/" } }
+                mux = @{ enabled = $false }
+            }
+        }
+        $balancers += @{ tag = $bTag; selector = @($selector); strategy = @{ type = "leastPing" }; fallbackTag = $selector[0] }
+        $routingRules += @{ type = "field"; balancerTag = $bTag; domain = $domains }
+        Write-Host "  [Region] $name -> $region ($($regionNodes.Count) nodes) -> $bTag"
+    }
+    return [PSCustomObject]@{ Outbounds = $outbounds; Balancers = $balancers; Rules = $routingRules; ObsTags = $obsTags }
+}
+
+# Does an existing config already carry all region-routing rules?
+function Test-RegionRoutingPresent {
+    param($config, $rules)
+    if (-not $rules -or @($rules).Count -eq 0) { return $true }
+    try {
+        $balTags = @($config.routing.balancers | ForEach-Object { $_.tag })
+        $ruleBals = @($config.routing.rules | ForEach-Object { $_.balancerTag })
+    } catch { return $false }
+    foreach ($r in $rules) {
+        if (-not $r.name -or -not $r.region) { continue }
+        $expected = "region-$(Get-RegionSlug $r.region $r.slug)-$($r.name)"
+        if ($balTags -notcontains $expected -or $ruleBals -notcontains $expected) { return $false }
+    }
+    return $true
+}
+
+# ============================================================
 # STANDALONE CONFIG (DB mode — no native config.json available)
 # ============================================================
 
 function Build-StandaloneConfig {
-    param($nodes)   # PSCustomObject[] with Protocol/Address/Port/UUID/Flow/SNI/PublicKey/Fingerprint/Network/Security
+    param($nodes, $regionRouting)   # $nodes: top selected nodes; $regionRouting: Build-RegionRouting result
 
     $outbounds = @()
     $balancerTags = @()
     $obsTags = @()
     $fallbackTag = ""
     foreach ($n in $nodes) {
-        $tag = "px-$($n.Address.Split('.')[0])-$($n.Port)" -replace '[^a-zA-Z0-9_-]', ''
+        $tag = "px-$(Get-NodeTagPrefix $n.Address $n.Port)"
         $balancerTags += $tag
         $obsTags += $tag
         if (-not $fallbackTag) { $fallbackTag = $tag }
@@ -144,7 +239,7 @@ function Build-StandaloneConfig {
             protocol = $n.Protocol
             settings = @{ vnext = @(@{
                 address = $n.Address; port = $n.Port
-                users = @(@{ id = $n.UUID; email = "t@t.tt"; security = "auto"; encryption = "none"; flow = $n.Flow })
+                users = @(@{ id = $n.UUID; email = "t@[域名已脱敏]"; security = "auto"; encryption = "none"; flow = $n.Flow })
             })}
             streamSettings = @{
                 network = $n.Network; security = $n.Security
@@ -162,24 +257,21 @@ function Build-StandaloneConfig {
     $config = [ordered]@{
         log = @{ loglevel = "warning" }
         dns = @{
-            hosts = @{
-                "dns.google" = @("[IP已脱敏]", "[IP已脱敏]")
-                "dns.alidns.com" = @("[IP已脱敏]", "[IP已脱敏]")
-            }
+            # All resolution via alidns DoH (direct) — real foreign IPs (DoH is
+            # not poisoned) without depending on proxy node health
             servers = @(
-                @{ address = "https://dns.alidns.com/dns-query"; domains = @("geosite:private", "geosite:cn"); skipFallback = $true; tag = "direct-dns-1" },
-                @{ address = "https://cloudflare-dns.com/dns-query"; domains = @("geosite:google"); skipFallback = $true },
-                @{ address = "[IP已脱敏]"; domains = @("full:dns.alidns.com"); skipFallback = $true },
-                "https://cloudflare-dns.com/dns-query"
+                @{ address = "https://[域名已脱敏]/dns-query"; domains = @("geosite:private", "geosite:cn"); skipFallback = $true; tag = "direct-dns-1" },
+                @{ address = "[IP已脱敏]"; domains = @("full:[域名已脱敏]"); skipFallback = $true },
+                "https://[域名已脱敏]/dns-query"
             )
             tag = "dns-module"
         }
         inbounds = @(@{
-            tag = "socks"; port = 10808; listen = "[IP已脱敏]"; protocol = "mixed"
+            tag = "socks"; port = 10808; listen = "127.0.0.1"; protocol = "mixed"
             sniffing = @{ enabled = $true; destOverride = @("http", "tls"); routeOnly = $false }
             settings = @{ auth = "noauth"; udp = $true; allowTransparent = $false }
         })
-        outbounds = @($outbounds) + @(
+        outbounds = @($outbounds) + @($regionRouting.Outbounds) + @(
             @{ tag = "direct"; protocol = "freedom" },
             @{ tag = "block"; protocol = "blackhole" }
         )
@@ -190,20 +282,22 @@ function Build-StandaloneConfig {
                 selector = @($balancerTags)
                 strategy = @{ type = "leastPing" }
                 fallbackTag = $fallbackTag
-            })
+            }) + @($regionRouting.Balancers)
             rules = @(
                 @{ type = "field"; port = "443"; network = "udp"; outboundTag = "block" },
-                @{ type = "field"; outboundTag = "balancer"; domain = @("geosite:google") },
+                @{ type = "field"; balancerTag = "balancer"; domain = @("geosite:google") },
                 @{ type = "field"; outboundTag = "direct"; ip = @("geoip:private") },
                 @{ type = "field"; outboundTag = "direct"; domain = @("geosite:private") },
                 @{ type = "field"; outboundTag = "direct"; ip = @("geoip:cn") },
                 @{ type = "field"; outboundTag = "direct"; domain = @("geosite:cn") },
+                @{ type = "field"; inboundTag = @("dns-module", "direct-dns-1"); outboundTag = "direct" }
+            ) + @($regionRouting.Rules) + @(
                 @{ type = "field"; network = "tcp,udp"; balancerTag = "balancer" }
             )
         }
         observatory = @{
-            subjectSelector = @($obsTags)
-            probeURL = "https://www.google.com/generate_204"
+            subjectSelector = @($obsTags) + @($regionRouting.ObsTags)
+            probeURL = "https://[域名已脱敏]/generate_204"
             probeInterval = "2m"
         }
     }
@@ -221,15 +315,19 @@ function Invoke-Enhance {
     if (-not $dir) { Write-Host "ERROR: v2rayN not found"; return $false }
     $configFile = "$dir\binConfigs\config.json"
     $binDir = "$dir\bin"
+    $regionRules = Read-RegionRules
 
-    # Already enhanced? (multi-server + balancer from a previous run) — no-op
+    # Already enhanced? (multi-server + balancer + region routing from a previous run)
     if (Test-Path $configFile) {
         try {
             $cur = Get-Content $configFile -Raw | ConvertFrom-Json
             $curPx = @($cur.outbounds | Where-Object { $_.protocol -ne "freedom" -and $_.protocol -ne "blackhole" })
             if ($curPx.Count -ge 3) {
-                Write-Host "Config already multi-server ($($curPx.Count) proxy outbounds) — nothing to do"
-                return $true
+                if (Test-RegionRoutingPresent $cur $regionRules) {
+                    Write-Host "Config already multi-server ($($curPx.Count) proxy outbounds) + region routing — nothing to do"
+                    return $true
+                }
+                Write-Host "Region routing missing/outdated — re-applying"
             }
         } catch {}
     }
@@ -239,6 +337,8 @@ function Invoke-Enhance {
         Write-Host "ERROR: need >=2 subscription nodes in guiNDB.db (found: $($nodes.Count))"
         return $false
     }
+    # Full node list before pool filter — region routing uses all reachable nodes
+    $allNodes = @($nodes)
 
     $poolApplied = $false
     if (Test-Path $POOL_FILE) {
@@ -246,7 +346,7 @@ function Invoke-Enhance {
         if ($pool.Count -gt 0) {
             $before = $nodes.Count
             $nodes = @($nodes | Where-Object { "$($_.Address):$($_.Port)" -in $pool })
-            Write-Host "[Pool] node-pool.txt restricts candidates to $($pool.Count) entries — $($nodes.Count)/$before matched"
+            Write-Host "[Pool] node-pool.txt restricts main-balancer candidates to $($pool.Count) entries — $($nodes.Count)/$before matched"
             $poolApplied = $true
         }
     }
@@ -254,16 +354,16 @@ function Invoke-Enhance {
         Write-Host "ERROR: fewer than 2 pool nodes available (found: $($nodes.Count))"
         return $false
     }
-    Write-Host "[1] Discovered $($nodes.Count) subscription nodes from guiNDB.db"
-    $nodes | Select-Object -First 5 | ForEach-Object { Write-Host "    - $($_.Address):$($_.Port) [$($_.Remarks)]" }
+    Write-Host "[1] Discovered $($nodes.Count) pool nodes (region routing sees all $($allNodes.Count))"
+    $nodes | Select-Object -First 5 | ForEach-Object { Write-Host "    - port $($_.Port) [$($_.Remarks)]" }
     if ($nodes.Count -gt 5) { Write-Host "    ... ($($nodes.Count - 5) more)" }
 
-    # Ping test
-    Write-Host "[2] Ping test..."
-    foreach ($n in $nodes) {
+    # Ping test — ping ALL nodes once (pool + region-routing candidates)
+    Write-Host "[2] Ping test ($($allNodes.Count) nodes)..."
+    foreach ($n in $allNodes) {
         $n.Latency = Test-Latency $n.Address
         $status = if ($n.Latency -lt 300) { "OK" } elseif ($n.Latency -lt 500) { "SLOW" } else { "DEAD" }
-        Write-Host "    $($n.Address):$($n.Port) — $($n.Latency)ms [$status]"
+        Write-Host "    port $($n.Port) [$($n.Remarks)] — $($n.Latency)ms [$status]"
     }
 
     # Score + select top diverse nodes (exclude DEAD)
@@ -281,7 +381,11 @@ function Invoke-Enhance {
         Write-Host "  Too few reachable nodes — no optimization possible"
         return $false
     }
-    Write-Host "  Selected: $(($best | ForEach-Object { "$($_.Address):$($_.Port)($($_.Score))" }) -join ', ')"
+    Write-Host "  Selected: $(($best | ForEach-Object { "[$($_.Region)]:$($_.Port)($($_.Score))" }) -join ', ')"
+
+    # Region routing (domain/geosite -> specific region), if rules defined — uses ALL alive nodes
+    $allAlive = $allNodes | Where-Object { $_.Latency -lt 500 }
+    $regionRouting = Build-RegionRouting -nodes $allAlive -rules $regionRules
 
     # Sync geo files
     foreach ($f in @("geosite.dat", "geoip.dat")) {
@@ -306,20 +410,29 @@ function Invoke-Enhance {
         # Exclude the current primary and any endpoint already in the config
         $existingAddrs = @($config.outbounds | ForEach-Object { if ($_.settings.vnext) { "$($_.settings.vnext[0].address):$($_.settings.vnext[0].port)" } })
         $cands = $best | Where-Object { "$($_.Address):$($_.Port)" -ne $origAddr -and "$($_.Address):$($_.Port)" -notin $existingAddrs }
+        $regionOnly = $false
         if ($cands.Count -eq 0) {
-            Write-Host "  All candidates equal current primary — no change needed"
-            return $true
+            if (@($regionRouting.Rules).Count -eq 0) {
+                Write-Host "  All candidates equal current primary — no change needed"
+                return $true
+            }
+            # Main nodes unchanged — preserve existing balancer, add region routing only
+            $regionOnly = $true
+            $best = @()
+            $balancerTags = if ($config.routing.balancers -and @($config.routing.balancers).Count -gt 0) { @($config.routing.balancers[0].selector) } else { @($primaryProxy.tag) }
+            Write-Host "  Main nodes unchanged — adding region routing to existing config"
+        } else {
+            $best = $cands
+            $balancerTags = @($primaryProxy.tag)
         }
-        $best = $cands
 
         $newOutbounds = @()
-        $balancerTags = @($primaryProxy.tag)
         foreach ($n in $best) {
-            $tag = "px-$($n.Address.Split('.')[0])-$($n.Port)" -replace '[^a-zA-Z0-9_-]', ''
+            $tag = "px-$(Get-NodeTagPrefix $n.Address $n.Port)"
             $balancerTags += $tag
             $newOutbounds += [PSCustomObject]@{
                 tag = $tag; protocol = $n.Protocol
-                settings = @{ vnext = @(@{ address = $n.Address; port = $n.Port; users = @(@{ id = $n.UUID; email = "t@t.tt"; security = "auto"; encryption = "none"; flow = $n.Flow }) })}
+                settings = @{ vnext = @(@{ address = $n.Address; port = $n.Port; users = @(@{ id = $n.UUID; email = "t@[域名已脱敏]"; security = "auto"; encryption = "none"; flow = $n.Flow }) })}
                 streamSettings = @{ network = $n.Network; security = $n.Security; realitySettings = @{ serverName = $n.SNI; fingerprint = "chrome"; publicKey = $n.PublicKey; shortId = ""; spiderX = "/" } }
                 mux = @{ enabled = $false }
             }
@@ -328,15 +441,18 @@ function Invoke-Enhance {
         $outboundsList = [System.Collections.ArrayList]@($config.outbounds)
         $insertIndex = 1
         foreach ($no in $newOutbounds) { $outboundsList.Insert($insertIndex, $no) }
+        foreach ($no in @($regionRouting.Outbounds)) { $null = $outboundsList.Add($no) }
 
         $routing = $config.routing
         if (-not $routing) { $routing = [PSCustomObject]@{ domainStrategy = "AsIs"; rules = @() } }
         $balancerConfig = @{ tag = "balancer"; selector = @($balancerTags); strategy = @{ type = "leastPing" } }
         if ($best.Count -gt 0) {
-            $fbTag = "px-$($best[0].Address.Split('.')[0])-$($best[0].Port)" -replace '[^a-zA-Z0-9_-]', ''
+            $fbTag = "px-$(Get-NodeTagPrefix $best[0].Address $best[0].Port)"
             $balancerConfig.fallbackTag = $fbTag
+        } elseif ($regionOnly -and $config.routing.balancers -and @($config.routing.balancers).Count -gt 0 -and $config.routing.balancers[0].fallbackTag) {
+            $balancerConfig.fallbackTag = $config.routing.balancers[0].fallbackTag
         }
-        $routing | Add-Member -MemberType NoteProperty -Name "balancers" -Value @($balancerConfig) -Force
+        $routing | Add-Member -MemberType NoteProperty -Name "balancers" -Value (@($balancerConfig) + @($regionRouting.Balancers)) -Force
 
         $rulesList = [System.Collections.ArrayList]@($routing.rules)
         for ($i = 0; $i -lt $rulesList.Count; $i++) {
@@ -351,6 +467,32 @@ function Invoke-Enhance {
         if (-not $hasCatchAll) {
             $null = $rulesList.Add([PSCustomObject]@{ type = "field"; network = "tcp,udp"; balancerTag = "balancer" })
         }
+        # Insert region routing rules before the catch-all balancer rule
+        if (@($regionRouting.Rules).Count -gt 0) {
+            $caIdx = -1
+            for ($i = 0; $i -lt $rulesList.Count; $i++) {
+                $r = $rulesList[$i]
+                if (($r.network -eq "tcp,udp") -and (-not $r.domain) -and (-not $r.ip) -and (-not $r.inboundTag) -and (-not $r.port)) { $caIdx = $i; break }
+            }
+            if ($caIdx -lt 0) { $caIdx = $rulesList.Count }
+            $rulesList.InsertRange($caIdx, @($regionRouting.Rules))
+        }
+
+        # DNS: resolve everything via alidns DoH directly — name resolution
+        # must not depend on proxy node health
+        $config.dns.servers = @(
+            @{ address = "https://[域名已脱敏]/dns-query"; domains = @("geosite:private", "geosite:cn"); skipFallback = $true; tag = "direct-dns-1" },
+            @{ address = "[IP已脱敏]"; domains = @("full:[域名已脱敏]"); skipFallback = $true },
+            "https://[域名已脱敏]/dns-query"
+        )
+        for ($i = 0; $i -lt $rulesList.Count; $i++) {
+            $rule = $rulesList[$i]
+            if ($rule.inboundTag -and ($rule.inboundTag -contains "dns-module")) {
+                $rule.PSObject.Properties.Remove("outboundTag")
+                $rule.PSObject.Properties.Remove("balancerTag")
+                $rule | Add-Member -MemberType NoteProperty -Name "outboundTag" -Value "direct" -Force
+            }
+        }
         $routing.rules = @($rulesList)
 
         $finalConfig = [ordered]@{
@@ -358,12 +500,12 @@ function Invoke-Enhance {
             outbounds = @($outboundsList); routing = $routing
         }
         $obsTags = @($balancerTags)
-        $finalConfig.observatory = @{ subjectSelector = @($obsTags); probeURL = "https://www.google.com/generate_204"; probeInterval = "3m" }
+        $finalConfig.observatory = @{ subjectSelector = @($obsTags) + @($regionRouting.ObsTags); probeURL = "https://[域名已脱敏]/generate_204"; probeInterval = "3m" }
     }
     # ---- Mode B: no native config — standalone template ----
     else {
         Write-Host "[4] No binConfigs\config.json — DB mode (standalone optimized config)"
-        $finalConfig = Build-StandaloneConfig $best
+        $finalConfig = Build-StandaloneConfig $best $regionRouting
     }
 
     $json = ConvertTo-Json -Depth 10 -Compress $finalConfig
@@ -422,7 +564,9 @@ function Invoke-Enhance {
 
     $pidInfo = Get-NetTCPConnection -LocalPort 10808 -State Listen -EA 0 | Select-Object -First 1
     Write-Host "  Enhanced config applied — xray listening on 10808 (PID $(if($pidInfo){$pidInfo.OwningProcess}else{'?'}))"
-    Write-Host "  Balancer: $((@($finalConfig.routing.balancers[0].selector)) -join ', ')"
+    $mainSel = @($finalConfig.routing.balancers[0].selector)
+    $regionBalTags = @($finalConfig.routing.balancers | Select-Object -Skip 1 | ForEach-Object { $_.tag })
+    Write-Host "  Balancer: $($mainSel.Count) nodes$(if($regionBalTags.Count -gt 0){" + region: $($regionBalTags -join ', ')"})"
     return $true
 }
 
@@ -493,4 +637,7 @@ Usage:
 Modes:
   NATIVE — binConfigs\config.json exists: preserves v2rayN routing, adds nodes+balancer
   DB     — no config.json (v2rayN 7.19.5+): standalone optimized config from guiNDB.db
+
+Region routing: edit region-routing.json to force specific domains/geosite
+  categories (e.g. geosite:tiktok) through a chosen exit region (e.g. 新加坡).
 "@

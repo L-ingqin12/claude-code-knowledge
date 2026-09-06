@@ -54,7 +54,7 @@ log "代理已重启 (PID $new_pid)"
 # ── 验证 ──────────────────────────────────────────────────────────
 
 sleep 2
-if curl -s --connect-timeout 10 "http://[IP已脱敏]:8787/" >/dev/null 2>&1; then
+if curl -s --connect-timeout 10 "http://127.0.0.1:8787/" >/dev/null 2>&1; then
     log "E2E 验证通过: 已恢复原始超时参数"
 else
     err "E2E 验证失败! 请手动检查"

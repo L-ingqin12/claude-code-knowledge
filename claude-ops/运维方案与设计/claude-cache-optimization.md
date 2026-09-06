@@ -144,10 +144,10 @@ bash /root/claude-rollback.sh
 
 ```bash
 # 实时统计
-curl -s http://[IP已脱敏]:8788/permafrost/stats | python3 -m json.tool
+curl -s http://127.0.0.1:8788/permafrost/stats | python3 -m json.tool
 
 # 诊断前缀变化
-curl -s http://[IP已脱敏]:8788/permafrost/doctor | python3 -m json.tool
+curl -s http://127.0.0.1:8788/permafrost/doctor | python3 -m json.tool
 
 # CC 内 slash 命令
 /permafrost:status

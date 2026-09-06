@@ -1,0 +1,111 @@
+{
+  "description": "可用代理节点列表 (17 节点, 4 供应商)",
+  "shared_credentials": {
+    "uuid": "[已脱敏]",
+    "flow": "xtls-rprx-vision",
+    "protocol": "vless",
+    "security": "reality",
+    "transport": "tcp",
+    "fingerprint": "chrome"
+  },
+  "ranking": [
+    {
+      "rank": 1,
+      "tag": "proxy-kr-dtwo1",
+      "address": "[域名已脱敏]",
+      "port": 10000,
+      "ping_ms": 70,
+      "provider": "KoreaKT",
+      "sni": "[域名已脱敏]",
+      "publicKey": "lBOOlrjPhalHVT0phmBx7unshto0G8q1EmLL2txK60Y",
+      "status": "active",
+      "role": "primary"
+    },
+    {
+      "rank": 2,
+      "tag": "proxy-p1d2",
+      "address": "[域名已脱敏]",
+      "port": 10086,
+      "ping_ms": 90,
+      "provider": "p1d2",
+      "sni": "[域名已脱敏]",
+      "publicKey": "0e170mEy43TNARHNG2wkpZD0sfDiosX03F5SQeqNHTU",
+      "status": "active",
+      "role": "primary"
+    },
+    {
+      "rank": 3,
+      "tag": "proxy-us1-dengta",
+      "address": "[域名已脱敏]",
+      "port": 443,
+      "ping_ms": 255,
+      "provider": "[域名已脱敏]",
+      "sni": "[域名已脱敏]",
+      "publicKey": "0e170mEy43TNARHNG2wkpZD0sfDiosX03F5SQeqNHTU",
+      "status": "active",
+      "role": "backup"
+    },
+    {
+      "rank": 4,
+      "tag": "proxy-sg1",
+      "address": "[域名已脱敏]",
+      "port": 443,
+      "ping_ms": 334,
+      "provider": "718node",
+      "sni": "[域名已脱敏]",
+      "publicKey": "CJuARk9RL9o2O_BD1TpDHsoRCPsF6m4kNgtB9Ph-ByU",
+      "status": "active",
+      "role": "fallback"
+    },
+    {
+      "rank": 5,
+      "tag": "proxy-z3",
+      "address": "[域名已脱敏]",
+      "port": 443,
+      "ping_ms": 370,
+      "provider": "[域名已脱敏]",
+      "sni": "[域名已脱敏]",
+      "publicKey": "2JSelebbqcprIrG8Xk6PmtonR0lccm22lKZchOtTiTc",
+      "status": "active",
+      "role": "backup"
+    },
+    {
+      "rank": 6,
+      "tag": "proxy-a1",
+      "address": "[域名已脱敏]",
+      "port": 443,
+      "ping_ms": 436,
+      "provider": "718node",
+      "sni": "[域名已脱敏]",
+      "publicKey": "0e170mEy43TNARHNG2wkpZD0sfDiosX03F5SQeqNHTU",
+      "status": "active",
+      "role": "backup"
+    },
+    {
+      "rank": 7,
+      "tag": "proxy-do1",
+      "address": "[域名已脱敏]",
+      "port": 443,
+      "ping_ms": 582,
+      "provider": "[域名已脱敏]",
+      "sni": "[域名已脱敏]",
+      "publicKey": "2JSelebbqcprIrG8Xk6PmtonR0lccm22lKZchOtTiTc",
+      "status": "active",
+      "role": "backup"
+    }
+  ],
+  "unreachable": [
+    "[域名已脱敏]",
+    "[域名已脱敏]",
+    "[域名已脱敏]",
+    "[域名已脱敏]",
+    "[域名已脱敏]",
+    "[域名已脱敏]"
+  ],
+  "slow": [
+    {"address": "[域名已脱敏]", "ping_ms": 731},
+    {"address": "[域名已脱敏]", "ping_ms": 1187},
+    {"address": "[域名已脱敏]", "ping_ms": 1321},
+    {"address": "[域名已脱敏]", "ping_ms": 2882}
+  ]
+}

@@ -21,6 +21,7 @@ cssclass: agents-manifest
 ```
 knowledge/
 ├── AGENTS.md                          ← 本文件 (AI 入口)
+├── HOME.md                            ← 全局目录索引 (2026-09 新增)
 ├── network/                           ← 网络优化子 Vault (MOC: Network-KB-Home)
 │   ├── Network-KB-Home.md             ← MOC (首页)
 │   ├── GUIDE.md                       ← 日常操作
@@ -31,8 +32,8 @@ knowledge/
 │   ├── ROUTER-FULL-CAPABILITY.md      ← 路由器手册
 │   ├── ROUTER-OPTIMIZATION.md         ← 路由器优化
 │   └── scripts/                       ← 脚本与配置
-├── AI大模型开发.md                    ← LLM 理论笔记 + 课程知识地图
 ├── ai-dev/                            ← LLM 应用开发实战子 Vault (MOC: AI-Dev-KB-Home)
+│   ├── AI大模型开发.md                 ← LLM 理论笔记 (2026-09 从根归档)
 │   ├── AI-Dev-KB-Home.md              ← MOC (首页)
 │   ├── Prompt-Engineering入门与Demo.md
 │   ├── Function-Calling工具调用实战.md
@@ -41,7 +42,7 @@ knowledge/
 │   ├── LangChain-LangGraph框架实战.md
 │   ├── LLM推理部署与量化.md
 │   └── LoRA参数高效微调实战.md / 强化学习对齐-RLHF到GRPO.md / 微调数据工程与模型蒸馏.md
-├── 参考-*.md                          ← 外部参考文档
+├── 参考-*.md (已归档至 network/ai-dev/cs-base/ai-links/)
 ├── ai-links/                          ← AI 链接收藏子 Vault (MOC: AI-Links-KB-Home)
 │   ├── articles/                      ← 文章拆解收藏
 │   └── DSH*.md 等                     ← 插件/Hook/Skills 实践
@@ -63,7 +64,8 @@ knowledge/
 │   └── 设计模式实战 / 架构设计与方案选型
 ├── diagrams/                          ← Excalidraw 图表库 + ARROW-CHECKLIST
 ├── scripts/                           ← 跨库脚本 (claude-ops-deployments/dumps)
-└── SESSION-ARCHIVE-*.md               ← 会话归档
+├── _archive/                          ← 会话归档 (SESSION-ARCHIVE-*.md 已归入)
+└── Excalidraw/                        ← 早期散装 Excalidraw 原图
 ```
 
 ## 二、Wiki 链接约定

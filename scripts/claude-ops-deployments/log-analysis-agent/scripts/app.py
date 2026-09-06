@@ -110,7 +110,7 @@ class AgentClient:
         方式 C: HTTP 调用 Agent 网关
             import requests
             resp = requests.post(
-                "http://[IP已脱敏]:9000/agent/run",
+                "http://127.0.0.1:9000/agent/run",
                 json={"task": "log_analysis", "input": log_content},
                 timeout=self.timeout,
             )
@@ -476,7 +476,7 @@ def main():
         max_buffer_size=100 * 1024 * 1024,
     )
     server.listen(args.port)
-    logging.info(f"Worker 就绪: http://[IP已脱敏]:{args.port}/api/health")
+    logging.info(f"Worker 就绪: http://127.0.0.1:{args.port}/api/health")
 
     # ── 优雅关闭 ──
     def shutdown_handler(sig, frame):

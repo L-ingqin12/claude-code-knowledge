@@ -1,0 +1,6 @@
+# sanitize-extra.txt — 话题词表（sanitize-session.py --mode aggressive 时启用）
+# 每行一词，# 开头为注释。
+# 维护方式：当某次新的 400 Content Exists Risk 出现、而节点 token 扫描零命中时，
+# 把这次触发的话题关键词补进此文件（一条事故词 = 一条新规则）。
+# 注意：词本身若属敏感内容，仅在本地维护，推送前须脱敏。
+

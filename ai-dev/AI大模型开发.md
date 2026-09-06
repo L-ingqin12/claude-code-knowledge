@@ -1137,7 +1137,7 @@ print(response.usage)   # prompt_tokens / completion_tokens → 计费依据, �
 ```bash
 curl https://api.deepseek.com/chat/completions \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $API_KEY" \
+  -H "Authorization: [已脱敏] $API_KEY" \
   -d '{
     "model": "deepseek-chat",
     "messages": [{"role":"user","content":"你好"}],

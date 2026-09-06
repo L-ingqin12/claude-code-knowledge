@@ -104,7 +104,7 @@ status: stable
 ## 五、未解决问题与风险登记
 
 1. **调研报告遗留待确认**：OpenCode org 归属（anomalyco vs sst）、skill allowed-tools 是否被执行、MCP 分隔符源码级确认；Pi 的 LiblibPi 名称、精确 star 数、MCP 官方一等支持——均需开放网络环境复核。
-2. **push 前脱敏**：`.claude/settings.local.json` 含本地代理地址（[IP已脱敏]:10808）；推公网仓库前须处理（AGENTS 五·五）。
+2. **push 前脱敏**：`.claude/settings.local.json` 含本地代理地址（127.0.0.1:10808）；推公网仓库前须处理（AGENTS 五·五）。
 3. **PoC 规模缺口**：FTS 5M 行验收、R2 burst 稠密场景退化、真实日志包解析器逐个补齐（isp/sensorhub 等）。
 4. **M1–M4 未启动**：crash/tombstone 符号化链路（addr2line/artget 设计已在方案 §五）、多 Agent 展开、服务化会话池。
 5. **学习资料入库** ✅：经用户澄清（CPO=C++ 定制点对象/tag_invoke，非共封装光学），新增 [[参考-COM组件框架-Windows集成]]（Windows 集成实战向）与 [[参考-CPP-CPO定制点与std-execution]]（P2300 机制+stdexec 实操）；两者各含待确认清单，时效性条目已标注。

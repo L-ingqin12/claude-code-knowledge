@@ -113,7 +113,7 @@ bash /root/claude-cache-monitor.sh daemon
 
 ```bash
 bash /root/claude-cache-monitor.sh status   # 监控状态 + dump 历史
-curl -s http://[IP已脱敏]:8788/permafrost/stats | jq .hit_rate  # 实时命中率
+curl -s http://127.0.0.1:8788/permafrost/stats | jq .hit_rate  # 实时命中率
 ```
 
 ### DeepSeek 后台告警阈值
@@ -130,7 +130,7 @@ curl -s http://[IP已脱敏]:8788/permafrost/stats | jq .hit_rate  # 实时命�
 ### 命中率骤降 → 排查顺序
 
 1. `bash /root/claude-cache-monitor.sh status` — 检查自动 dump
-2. `curl -s http://[IP已脱敏]:8788/permafrost/doctor` — 看 anchor 是否变化
+2. `curl -s http://127.0.0.1:8788/permafrost/doctor` — 看 anchor 是否变化
 3. `ls /root/.permafrost/dumps/ | wc -l` — 确认有新请求在捕获
 4. 对比最新 dump 的 tools 列表
 5. DeepSeek 后台确认是 pro 还是 flash 下降

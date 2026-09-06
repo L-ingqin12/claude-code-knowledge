@@ -1,0 +1,140 @@
+{
+  "log": { "loglevel": "warning" },
+  "dns": {
+    "hosts": {
+      "[域名已脱敏]": ["[IP已脱敏]", "[IP已脱敏]"],
+      "[域名已脱敏]": ["[IP已脱敏]", "[IP已脱敏]"]
+    },
+    "servers": [
+      {
+        "address": "https://[域名已脱敏]/dns-query",
+        "domains": ["domain:[域名已脱敏]", "domain:[域名已脱敏]", "domain:[域名已脱敏]", "domain:[域名已脱敏]", "domain:[域名已脱敏]"],
+        "skipFallback": true,
+        "tag": "direct-dns-1"
+      },
+      {
+        "address": "https://[域名已脱敏]/dns-query",
+        "domains": ["geosite:google"],
+        "skipFallback": true
+      },
+      {
+        "address": "https://[域名已脱敏]/dns-query",
+        "domains": ["geosite:private", "geosite:cn"],
+        "skipFallback": true,
+        "tag": "direct-dns-2"
+      },
+      {
+        "address": "[IP已脱敏]",
+        "domains": ["full:[域名已脱敏]", "full:[域名已脱敏]"],
+        "skipFallback": true
+      },
+      "https://[域名已脱敏]/dns-query"
+    ],
+    "tag": "dns-module"
+  },
+  "inbounds": [{
+    "tag": "socks",
+    "port": 10808,
+    "listen": "127.0.0.1",
+    "protocol": "mixed",
+    "sniffing": {
+      "enabled": true,
+      "destOverride": ["http", "tls"],
+      "routeOnly": false
+    },
+    "settings": {
+      "auth": "noauth",
+      "udp": true,
+      "allowTransparent": false
+    }
+  }],
+
+  "outbounds": [
+    {
+      "tag": "px-p1d2",
+      "protocol": "vless",
+      "settings": { "vnext": [{
+        "address": "[域名已脱敏]", "port": 10086,
+        "users": [{ "id": "[已脱敏]", "email": "t@[域名已脱敏]", "security": "auto", "encryption": "none", "flow": "xtls-rprx-vision" }]
+      }]},
+      "streamSettings": {
+        "network": "tcp", "security": "reality",
+        "realitySettings": { "serverName": "[域名已脱敏]", "fingerprint": "chrome", "publicKey": "0e170mEy43TNARHNG2wkpZD0sfDiosX03F5SQeqNHTU", "shortId": "", "spiderX": "/" }
+      },
+      "mux": { "enabled": false }
+    },
+    {
+      "tag": "px-kr",
+      "protocol": "vless",
+      "settings": { "vnext": [{
+        "address": "[域名已脱敏]", "port": 10000,
+        "users": [{ "id": "[已脱敏]", "email": "t@[域名已脱敏]", "security": "auto", "encryption": "none", "flow": "xtls-rprx-vision" }]
+      }]},
+      "streamSettings": {
+        "network": "tcp", "security": "reality",
+        "realitySettings": { "serverName": "[域名已脱敏]", "fingerprint": "chrome", "publicKey": "lBOOlrjPhalHVT0phmBx7unshto0G8q1EmLL2txK60Y", "shortId": "", "spiderX": "/" }
+      },
+      "mux": { "enabled": false }
+    },
+    {
+      "tag": "px-sg",
+      "protocol": "vless",
+      "settings": { "vnext": [{
+        "address": "[域名已脱敏]", "port": 443,
+        "users": [{ "id": "[已脱敏]", "email": "t@[域名已脱敏]", "security": "auto", "encryption": "none", "flow": "xtls-rprx-vision" }]
+      }]},
+      "streamSettings": {
+        "network": "tcp", "security": "reality",
+        "realitySettings": { "serverName": "[域名已脱敏]", "fingerprint": "chrome", "publicKey": "CJuARk9RL9o2O_BD1TpDHsoRCPsF6m4kNgtB9Ph-ByU", "shortId": "", "spiderX": "/" }
+      },
+      "mux": { "enabled": false }
+    },
+    {
+      "tag": "px-us1",
+      "protocol": "vless",
+      "settings": { "vnext": [{
+        "address": "[域名已脱敏]", "port": 443,
+        "users": [{ "id": "[已脱敏]", "email": "t@[域名已脱敏]", "security": "auto", "encryption": "none", "flow": "xtls-rprx-vision" }]
+      }]},
+      "streamSettings": {
+        "network": "tcp", "security": "reality",
+        "realitySettings": { "serverName": "[域名已脱敏]", "fingerprint": "chrome", "publicKey": "0e170mEy43TNARHNG2wkpZD0sfDiosX03F5SQeqNHTU", "shortId": "", "spiderX": "/" }
+      },
+      "mux": { "enabled": false }
+    },
+    { "tag": "direct", "protocol": "freedom" },
+    { "tag": "block", "protocol": "blackhole" }
+  ],
+
+  "observatory": {
+    "subjectSelector": ["px-p1d2", "px-kr", "px-sg", "px-us1"],
+    "probeURL": "https://[域名已脱敏]/generate_204",
+    "probeInterval": "3m"
+  },
+
+  "routing": {
+    "domainStrategy": "AsIs",
+    "balancers": [{
+      "tag": "balancer",
+      "selector": ["px-p1d2", "px-kr"],
+      "strategy": { "type": "leastPing" },
+      "fallbackTag": "px-sg"
+    }],
+    "rules": [
+      { "type": "field", "inboundTag": ["api"], "outboundTag": "api" },
+      { "type": "field", "port": "443", "network": "udp", "outboundTag": "block" },
+
+      { "type": "field", "outboundTag": "direct", "ip": ["geoip:private"] },
+      { "type": "field", "outboundTag": "direct", "domain": ["geosite:private"] },
+
+      { "type": "field", "outboundTag": "direct", "ip": ["geoip:cn"] },
+      { "type": "field", "outboundTag": "direct", "domain": ["geosite:cn"] },
+
+      { "type": "field", "inboundTag": ["direct-dns-1", "direct-dns-2"], "outboundTag": "direct" },
+
+      { "type": "field", "inboundTag": ["dns-module"], "outboundTag": "px-p1d2" },
+
+      { "type": "field", "network": "tcp,udp", "outboundTag": "balancer" }
+    ]
+  }
+}

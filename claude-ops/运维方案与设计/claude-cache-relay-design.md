@@ -71,12 +71,12 @@ host 含 minimaxi.com            → deepseek（隐式前缀，同策略）
 
 ## 五、逃生与回滚通道（软回滚优先，禁止硬删除）
 
-| 级别 | 类型 | 操作 | 场景 |
-|---|---|---|---|
-| E0 停中继 | 逃生 | `node cache-relay.mjs stop`（读 pid kill） | 中继异常，立即止血 |
-| S0 软回滚 | 软回滚 | `touch ~/.cache-relay/.disabled` 或 `RELAY_DISABLED=1` | 不需要缓存对齐时禁用（**不删脚本**，随时恢复） |
-| P0 单源降级 | 逃生 | `RELAY_FORCE_PROVIDER=passthrough`（全部直通，不做对齐） | 某 provider 对齐逻辑出问题，一键全直通 |
-| R0 硬回滚 | 硬回滚 | `git revert <commit>`（**不 `rm`**） | 正式撤销部署 |
+| 级别      | 类型  | 操作                                                    | 场景                        |
+| ------- | --- | ----------------------------------------------------- | ------------------------- |
+| E0 停中继  | 逃生  | `node cache-relay.mjs stop`（读 pid kill）               | 中继异常，立即止血                 |
+| S0 软回滚  | 软回滚 | `touch ~/.cache-relay/.disabled` 或 `RELAY_DISABLED=1` | 不需要缓存对齐时禁用（**不删脚本**，随时恢复） |
+| P0 单源降级 | 逃生  | `RELAY_FORCE_PROVIDER=passthrough`（全部直通，不做对齐）         | 某 provider 对齐逻辑出问题，一键全直通  |
+| R0 硬回滚  | 硬回滚 | `git revert <commit>`（**不 `rm`**）                     | 正式撤销部署                    |
 
 > **软回滚原则**：停用/降级一律走 `.disabled`/env 开关，**绝不删脚本**；`RELAY_FORCE_PROVIDER=passthrough` 是「全直通」逃生阀，保证对齐层挂了也能透传。
 

@@ -24,7 +24,7 @@ PERMAFROST_PORT=8788
 PERMAFROST_HOME="${PERMAFROST_HOME:-$HOME/.permafrost}"
 PERMAFROST_SCRIPT="$HOME/.claude/plugins/cache/permafrost/permafrost/0.3.0/proxy/permafrost_proxy.py"
 
-PROXY_UPSTREAM="http://[IP已脱敏]:${PROXY_PORT}"
+PROXY_UPSTREAM="http://127.0.0.1:${PROXY_PORT}"
 DIRECT_UPSTREAM="https://api.deepseek.com/anthropic"
 
 RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'; NC='\033[0m'
@@ -39,11 +39,11 @@ proxy_running() {
 }
 
 permafrost_running() {
-    curl -s "http://[IP已脱敏]:${PERMAFROST_PORT}/permafrost/health" >/dev/null 2>&1
+    curl -s "http://127.0.0.1:${PERMAFROST_PORT}/permafrost/health" >/dev/null 2>&1
 }
 
 get_permafrost_upstream() {
-    curl -s "http://[IP已脱敏]:${PERMAFROST_PORT}/permafrost/health" 2>/dev/null | \
+    curl -s "http://127.0.0.1:${PERMAFROST_PORT}/permafrost/health" 2>/dev/null | \
       python3 -c "import sys,json; print(json.load(sys.stdin).get('upstream','unknown'))" 2>/dev/null || echo "down"
 }
 
@@ -84,7 +84,7 @@ start_permafrost() {
         pkill -f permafrost_proxy.py 2>/dev/null || true
         # 等待端口释放
         for _ in $(seq 1 5); do
-            curl -s --connect-timeout 1 "http://[IP已脱敏]:${PERMAFROST_PORT}/permafrost/health" >/dev/null 2>&1 || break
+            curl -s --connect-timeout 1 "http://127.0.0.1:${PERMAFROST_PORT}/permafrost/health" >/dev/null 2>&1 || break
             sleep 1
         done
     else
@@ -116,8 +116,8 @@ start_permafrost() {
 verify_chain() {
     log "端到端验证..."
     local result
-    result=$(curl -s --connect-timeout 10 -X POST "http://[IP已脱敏]:${PERMAFROST_PORT}/v1/messages" \
-      -H "Authorization: Bearer ${ANTHROPIC_AUTH_TOKEN}" \
+    result=$(curl -s --connect-timeout 10 -X POST "http://127.0.0.1:${PERMAFROST_PORT}/v1/messages" \
+      -H "Authorization: [已脱敏] ${ANTHROPIC_AUTH_TOKEN}" \
       -H "Content-Type: application/json" \
       -H "anthropic-version: 2023-06-01" \
       -d '{"model":"deepseek-v4-pro","max_tokens":5,"messages":[{"role":"user","content":"Say hi"}]}' \
@@ -197,7 +197,7 @@ cf=\"$HOME/.claude/settings.local.json\"
 d=json.load(open(cf))
 url=d.get('env',{}).get('ANTHROPIC_BASE_URL','')
 if '8788' not in url and 'permafrost' not in url:
-    d['env']['ANTHROPIC_BASE_URL']='http://[IP已脱敏]:8788'
+    d['env']['ANTHROPIC_BASE_URL']='http://127.0.0.1:8788'
     json.dump(d,open(cf,'w'),indent=2)
 " 2>/dev/null || true
 
@@ -219,7 +219,7 @@ fi
 
 
     # 运行中保护: permafrost+proxy 已在运行且链路通 → 只更新代码不重启
-    if curl -s --connect-timeout 2 "http://[IP已脱敏]:${PERMAFROST_PORT}/permafrost/health" >/dev/null 2>&1 &&        curl -sI --connect-timeout 2 "http://[IP已脱敏]:${PROXY_PORT}/" >/dev/null 2>&1; then
+    if curl -s --connect-timeout 2 "http://127.0.0.1:${PERMAFROST_PORT}/permafrost/health" >/dev/null 2>&1 &&        curl -sI --connect-timeout 2 "http://127.0.0.1:${PROXY_PORT}/" >/dev/null 2>&1; then
         if [ "${1:-start}" = "force" ]; then
         log "强制重启模式"
     else
@@ -261,7 +261,7 @@ log "=== 部署方案 C: permafrost → proxy → DeepSeek ==="
         # 找干净备用端口
         local backup=""
         for p in 8789 8790 8791 8792; do
-            if ! curl -s --connect-timeout 1 "http://[IP已脱敏]:$p/" >/dev/null 2>&1; then
+            if ! curl -s --connect-timeout 1 "http://127.0.0.1:$p/" >/dev/null 2>&1; then
                 backup=$p; break
             fi
         done
@@ -279,7 +279,7 @@ log "=== 部署方案 C: permafrost → proxy → DeepSeek ==="
 
         # 2. 切换 permafrost upstream → 新端口
         local old_up=$(get_permafrost_upstream)
-        start_permafrost "http://[IP已脱敏]:$backup" "restart-临时"
+        start_permafrost "http://127.0.0.1:$backup" "restart-临时"
         verify_chain || { err "切换验证失败, 回退"; start_permafrost "$old_up" "回退"; kill $NEW_PID 2>/dev/null; exit 1; }
 
         # 3. kill 旧 proxy

@@ -60,7 +60,7 @@ fi
 ```bash
 # 检测 proxy :8787 是否存活，挂了自动拉起
 check_proxy_alive() {
-    if ! curl -s -o /dev/null --max-time 2 http://[IP已脱敏]:8787/ 2>/dev/null; then
+    if ! curl -s -o /dev/null --max-time 2 http://127.0.0.1:8787/ 2>/dev/null; then
         echo "[gate] proxy :8787 无响应，尝试拉起..."
         bash /root/claude-permafrost-deploy.sh start 2>/dev/null || true
     fi
@@ -108,7 +108,7 @@ if (req.url === '/health') {
 }
 ```
 
-收益：`curl http://[IP已脱敏]:8787/health` 秒级判断 proxy 状态，不做全量 API 调用。
+收益：`curl http://127.0.0.1:8787/health` 秒级判断 proxy 状态，不做全量 API 调用。
 
 ### 5. 代理链路状态文件
 

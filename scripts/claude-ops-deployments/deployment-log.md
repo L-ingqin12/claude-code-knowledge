@@ -97,7 +97,7 @@
   - L1: `bash /root/claude-permafrost-rollback.sh` → permafrost 绕过 proxy
   - L2: 直连 DeepSeek
 - **已知问题**: 
-  - `ANTHROPIC_BASE_URL=http://[IP已脱敏]:8788` (permafrost 端口), 非直接 :8787
+  - `ANTHROPIC_BASE_URL=http://127.0.0.1:8788` (permafrost 端口), 非直接 :8787
   - CC v2.1.198 → v2.1.199 升级失败 (`install_failed`, 已记录于 `2026-07-02T15:39:40.687Z`)
   - SessionStart hook 可用: `bash /root/claude-version-hook.sh full`
 - **commit**: 5d6bbd5
@@ -168,3 +168,18 @@
 - **逃生**: `git revert 7a7ba14` 或直接删除 scripts/lognet-poc/（无外部副作用；派生 db 可随时重建）
 - **日志可审计**: builder.stats 结构化输出（每文件 events/folded_rows/skipped_lines/unknown_files）
 - **commit**: 7a7ba14
+
+## 2026-09-06
+
+### cache-relay 内容审核 400 兜底扩展（Content Exists Risk → OpenRouter GLM）
+- **时间**: 2026-09-06
+- **操作**: 扩展 `scripts/claude-ops-deployments/cache-relay/cache-relay.mjs` 加 400 内容审核兜底；本地 `~/.cache-relay/config.json` 加 fallback 块；全局 `~/.claude/CLAUDE.md` 加会话红线
+- **变更**:
+  1. `forward()` 支持 overrideHeaders；新增 `readBody` / `fallbackConfig` / `isRisk400`
+  2. `serve()`：命中 `400 + content exists risk` → 改投 OpenRouter `z-ai/glm-5.3-flash`（换 auth+model，成功路径纯透传）
+  3. 兜底 key 走 `authTokenSource` → `~/.claude/oxalpha-settings.json`（密钥不落地）
+- **预检**: ✅ `node --check` 语法通过；✅ authTokenSource 可读、token 可解析
+- **部署**: ✅ 热部署（stop + deploy），端口 8790 监听
+- **逃生**: `node cache-relay.mjs undeploy`（软回滚写 .disabled）；删 config.json 的 fallback 块即禁用兜底
+- **待验证**: 端到端兜底触发未做（需构造审核命中请求）；恢复脚本 `sanitize-session.py` 待用户确认放行
+- **commit**: 待提交（本地 main 分支）

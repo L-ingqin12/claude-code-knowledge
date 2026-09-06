@@ -86,7 +86,7 @@ fetched_at: 2026-08-25
 
 ## 5. MCP
 
-- opencode.json(c) 的 `mcp` 字段 schema：**`"<server-key>": { "type": "local", "command": ["bun","x","..."], "environment": {...}, "enabled": true }` 或 `{ "type": "remote", "url": "https://...", "headers": {"Authorization":"Bearer ..."}, "enabled": true }`**。[来源](https://github.com/anomalyco/opencode/blob/dev/packages/web/src/content/docs/mcp-servers.mdx)、[来源](https://opencode.ai/v2/docs/mcp-servers)
+- opencode.json(c) 的 `mcp` 字段 schema：**`"<server-key>": { "type": "local", "command": ["bun","x","..."], "environment": {...}, "enabled": true }` 或 `{ "type": "remote", "url": "https://...", "headers": {"Authorization":"[已脱敏] ..."}, "enabled": true }`**。[来源](https://github.com/anomalyco/opencode/blob/dev/packages/web/src/content/docs/mcp-servers.mdx)、[来源](https://opencode.ai/v2/docs/mcp-servers)
 - **工具命名：以服务器键为前缀暴露**（`<server>_<tool>` 形态）——证据：sverklo 出现双重前缀 `sverklo_sverklo_*` 缺陷、上游有"MCP 工具名清洗适配上游 provider"的需求 #31278；`mcp__<server>__<tool>` 双下划线是 Claude Code 惯例而非 OpenCode 文档口径（分隔符精确形态**待确认**）。[来源](https://github.com/sverklo/sverklo/issues/71)、[来源](https://github.com/anomalyco/opencode/issues/31278)
 - 注意事项：`enabled:false` 整体停用；本地 stdio 用 command 数组拉起进程；remote 走 Streamable HTTP 并支持 headers 鉴权；专用 timeout 配置项**未见于检索到的文档，待确认**。[来源](https://github.com/anomalyco/opencode/blob/dev/packages/web/src/content/docs/mcp-servers.mdx)
 

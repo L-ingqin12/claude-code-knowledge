@@ -89,7 +89,7 @@ $issues = @()
 # ── 检查 Tornado Workers ──
 for ($i = 0; $i -lt $WorkerCount; $i++) {
     $port = $PortStart + $i
-    $url = "http://[IP已脱敏]:$port/api/health"
+    $url = "http://127.0.0.1:$port/api/health"
     $svcName = "LogAgent-Tornado-$port"
 
     if (Test-Endpoint $url $TimeoutMs) {
@@ -106,7 +106,7 @@ for ($i = 0; $i -lt $WorkerCount; $i++) {
 }
 
 # ── 检查 Nginx ──
-$nginxUrl = "http://[IP已脱敏]/api/health"
+$nginxUrl = "http://127.0.0.1/api/health"
 if (Test-Endpoint $nginxUrl $TimeoutMs) {
     Write-Log "  [LogAgent-Nginx] OK" "Green"
 } else {

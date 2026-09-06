@@ -1,0 +1,11 @@
+{
+  "_comment": "区域定向路由：把指定域名/geosite 类别强制走特定地区节点。region 填节点 Remarks 里的中文地区名（如 新加坡/香港/韩国）；slug 是可选的 ASCII 标签（用于生成 balancer tag，缺省则自动哈希）。domains 支持 geosite:xxx、domain:xxx（含子域）、full:xxx（精确）。rules 可为空数组以关闭此功能。",
+  "rules": [
+    {
+      "name": "tiktok",
+      "region": "新加坡",
+      "slug": "sg",
+      "domains": ["geosite:tiktok", "geosite:bytedance"]
+    }
+  ]
+}

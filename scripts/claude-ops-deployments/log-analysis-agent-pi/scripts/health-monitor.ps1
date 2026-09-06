@@ -58,7 +58,7 @@ $deadPorts = @()
 # ── 检查所有 Worker 端口 ──
 for ($i = 0; $i -lt $WorkerCount; $i++) {
     $port = $PortStart + $i
-    $url = "http://[IP已脱敏]:$port/api/health"
+    $url = "http://127.0.0.1:$port/api/health"
 
     if (Test-Endpoint $url $TimeoutMs) {
         Write-Log "  :$port OK" "Green"
@@ -70,7 +70,7 @@ for ($i = 0; $i -lt $WorkerCount; $i++) {
 }
 
 # ── 检查 Nginx ──
-if (Test-Endpoint "http://[IP已脱敏]/api/health" $TimeoutMs) {
+if (Test-Endpoint "http://127.0.0.1/api/health" $TimeoutMs) {
     Write-Log "  Nginx OK" "Green"
 } else {
     Write-Log "  Nginx 无响应" "Red"

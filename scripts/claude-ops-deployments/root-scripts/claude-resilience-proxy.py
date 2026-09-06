@@ -18,7 +18,7 @@ Claude API Resilience Proxy v2
   PROXY_TARGET=https://api.anthropic.com PROXY_PORT=8787 python3 /root/claude-resilience-proxy.py &
 
   # Claude 侧
-  ANTHROPIC_BASE_URL=http://[IP已脱敏]:8787/anthropic claude --permission-mode accept-edits
+  ANTHROPIC_BASE_URL=http://127.0.0.1:8787/anthropic claude --permission-mode accept-edits
 """
 
 import http.server
@@ -427,13 +427,13 @@ class ProxyHandler(http.server.BaseHTTPRequestHandler):
 # ── 主入口 ──
 
 if __name__ == '__main__':
-    server = http.server.HTTPServer(('[IP已脱敏]', LISTEN_PORT), ProxyHandler)
+    server = http.server.HTTPServer(('127.0.0.1', LISTEN_PORT), ProxyHandler)
     server.socket.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
 
     print(f"╔══════════════════════════════════════════════════════╗")
     print(f"║  Claude API Resilience Proxy v2                      ║")
     print(f"╠══════════════════════════════════════════════════════╣")
-    print(f"║  Listen:      [IP已脱敏]:{LISTEN_PORT}                            ║")
+    print(f"║  Listen:      127.0.0.1:{LISTEN_PORT}                            ║")
     print(f"║  Target:      {TARGET_BASE}")
     print(f"║                                                     ║")
     print(f"║  L0 Gate:     thinking≥{STABILITY_THRESHOLD_THINKING} normal≥{STABILITY_THRESHOLD_NORMAL}     ║")

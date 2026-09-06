@@ -69,10 +69,10 @@ C:\nginx\nginx
 
 ```powershell
 # 健康检查
-curl http://[IP已脱敏]/api/health
+curl http://127.0.0.1/api/health
 
 # 提交分析
-curl -X POST http://[IP已脱敏]/api/analyze `
+curl -X POST http://127.0.0.1/api/analyze `
   -H "Content-Type: application/json" `
   -d '{"log_content":"ERROR: connection timeout after 30s"}'
 ```

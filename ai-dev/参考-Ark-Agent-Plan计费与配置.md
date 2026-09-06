@@ -173,7 +173,7 @@ AFP = (消耗的 tokens / 10,000) × 视频系数
 ```json
 {
   "env": {
-    "ANTHROPIC_BASE_URL": "http://[IP已脱敏]:8788",
+    "ANTHROPIC_BASE_URL": "http://127.0.0.1:8788",
     "ANTHROPIC_AUTH_TOKEN": "[已脱敏]",
     "ANTHROPIC_MODEL": "deepseek-v4-pro",
     "ANTHROPIC_DEFAULT_HAIKU_MODEL": "deepseek-v4-flash",
@@ -193,7 +193,7 @@ AFP = (消耗的 tokens / 10,000) × 视频系数
 
 ```
 Claude Code
-  → POST http://[IP已脱敏]:8788/v1/messages
+  → POST http://127.0.0.1:8788/v1/messages
   → 代理转发到 https://ark.cn-beijing.volces.com/api/plan/v1/messages
   → Ark 返回 Anthropic 格式响应
 ```

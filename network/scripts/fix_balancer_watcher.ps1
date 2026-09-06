@@ -26,7 +26,7 @@ while ($true) {
             }
             if ($changed) {
                 $text = $json | ConvertTo-Json -Depth 20
-                [System.IO.File]::WriteAllText($configPath, $text, $utf8NoBom)
+                [[域名已脱敏].File]::WriteAllText($configPath, $text, $utf8NoBom)
                 Get-Process xray -ErrorAction SilentlyContinue |
                     Where-Object { $_.Path -like '*v2rayN-windows-64*' } |
                     Stop-Process -Force -ErrorAction SilentlyContinue

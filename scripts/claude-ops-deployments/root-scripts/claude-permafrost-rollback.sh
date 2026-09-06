@@ -23,9 +23,9 @@ PERMAFROST_PORT=8788
 PROXY_PORT=8787
 PERMAFROST_HOME="${PERMAFROST_HOME:-$HOME/.permafrost}"
 PERMAFROST_SCRIPT="$HOME/.claude/plugins/cache/permafrost/permafrost/0.3.0/proxy/permafrost_proxy.py"
-PROXY_UPSTREAM="http://[IP已脱敏]:${PROXY_PORT}"
+PROXY_UPSTREAM="http://127.0.0.1:${PROXY_PORT}"
 DIRECT_UPSTREAM="https://api.deepseek.com/anthropic"
-HEALTH_URL="http://[IP已脱敏]:${PERMAFROST_PORT}/permafrost/health"
+HEALTH_URL="http://127.0.0.1:${PERMAFROST_PORT}/permafrost/health"
 
 RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'; NC='\033[0m'
 log()  { echo -e "${GREEN}[rollback]${NC} $1"; }
@@ -69,7 +69,7 @@ show_status() {
         echo -e "  当前: ${RED}未知${NC} (CC→$cc)"
     fi
 
-    echo "  permafrost: $(permafrost_running && echo 'UP' || echo 'DOWN')  proxy: $(curl -sI --connect-timeout 1 http://[IP已脱敏]:$PROXY_PORT/ >/dev/null 2>&1 && echo 'UP' || echo 'DOWN')"
+    echo "  permafrost: $(permafrost_running && echo 'UP' || echo 'DOWN')  proxy: $(curl -sI --connect-timeout 1 http://127.0.0.1:$PROXY_PORT/ >/dev/null 2>&1 && echo 'UP' || echo 'DOWN')"
     echo ""
     echo "  逐层回退:"
     echo "    L0m bash $0 model-off    关闭model路由"

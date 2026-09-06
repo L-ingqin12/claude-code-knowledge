@@ -5,7 +5,7 @@ const CODE = process.argv[2] || 'AAAAA';
 
 function getList() {
   return new Promise((res, rej) => {
-    http.get('http://[IP已脱敏]:9229/json/list', r => {
+    http.get('http://127.0.0.1:9229/json/list', r => {
       let b = '';
       r.on('data', d => b += d);
       r.on('end', () => res(JSON.parse(b)));

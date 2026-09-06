@@ -133,7 +133,7 @@ Write-Host "[完成] 已启动 $($processes.Count) 个 Worker" -ForegroundColor 
 Write-Host ""
 Write-Host "  PID 文件: $pidFile" -ForegroundColor Gray
 Write-Host "  停止命令: .\stop-workers.ps1" -ForegroundColor Gray
-Write-Host "  健康检查: curl http://[IP已脱敏]:$PortStart/api/health" -ForegroundColor Gray
+Write-Host "  健康检查: curl http://127.0.0.1:$PortStart/api/health" -ForegroundColor Gray
 Write-Host ""
 
 # ── 快速健康检查 ──
@@ -141,7 +141,7 @@ Write-Host "[健康检查]" -ForegroundColor Yellow
 Start-Sleep -Seconds 2
 foreach ($p in $processes) {
     try {
-        $url = "http://[IP已脱敏]:$($p.Port)/api/health"
+        $url = "http://127.0.0.1:$($p.Port)/api/health"
         $resp = Invoke-RestMethod -Uri $url -TimeoutSec 3 -ErrorAction Stop
         Write-Host "  $($p.Name) ($($p.Port)): $($resp.status) ✓" -ForegroundColor Green
     } catch {

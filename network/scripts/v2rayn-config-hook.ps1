@@ -130,13 +130,13 @@ function Build-OptimizedConfig {
             tag = $tag; protocol = "vless"
             settings = @{ vnext = @(@{
                 address = $n.Address; port = $n.Port
-                users = @(@{ id = $uuid; email = "t@t.tt"
+                users = @(@{ id = $uuid; email = "t@[域名已脱敏]"
                     security = "auto"; encryption = "none"; flow = $flow })
             })}
             streamSettings = @{
                 network = "tcp"; security = "reality"
                 realitySettings = @{
-                    serverName = if ($n.SNI) { $n.SNI } else { "apple.com" }
+                    serverName = if ($n.SNI) { $n.SNI } else { "[域名已脱敏]" }
                     fingerprint = "chrome"
                     publicKey = if ($n.PublicKey) { $n.PublicKey } else { "" }
                     shortId = ""; spiderX = "/"; mldsa65Verify = ""
@@ -162,29 +162,29 @@ function Build-OptimizedConfig {
         log = @{ loglevel = "warning" }
         dns = @{
             hosts = @{
-                "dns.google" = @("[IP已脱敏]", "[IP已脱敏]")
-                "dns.alidns.com" = @("[IP已脱敏]", "[IP已脱敏]")
+                "[域名已脱敏]" = @("[IP已脱敏]", "[IP已脱敏]")
+                "[域名已脱敏]" = @("[IP已脱敏]", "[IP已脱敏]")
             }
             servers = @(
-                @{ address = "https://dns.alidns.com/dns-query"
+                @{ address = "https://[域名已脱敏]/dns-query"
                    domains = @("geosite:private", "geosite:cn")
                    skipFallback = $true; tag = "direct-dns" },
-                @{ address = "https://cloudflare-dns.com/dns-query"
+                @{ address = "https://[域名已脱敏]/dns-query"
                    domains = @("geosite:google"); skipFallback = $true },
-                @{ address = "[IP已脱敏]"; domains = @("full:dns.alidns.com"); skipFallback = $true },
-                "https://cloudflare-dns.com/dns-query"
+                @{ address = "[IP已脱敏]"; domains = @("full:[域名已脱敏]"); skipFallback = $true },
+                "https://[域名已脱敏]/dns-query"
             )
             tag = "dns-module"
         }
         inbounds = @(@{
-            tag = $inboundTag; port = $inboundPort; listen = "[IP已脱敏]"; protocol = "mixed"
+            tag = $inboundTag; port = $inboundPort; listen = "127.0.0.1"; protocol = "mixed"
             sniffing = @{ enabled = $true; destOverride = @("http", "tls"); routeOnly = $false }
             settings = @{ auth = "noauth"; udp = $true; allowTransparent = $false }
         })
         outbounds = $outbounds
         observatory = @{
             subjectSelector = $allTags
-            probeURL = "https://www.google.com/generate_204"
+            probeURL = "https://[域名已脱敏]/generate_204"
             probeInterval = "2m"
         }
         routing = @{
@@ -310,10 +310,10 @@ function Start-Watcher {
     # Do initial check
     Invoke-ConfigUpgrade
 
-    $watcher = New-Object System.IO.FileSystemWatcher
+    $watcher = New-Object [域名已脱敏].FileSystemWatcher
     $watcher.Path = $watchPath
     $watcher.Filter = "config.json"
-    $watcher.NotifyFilter = [System.IO.NotifyFilters]::LastWrite -bor [System.IO.NotifyFilters]::FileName
+    $watcher.NotifyFilter = [[域名已脱敏].NotifyFilters]::LastWrite -bor [[域名已脱敏].NotifyFilters]::FileName
     $watcher.EnableRaisingEvents = $true
 
     # Track debounce timer to batch rapid changes

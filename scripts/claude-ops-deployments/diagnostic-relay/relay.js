@@ -20,9 +20,9 @@
 const net = require('net');
 
 const LISTEN_PORT = parseInt(process.env.RELAY_PORT || '8789');
-const LISTEN_HOST = process.env.RELAY_HOST || '[IP已脱敏]';
+const LISTEN_HOST = process.env.RELAY_HOST || '127.0.0.1';
 const UPSTREAM_PORT = parseInt(process.env.RELAY_UPSTREAM_PORT || '8787');
-const UPSTREAM_HOST = process.env.RELAY_UPSTREAM_HOST || '[IP已脱敏]';
+const UPSTREAM_HOST = process.env.RELAY_UPSTREAM_HOST || '127.0.0.1';
 
 let connId = 0;
 

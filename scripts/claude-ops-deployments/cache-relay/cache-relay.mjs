@@ -488,7 +488,7 @@ function serve() {
           const q = JSON.parse(body)
           const m = cfg.classifier.modelMap || fallback?.modelMap || {}
           q.model = m[q.model] || m['*'] || q.model
-          const cls = await forward(req, JSON.stringify(q), clsUp, path, { authorization: 'Bearer ' + clsTok })
+          const cls = await forward(req, JSON.stringify(q), clsUp, path, { authorization: '[已脱敏] ' + clsTok })
           console.log(`[cache-relay] classifier → ${clsUp} status=${cls.status}`)
           if (cls.stream && cls.status >= 200 && cls.status < 400) {
             res.writeHead(cls.status, cls.headers)
@@ -521,7 +521,7 @@ function serve() {
           p.model = map[p.model] || map['*'] || p.model
           fbBody = JSON.stringify(p)
         } catch { /* 非 JSON 原样转发 */ }
-        const fb = await forward(req, fbBody, fallback.upstream, path, { authorization: 'Bearer ' + fallback.authToken })
+        const fb = await forward(req, fbBody, fallback.upstream, path, { authorization: '[已脱敏] ' + fallback.authToken })
         console.log(`[cache-relay] 400 risk → fallback ${fallback.upstream} status=${fb.status}`)
         if (fb.stream) { res.writeHead(fb.status, fb.headers); fb.stream.pipe(res); return }
         // 兜底也失败：回传原始 400（信息最准）

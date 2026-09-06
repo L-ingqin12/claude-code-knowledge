@@ -24,7 +24,7 @@ See also: [[Network-KB-Home]] | [[FINAL-SUMMARY]] | [[ARCHITECTURE]]
 |------|------|--------|
 | WiFi 网关延迟 | 2ms~541ms, avg 154ms（原记 7~457ms/avg 134ms，与 Phase 4 原始测量统一） | 🔴 极差 |
 | 代理吞吐 | ~6 Mbps (761 KB/s)（2026-07-27 实测） | 🟡 偏低 |
-| 代理服务器 | 仅 `fuck.p1d2.com` 单节点 | 🔴 无冗余 |
+| 代理服务器 | 仅 `[域名已脱敏]` 单节点 | 🔴 无冗余 |
 | 代理协议 | VLESS+Reality, Mux 未开 | 🟡 |
 | 系统代理 | v2rayN 10808, 开启 | ✅ |
 | VPN | v2rayN + xray 26.3.27 | ✅ |

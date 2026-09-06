@@ -36,7 +36,7 @@ server.on('listening', () => {
 
 // 正确方式: Node.js ≥13.9 支持 net.Server listen 的 options.reusePort
 // (http.createServer 返回的 server 继承 net.Server，其 listen 同样接受 options)
-net.createServer(handler).listen({ port: 8787, host: '[IP已脱敏]', reusePort: true });
+net.createServer(handler).listen({ port: 8787, host: '127.0.0.1', reusePort: true });
 ```
 
 **Node.js 下的实施方式**：在 server 创建后、listen 前设置：
@@ -56,7 +56,7 @@ server.on('listening', () => {
 # deploy.sh start_proxy 改为:
 start_proxy() {
     for port in 8787 8789 8790; do   # 跳过 8788 (permafrost 固定端口)
-        if ! curl -s "http://[IP已脱敏]:$port/" >/dev/null 2>&1; then
+        if ! curl -s "http://127.0.0.1:$port/" >/dev/null 2>&1; then
             PROXY_PORT=$port
             node /root/claude-resilience-proxy.js > /root/.claude/proxy.log 2>&1 &
             ...

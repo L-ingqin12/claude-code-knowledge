@@ -81,6 +81,9 @@ function Get-NodesHash {
     $q = "SELECT Address, Port, IFNULL(Password,''), IFNULL(PublicKey,''), IFNULL(Sni,'') FROM ProfileItem WHERE IsSub=1 ORDER BY Address, Port;"
     $raw = & $sqlite $db $q 2>&1
     if ($LASTEXITCODE -ne 0) { return $null }
+    # Region routing rules affect the generated config too — include them in the hash
+    $regionFile = "$SCRIPT_DIR\region-routing.json"
+    if (Test-Path $regionFile) { $raw += (Get-Content $regionFile -Raw) }
     $seed = ($raw -join "|")
     $sha = [Security.Cryptography.SHA256]::Create()
     $b = [Text.Encoding]::UTF8.GetBytes($seed)
